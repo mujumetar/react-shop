@@ -1,4 +1,4 @@
-import { useState } from 'react'
+
 import './App.css'
 
 import Navbars from './components/Navbar'
@@ -8,6 +8,7 @@ import Aboutsect from './components/Aboutsect'
 import Productcard from './components/Productcard'
 import Service from './components/Service'
 import Footer from './components/Footer'
+import Contactpage from './components/pages/Contactpage'
 
 function App() {
 
@@ -93,6 +94,7 @@ function App() {
       <Productcard />
       <Service />
       <Footer />
+      <Contactpage />
     </>
   )
 }
