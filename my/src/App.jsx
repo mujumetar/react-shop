@@ -9,6 +9,8 @@ import Service from './components/Service'
 import Footer from './components/Footer'
 import Contactpage from './components/pages/Contactpage'
 import Contact from './components/Contact'
+import Aboutpage from './components/pages/Aboutpage'
+
 
 
 function App() {
@@ -88,12 +90,20 @@ function App() {
 
   return (
     <>
+
+      {/* <Routes>
+
+        <Route path="/" element={<Contactpage />}
+      
+    </Routes> */}
       <Navbars />
       <Slider />
       <Offersect />
       <Aboutsect />
       <Productcard />
       <Service />
+
+      {/* <Aboutpage/> */}
       <Contact />
       <Footer />
     </>
