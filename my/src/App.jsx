@@ -9,6 +9,7 @@ import Productcard from './components/Productcard'
 import Service from './components/Service'
 import Footer from './components/Footer'
 import Contactpage from './components/pages/Contactpage'
+import Contact from './components/Contact'
 
 function App() {
 
@@ -93,8 +94,8 @@ function App() {
       <Aboutsect />
       <Productcard />
       <Service />
+      <Contact />
       <Footer />
-      <Contactpage />
     </>
   )
 }
