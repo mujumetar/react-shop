@@ -18,47 +18,47 @@ function App() {
 
 
   {
-    // Countdown timer
-    function updateCountdown() {
-      const countdownItems = document.querySelectorAll('.countdown-number');
-      let days = parseInt(countdownItems[0].textContent);
-      let hours = parseInt(countdownItems[1].textContent);
-      let minutes = parseInt(countdownItems[2].textContent);
-      let seconds = parseInt(countdownItems[3].textContent);
+    // // Countdown timer
+    // function updateCountdown() {
+    //   const countdownItems = document.querySelectorAll('.countdown-number');
+    //   let days = parseInt(countdownItems[0].textContent);
+    //   let hours = parseInt(countdownItems[1].textContent);
+    //   let minutes = parseInt(countdownItems[2].textContent);
+    //   let seconds = parseInt(countdownItems[3].textContent);
 
-      seconds--;
+    //   seconds--;
 
-      if (seconds < 0) {
-        seconds = 59;
-        minutes--;
+    //   if (seconds < 0) {
+    //     seconds = 59;
+    //     minutes--;
 
-        if (minutes < 0) {
-          minutes = 59;
-          hours--;
+    //     if (minutes < 0) {
+    //       minutes = 59;
+    //       hours--;
 
-          if (hours < 0) {
-            hours = 23;
-            days--;
+    //       if (hours < 0) {
+    //         hours = 23;
+    //         days--;
 
-            if (days < 0) {
-              // Countdown finished
-              days = 0;
-              hours = 0;
-              minutes = 0;
-              seconds = 0;
-            }
-          }
-        }
-      }
+    //         if (days < 0) {
+    //           // Countdown finished
+    //           days = 0;
+    //           hours = 0;
+    //           minutes = 0;
+    //           seconds = 0;
+    //         }
+    //       }
+    //     }
+    //   }
 
-      countdownItems[0].textContent = days.toString().padStart(2, '0');
-      countdownItems[1].textContent = hours.toString().padStart(2, '0');
-      countdownItems[2].textContent = minutes.toString().padStart(2, '0');
-      countdownItems[3].textContent = seconds.toString().padStart(2, '0');
-    }
+    //   countdownItems[0].textContent = days.toString().padStart(2, '0');
+    //   countdownItems[1].textContent = hours.toString().padStart(2, '0');
+    //   countdownItems[2].textContent = minutes.toString().padStart(2, '0');
+    //   countdownItems[3].textContent = seconds.toString().padStart(2, '0');
+    // }
 
-    // Update countdown every second
-    setInterval(updateCountdown, 1000);
+    // // Update countdown every second
+    // setInterval(updateCountdown, 1000);
 
     // Animation on scroll
     document.addEventListener('DOMContentLoaded', function () {
@@ -89,22 +89,22 @@ function App() {
     });
   }
 
-  
-    async function getData() {
-      let res = await axios.get("http://localhost:3000/test")
-      console.log(res)
-    }
-  
+
+
 
   useEffect(() => {
-    getData()
+    const fetchData = async () => {
+      const res = await fetch('http://localhost:3000/test')
+      const data = await res.json()
+      console.log(data)
+    }
+    fetchData()
   }, [])
-
 
   return (
     <>
 
-     
+
       <Navbars />
       <Slider />
       {/* <Offersect /> */}
