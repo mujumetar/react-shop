@@ -11,7 +11,7 @@ const Productcard = () => {
                 <h2 className="section-title-x text-white text-center my-3">Products</h2>
                 <div className="row">
 
-                    <div class="col-lg-3 col-md-4 col-sm-4 mb-4">
+                    <div className="col-lg-3 col-md-4 col-sm-4 mb-4">
                         <div className="product-card">
                             <div className="product-image">
                                 <img src={white} className='img-fluid'
@@ -25,7 +25,7 @@ const Productcard = () => {
                         </div>
 
                     </div>
-                    <div class="col-lg-3 col-md-4 col-sm-4 mb-4">
+                    <div className="col-lg-3 col-md-4 col-sm-4 mb-4">
                         <div className="product-card">
                             <div className="product-image">
                                 <img src={black} className='img-fluid'

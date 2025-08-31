@@ -27,7 +27,7 @@ const Footer = () => {
                                 <div className="social-icons">
                                     <a href="#"><i className="fab fa-facebook"></i></a>
                                     <a href="#"><i className="fab fa-twitter"></i></a>
-                                    <a href="https://www.instagram.com/dilkhush_kirana" target='__blank' className='text-decoration-none'><i class="ri-instagram-line"></i></a>
+                                    <a href="https://www.instagram.com/dilkhush_kirana" target='__blank' className='text-decoration-none'><i className="ri-instagram-line"></i></a>
                                     <a href="#"><i className="fab fa-pinterest"></i></a>
                                 </div>
                             </div>

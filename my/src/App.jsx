@@ -10,7 +10,8 @@ import Footer from './components/Footer'
 import Contactpage from './components/pages/Contactpage'
 import Contact from './components/Contact'
 import Aboutpage from './components/pages/Aboutpage'
-
+import { useEffect } from 'react'
+import axios from "axios"
 
 
 function App() {
@@ -88,14 +89,22 @@ function App() {
     });
   }
 
+  
+    async function getData() {
+      let res = await axios.get("http://localhost:3000/test")
+      console.log(res)
+    }
+  
+
+  useEffect(() => {
+    getData()
+  }, [])
+
+
   return (
     <>
 
-      {/* <Routes>
-
-        <Route path="/" element={<Contactpage />}
-      
-    </Routes> */}
+     
       <Navbars />
       <Slider />
       {/* <Offersect /> */}
