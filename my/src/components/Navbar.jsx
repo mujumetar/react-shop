@@ -1,15 +1,17 @@
 import React from 'react'
+import logo from "../img/logo.png"
+
 
 const Navbars = () => {
     return (
         <>
-            <header>
+            <header className='py-0'>
                 <div className="container">
                     <nav className="navbar navbar-expand-lg navbar-dark">
                         <div className="container-fluid">
                             <a className="navbar-brand logo" href="#">
                                 <i className="fas fa-shopping-basket"></i>
-                                Dilkhush
+                                <img src={logo} className='img-fluid' style={{width:'6rem'}} alt="" />
                             </a>
                             <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

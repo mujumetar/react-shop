@@ -1,57 +1,46 @@
 import React from 'react'
+import white from "../img/white.jpeg"
+import black from "../img/black.jpeg"
 
 const Productcard = () => {
     return (
         <>
-            <div className="container">
+
+            <div className="container mt-4 ">
+
+                <h2 className="section-title-x text-white text-center my-3">Products</h2>
                 <div className="row">
-              
-                    <div class="col-md-4 mb-4">
+
+                    <div class="col-lg-3 col-md-4 col-sm-4 mb-4">
                         <div className="product-card">
                             <div className="product-image">
-                                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=981&q=80"
+                                <img src={white} className='img-fluid'
                                     alt="Breakfast collection" />
                             </div>
                             <div className="product-content">
-                                <h3 className="product-title">Eggy after coffee with all</h3>
-                                <p className="product-description">A delicious breakfast collection for products from your flat.
-                                    Start your day with our specially curated breakfast items.</p>
+                                <h3 className="product-title">White Sani ( Kachariya )</h3>
+                                <p className="product-description">₹ 430</p>
                                 <a href="#" className="btn">Order Now</a>
                             </div>
                         </div>
 
                     </div>
-                    <div class="col-md-4 mb-4">
+                    <div class="col-lg-3 col-md-4 col-sm-4 mb-4">
                         <div className="product-card">
                             <div className="product-image">
-                                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=981&q=80"
+                                <img src={black} className='img-fluid'
                                     alt="Breakfast collection" />
                             </div>
                             <div className="product-content">
-                                <h3 className="product-title">Eggy after coffee with all</h3>
-                                <p className="product-description">A delicious breakfast collection for products from your flat.
-                                    Start your day with our specially curated breakfast items.</p>
+                                <h3 className="product-title">Black Sani ( Kachariya )</h3>
+                                <p className="product-description">₹ 450</p>
                                 <a href="#" className="btn">Order Now</a>
                             </div>
                         </div>
 
                     </div>
 
-                    <div class="col-md-4 mb-4">
-                        <div className="product-card">
-                            <div className="product-image">
-                                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=981&q=80"
-                                    alt="Breakfast collection" />
-                            </div>
-                            <div className="product-content">
-                                <h3 className="product-title">Eggy after coffee with all</h3>
-                                <p className="product-description">A delicious breakfast collection for products from your flat.
-                                    Start your day with our specially curated breakfast items.</p>
-                                <a href="#" className="btn">Order Now</a>
-                            </div>
-                        </div>
 
-                    </div>
                 </div>
             </div>
 

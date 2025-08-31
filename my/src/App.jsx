@@ -98,7 +98,7 @@ function App() {
     </Routes> */}
       <Navbars />
       <Slider />
-      <Offersect />
+      {/* <Offersect /> */}
       <Aboutsect />
       <Productcard />
       <Service />

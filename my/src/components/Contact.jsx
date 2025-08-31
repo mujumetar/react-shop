@@ -1,4 +1,5 @@
-import React from 'react'
+
+ import React from 'react'
 import Navbars from './Navbar'
 import Footer from './Footer'
 
@@ -7,15 +8,9 @@ const Contact = () => {
         <>
 
             <div className="container">
+                    <h2 className="section-title-x text-white text-center my-3">Contact</h2>
                 <section className="py-3 py-md-5 py-xl-8">
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-12 col-md-10 col-lg-8">
-                                <h3 className="fs-5 mb-2 text-secondary text-uppercase">Contact</h3>
-                                <h2 className="display-5 mb-4 mb-md-5 mb-xl-8">We're always on the lookout to work with new clients. Please get in touch in one of the following ways.</h2>
-                            </div>
-                        </div>
-                    </div>
+                  
 
                     <div className="container">
                         <div className="row gy-4 gy-md-5 gy-lg-0 align-items-md-center">
