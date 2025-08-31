@@ -1,6 +1,5 @@
 
 import './App.css'
-
 import Navbars from './components/Navbar'
 import Slider from './components/Slider'
 import Offersect from './components/Offersect'
@@ -10,6 +9,7 @@ import Service from './components/Service'
 import Footer from './components/Footer'
 import Contactpage from './components/pages/Contactpage'
 import Contact from './components/Contact'
+
 
 function App() {
 
