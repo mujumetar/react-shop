@@ -1,21 +1,17 @@
 
 import './App.css'
 import Navbars from './components/Navbar'
-import Slider from './components/Slider'
-import Offersect from './components/Offersect'
-import Aboutsect from './components/Aboutsect'
-import Productcard from './components/Productcard'
 import Service from './components/Service'
 import Footer from './components/Footer'
-import Contactpage from './components/pages/Contactpage'
-import Contact from './components/Contact'
+import Contactpage from './components/pages/Contactpage.jsx'
 import Aboutpage from './components/pages/Aboutpage'
-import { useEffect } from 'react'
-import axios from "axios"
+
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
-import Home from './components/hOME.JSX'
+
 import Productpage from './components/pages/Productpage'
 import Offerspage from './components/pages/offerspage'
+import Home from './components/pages/Home.jsx'
+
 
 
 function App() {
@@ -116,7 +112,7 @@ function App() {
           <Route path="/about" element={<Aboutpage />} />
           <Route path="/services" element={<Service />} />
           <Route path="/contact" element={<Contactpage />} />
-           <Route path="/offers" element={<Offerspage />} />
+          <Route path="/offers" element={<Offerspage />} />
         </Routes>
         <Footer />
       </Router>
