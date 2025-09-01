@@ -3,7 +3,8 @@ import React from 'react'
 const Qna = () => {
     return (
         <>
-            <section>
+            <section className=' bg-light'>
+                <h2 className="section-title">Why We ?</h2>
                 <div className="container">
                     <div className="accordion accordion-flush shadow" id="accordionFlushExample">
                         <div className="accordion-item ">

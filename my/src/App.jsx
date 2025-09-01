@@ -12,6 +12,10 @@ import Contact from './components/Contact'
 import Aboutpage from './components/pages/Aboutpage'
 import { useEffect } from 'react'
 import axios from "axios"
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import Home from './components/hOME.JSX'
+import Productpage from './components/pages/Productpage'
+import Offerspage from './components/pages/offerspage'
 
 
 function App() {
@@ -104,17 +108,20 @@ function App() {
   return (
     <>
 
+      <Router>
+        <Navbars />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Productpage />} />
+          <Route path="/about" element={<Aboutpage />} />
+          <Route path="/services" element={<Service />} />
+          <Route path="/contact" element={<Contactpage />} />
+           <Route path="/offers" element={<Offerspage />} />
+        </Routes>
+        <Footer />
+      </Router>
 
-      <Navbars />
-      <Slider />
-      {/* <Offersect /> */}
-      <Aboutsect />
-      <Productcard />
-      <Service />
 
-      {/* <Aboutpage/> */}
-      <Contact />
-      <Footer />
     </>
   )
 }
