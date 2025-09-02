@@ -11,6 +11,7 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import Productpage from './components/pages/Productpage'
 import Offerspage from './components/pages/offerspage'
 import Home from './components/pages/Home.jsx'
+import { useEffect } from 'react'
 
 
 
@@ -92,14 +93,14 @@ function App() {
 
 
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const res = await fetch('http://localhost:3000/test')
-  //     const data = await res.json()
-  //     console.log(data)
-  //   }
-  //   fetchData()
-  // }, [])
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch('http://localhost:3000/test')
+      const data = await res.json()
+      console.log(data)
+    }
+    fetchData()
+  }, [])
 
   return (
     <>

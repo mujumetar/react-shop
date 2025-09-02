@@ -1,11 +1,11 @@
-/* LESS variables */
+
 :root {
   /* --primary-color: #4CAF50; */
-  --primary-color: #000000;
+  --primary-color: #4CAF50;
 
   
   /* --secondary-color: #8BC34A; */
-  --secondary-color: #000000;
+  --secondary-color: #4CAF50;
 
   --accent-color: #ff5722;
   --light-bg: #000000;
