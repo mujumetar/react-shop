@@ -76,7 +76,7 @@ const Contact = () => {
                                                 <h4 className="mb-2">Office</h4>
                                                 <p className="mb-2">Please visit us to have a discussion.</p>
                                                 <hr className="w-50 mb-3 border-dark-subtle" />
-                                                <address className="m-0 text-secondary">8014 Edith Blvd NE, Albuquerque, New York, United States</address>
+                                                <address className="m-0 text-secondary"><a href="https://maps.app.goo.gl/2yeV6Ern1uCUVyEV8" target='_blank'>Live Location</a></address>
                                             </div>
                                         </div>
                                         <div className="row mb-sm-4 mb-md-5">
@@ -92,7 +92,10 @@ const Contact = () => {
                                                         <p className="mb-2">Please speak with us directly.</p>
                                                         <hr className="w-75 mb-3 border-dark-subtle" />
                                                         <p className="mb-0">
-                                                            <a className="link-secondary text-decoration-none" href="tel:+15057922430">(505) 792-2430</a>
+                                                            <a className="link-secondary text-decoration-none" href="tel:+919033332365">9033332365</a>
+                                                            <br />
+                                                            <a className="link-secondary text-decoration-none" href="tel:+919723089786">9723089786</a>
+
                                                         </p>
                                                     </div>
                                                 </div>

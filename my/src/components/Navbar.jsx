@@ -1,5 +1,5 @@
 import React from 'react'
-import logo from "../img/logo.png"
+import logo from "../img/logo2.jpg"
 import { Link } from 'react-router-dom'
 
 
@@ -8,7 +8,7 @@ const Navbars = () => {
         <>
             <header className='py-0'>
                 <div className="container">
-                    <nav className="navbar navbar-expand-lg navbar-dark">
+                    <nav className="navbar navbar-expand-lg navbar-light">
                         <div className="container-fluid">
                             <a className="navbar-brand logo" >
                                 <i className="fas fa-shopping-basket"></i>

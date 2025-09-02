@@ -4,8 +4,8 @@
   --primary-color: #4CAF50;
 
   
-  /* --secondary-color: #8BC34A; */
-  --secondary-color: #4CAF50;
+  --secondary-color: #8BC34A;
+  /* --secondary-color: #4CAF50; */
 
   --accent-color: #ff5722;
   --light-bg: #000000;
@@ -14,8 +14,15 @@
   --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: var(--light-bg);
+  background-color:white;
   color: var(--dark-text);
   line-height: 1.6;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -23,8 +30,8 @@ body {
 
 /* Header */
 header {
-  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-  color: var(--light-text);
+  background:white;
+  color:black;
   padding: 20px 0;
   box-shadow: var(--shadow);
 }
@@ -146,9 +153,12 @@ section {
   display: block;
   width: 80px;
   height: 4px;
-  background:white;
+  background: var(--primary-color);
   margin: 10px auto;
 }
+
+
+
 
 .offer-container {
   background: linear-gradient(to right, #ff9800, var(--accent-color));
