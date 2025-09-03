@@ -6,11 +6,12 @@ import Service from '../Service'
 import Contact from '../Contact'
 import Qna from '../Qna'
 
-const Home = () => {
+const Home = ({products}) => {
+    // console.log(products)
     return (
         <>
             <Slider />
-            <Productcard/>
+            <Productcard products={products}/>
             {/* <Service/> */}
             <Qna/>
             <Aboutsect/>

@@ -2,8 +2,8 @@ import React from 'react'
 import white from "../img/white.jpeg"
 import black from "../img/black.jpeg"
 
-const Productcard = ({prods}) => {
-console.log(prods)
+const Productcard = ({products}) => {
+console.log(products)
     return (
         <>
 
@@ -11,10 +11,11 @@ console.log(prods)
 
                 <h2 className="section-title  text-center my-3">Products</h2>
                 <div className="row">
-{/* 
+
                     {
-                            prods.map((ele, index) => (
+                            products.map((ele, index) => (
                         <div className="col-lg-3 col-md-4 col-sm-4 mb-4" key={index}>
+                            <div className="hidden" hidden>{ele._id}</div>
                                 <div className="product-card">
                                     <div className="product-image">
                                         <img
@@ -24,14 +25,14 @@ console.log(prods)
                                         />
                                     </div>
                                     <div className="product-content">
-                                        <h3 className="product-title">{ele.title || "Unnamed Product"}</h3>
+                                        <h3 className="product-title">{ele.name || "Unnamed Product"}</h3>
                                         <p className="product-description">₹ {ele.price || 0}</p>
                                         <a href="#" className="btn">Order Now</a>
                                     </div>
                                 </div>
                             </div>
                             ))
-                    } */}
+                    }
 
 
 

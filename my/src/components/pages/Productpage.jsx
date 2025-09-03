@@ -3,8 +3,6 @@ import Slider from '../Slider'
 import Productcard from '../Productcard'
 
 const Productpage = ({products}) => {
-
-  console.log(products)
   return (
     <>
     <Slider/>
