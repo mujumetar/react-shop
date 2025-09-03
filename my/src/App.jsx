@@ -9,13 +9,13 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import Productpage from './components/pages/Productpage'
 import Offerspage from './components/pages/offerspage'
 import Home from './components/pages/Home.jsx'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Eachprod from './components/pages/Eachprod.jsx'
 
 
 
 function App() {
-
+  const [products, setProducts] = useState([])
 
   {
     // // Countdown timer
@@ -96,7 +96,8 @@ function App() {
     const fetchData = async () => {
       const res = await fetch('http://localhost:3000/test')
       const data = await res.json()
-      console.log(data)
+      setProducts(data.product)
+      console.log(data.product)
     }
     fetchData()
   }, [])
@@ -105,18 +106,18 @@ function App() {
     <>
 
       <Router>
-        <Navbars />  
+        <Navbars />
         {/* <Eachprod/> */}
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Productpage />} />
+          <Route path="/products" element={<Productpage products={products} />} />
           <Route path="/about" element={<Aboutpage />} />
           <Route path="/services" element={<Service />} />
           <Route path="/contact" element={<Contactpage />} />
           <Route path="/offers" element={<Offerspage />} />
         </Routes>
         <Footer />
-      
+
       </Router>
 
 
