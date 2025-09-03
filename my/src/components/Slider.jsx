@@ -20,19 +20,7 @@ const Slider = () => {
                             <div className="hero-content">
                                 <h1>A different kind of grocery store</h1>
                                 <p>Order any goods from our store online and we'll deliver within 24 hours.</p>
-                               <div className="container">
-                                    <div className="row">
-                                        <div className="col-lg-6  col-sm-12 p-0 m-0">
-                                            <div className="price-tag">$9.99</div>
-
-                                        </div>
-
-                                        <div className="col-lg-6  col-sm-12 p-0 m-0">
-                                            <a href="#" className="btn">Order Now</a>
-                                        </div>
-                                    </div>
-                                </div>
-
+                               
                             </div>
                         </div>
                     </div>
@@ -43,18 +31,7 @@ const Slider = () => {
                             <div className="hero-content">
                                 <h1>Fresh Organic Produce</h1>
                                 <p>Locally sourced organic vegetables and fruits delivered daily to your doorstep.</p>
-                             <div className="container">
-                                    <div className="row">
-                                        <div className="col-lg-6  col-sm-12 p-0 m-0">
-                                            <div className="price-tag">$9.99</div>
-
-                                        </div>
-
-                                        <div className="col-lg-6  col-sm-12 p-0 m-0">
-                                            <a href="#" className="btn">Order Now</a>
-                                        </div>
-                                    </div>
-                                </div>
+                            
 
                             </div>
                         </div>

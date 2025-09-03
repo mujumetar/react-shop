@@ -11,7 +11,7 @@ const Contactpage = () => {
             {/* <Navbars /> */}
             <Slider/>
             <Contact/>
-            <Footer/>
+            {/* <Footer/> */}
         </>
     )
 }

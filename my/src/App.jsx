@@ -12,6 +12,7 @@ import Productpage from './components/pages/Productpage'
 import Offerspage from './components/pages/offerspage'
 import Home from './components/pages/Home.jsx'
 import { useEffect } from 'react'
+import Eachprod from './components/pages/Eachprod.jsx'
 
 
 
@@ -106,7 +107,8 @@ function App() {
     <>
 
       <Router>
-        <Navbars />
+        <Navbars />  
+        {/* <Eachprod/> */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Productpage />} />
@@ -116,6 +118,7 @@ function App() {
           <Route path="/offers" element={<Offerspage />} />
         </Routes>
         <Footer />
+      
       </Router>
 
 

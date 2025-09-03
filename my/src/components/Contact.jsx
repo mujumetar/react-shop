@@ -8,14 +8,14 @@ const Contact = () => {
         <>
 
             <div className="container">
-                    <h2 className="section-title-x text-white text-center my-3">Contact</h2>
+                    <h2 className="section-title text-center my-3">Contact</h2>
                 <section className="py-3 py-md-5 py-xl-8">
                   
 
                     <div className="container">
                         <div className="row gy-4 gy-md-5 gy-lg-0 align-items-md-center">
-                            <div className="col-12 col-lg-6">
-                                <div className="border overflow-hidden">
+                            <div className="col-12 col-lg-6 ">
+                                <div className="border overflow-hidden rounded-3 shadow">
 
                                     <form action="/admin/contact">
                                         <div className="row gy-4 gy-xl-5 p-4 p-xl-5">

@@ -8,7 +8,7 @@ const Productcard = () => {
 
             <div className="container mt-4 ">
 
-                <h2 className="section-title-x  text-center my-3">Products</h2>
+                <h2 className="section-title  text-center my-3">Products</h2>
                 <div className="row">
 
                     <div className="col-lg-3 col-md-4 col-sm-4 mb-4">
