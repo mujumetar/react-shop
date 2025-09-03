@@ -5,9 +5,7 @@ import Service from './components/Service'
 import Footer from './components/Footer'
 import Contactpage from './components/pages/Contactpage.jsx'
 import Aboutpage from './components/pages/Aboutpage'
-
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
-
 import Productpage from './components/pages/Productpage'
 import Offerspage from './components/pages/offerspage'
 import Home from './components/pages/Home.jsx'

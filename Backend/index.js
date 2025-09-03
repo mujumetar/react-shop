@@ -7,14 +7,18 @@ const port = 3000
 const cors = require("cors")
 const db = require("./db")
 const contactModel = require("./models/contact")
+const productModel = require("./models/prod")
+const product = require('./models/prod')
 
 app.use(express.json())
 app.use(cors())
 
 app.get('/test', async (req, res) => {
   const response = await contactModel.find()
+  const prod = await productModel.find()
   // res.send(contact)
-  return res.json({contact : response})
+  return res.json({contact : response, product : prod})
+  
 })
 
 app.listen(port, () => {
