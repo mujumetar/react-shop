@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 const multer = require("multer");
-const admin = require("../models/adminTbl");
+const contactModel = require("../models/contact");
+// const admin = require("../models/adminTbl");
+const productModel = require("../models/prod");
 
-
-module.exports.dashboard = (req, res) => {
-  try {
-    res.render("dashboard");
-  } catch (err) {
-    console.log("err");
-  }
+module.exports.test = async (req, res) => {
+  const response = await contactModel.find();
+  const prod = await productModel.find();
+  // res.send(contact)
+  return res.json({ contact: response, product: prod });
 };

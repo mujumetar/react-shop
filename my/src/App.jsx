@@ -13,11 +13,26 @@ import Eachprod from './components/pages/Eachprod.jsx'
 
 function App() {
   const [products, setProducts] = useState([])
+  const [formData, setFormData] = useState({});
 
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.post("http://localhost:3000/admin/api", formData);
+            alert(res.data.message);
+        } catch (err) {
+            alert("Error adding product ❌");
+            console.log(err);
+        }
+    };
   // fetch products
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch('http://localhost:3000/test')
+      const res = await fetch('http://localhost:3000/admin/api')
       const data = await res.json()
       setProducts(data.product)
       console.log(data.product)

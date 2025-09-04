@@ -9,17 +9,17 @@ const db = require("./db")
 const contactModel = require("./models/contact")
 const productModel = require("./models/prod")
 const product = require('./models/prod')
+const adminRoutes = require("./routes/admin-routes")
+
+
+
 
 app.use(express.json())
 app.use(cors())
 
-app.get('/test', async (req, res) => {
-  const response = await contactModel.find()
-  const prod = await productModel.find()
-  // res.send(contact)
-  return res.json({contact : response, product : prod})
-  
-})
+app.use("/admin", adminRoutes)
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
