@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import white from "../../img/white.jpeg";
+import contains from "../../img/contains.png"
 import black from "../../img/black.jpeg";
 import { useNavigate } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
@@ -97,10 +98,10 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                 style={{ display: "block" }}
             >
                 <div className="modal-dialog modal-fullscreen">
-                   
+
                     <div className="modal-content">
                         <div className="modal-header">
-                            
+
                             <h5 className="modal-title">{selectedProduct.name}</h5>
                             <button
                                 type="button"
@@ -184,6 +185,46 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                                         )}
                                     </div>
 
+                                    <div>
+                                        <marquee className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background" behavior="" direction="">  <b>25 years of trust</b></marquee>
+                                        <marquee behavior="" direction="">   <b>we belive in quality not in quantity</b></marquee>
+                                        <p> <b>Latest Products</b>
+                                            <br />
+                                            {selectedProduct.name} kachariyu/saani
+
+
+                                            <ul>
+                                                <li> No added flavours.</li>
+                                                <li> No harmful Chemicals.</li>
+                                                <li>Best for winters.</li>
+                                                <li> No additional colours.</li>
+                                                <li>  100% natural and healthy.</li>
+                                                <li> Healthy for everyone ☺️.</li>
+                                            </ul>
+                                        </p>
+                                        <b> It contains</b>
+                                        <img className="img-fluid" src={contains} alt="" />
+
+                                        <b>✅ Health Review</b>
+                                        <br />
+                                        Energy-dense (~474 kcal per 100 g) → great for winters, boosts energy.
+                                        <br />
+                                        Balanced macros → Carbs from jaggery + healthy fats & protein from sesame.
+                                        <br />
+                                        Rich in minerals → especially Calcium (good for bones), Iron (blood health), Magnesium, and Potassium.
+                                        <br />
+                                        Fiber content (6 g/100 g) → supports digestion.
+                                        <br />
+                                        Antioxidants → Sesamin & sesamolin from sesame + minerals from jaggery.
+                                        <br />
+                                        <b>🏆 Why This Mixture is Powerful</b>
+                                        <br />
+                                        Gives instant energy (from jaggery).
+                                        <br />
+                                        Provides long-lasting satiety & strength (from sesame protein & fats).
+                                        <br />
+                                        Traditional wisdom = perfect winter superfood 🌿.
+                                    </div>
                                     {/* Summary */}
                                     <div className="border rounded p-3 bg-light mt-3">
                                         <h6 className="fw-bold mb-2">Order Summary</h6>
@@ -193,13 +234,11 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                                         <p className="mb-1">Delivery Charges: ₹ {deliveryCharge}</p>
                                         {discount > 0 && (
                                             <p className="mb-1 text-success">
-                                                Discount: -₹ {discount.toFixed(2)}
+                                                Discount: -₹ {discount.toFixed(2)} (20%)
                                             </p>
                                         )}
                                         <hr />
-                                        <h5 className="fw-bold">
-                                            Grand Total: ₹ {grandTotal.toFixed(2)}
-                                        </h5>
+
                                     </div>
                                 </div>
                             </div>
@@ -207,14 +246,10 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
 
                         {/* Footer */}
                         <div className="modal-footer">
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                data-bs-dismiss="modal"
-                                onClick={() => setSelectedProduct(null)}
-                            >
-                                Close
-                            </button>
+                            <h5 className="fw-bold">
+                                Grand Total: ₹ {grandTotal.toFixed(2)}
+                            </h5>
+
                             <button
                                 type="button"
                                 className="btn btn-success"
