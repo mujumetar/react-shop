@@ -33,7 +33,7 @@ Hello! I just placed an order:
 - Total: $250
 `;
 
-let phoneNumber = 7874536227;
+  let phoneNumber = 7874536227;
 
   const sendWhatsApp = () => {
     const phoneNumber = "+917874536227" // your business WhatsApp number
@@ -44,7 +44,7 @@ let phoneNumber = 7874536227;
   return (
     <div className="container text-center py-5">
       <DotLottieReact
-        src="https://lottie.host/4cd9cae9-5e75-4984-be70-ac193552b082/rMNXmUNLK0.lottie"
+        src="https://lottie.host/3b0b1e9f-c4b5-4a83-ac91-a684ae861f27/cgY4CSU3Wl.lottie"
         loop
         autoplay
       />

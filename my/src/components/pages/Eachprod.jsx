@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import white from "../../img/white.jpeg";
 import black from "../../img/black.jpeg";
 import { useNavigate } from "react-router-dom";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
     const [quantity, setQuantity] = useState(1);
@@ -20,12 +21,11 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
     });
 
     const deliveryCharge = 40;
-    const isFirstOrder = true;
+    let isFirstOrder = true;
 
     const imageMap = { white, black };
 
     if (!selectedProduct) return null;
-
 
     const productTotal = (selectedProduct.price || 0) * quantity;
 
@@ -76,11 +76,11 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
             *Email*: ${address.email || "N/A"}
                 `;
 
-     
+
         const adminNumber = "+917874536227";
         const url = `https://wa.me/${adminNumber}?text=${encodeURIComponent(orderDetails)}`;
 
-       
+
         window.open(url, "_blank");
     };
 
@@ -97,8 +97,10 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                 style={{ display: "block" }}
             >
                 <div className="modal-dialog modal-fullscreen">
+                   
                     <div className="modal-content">
                         <div className="modal-header">
+                            
                             <h5 className="modal-title">{selectedProduct.name}</h5>
                             <button
                                 type="button"
