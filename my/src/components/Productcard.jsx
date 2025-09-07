@@ -2,20 +2,20 @@ import React from 'react'
 import white from "../img/white.jpeg"
 import black from "../img/black.jpeg"
 
-const Productcard = ({products}) => {
-console.log(products)
+const Productcard = ({ products }) => {
+    console.log(products)
     return (
         <>
 
-            <div className="container mt-4 ">
+            <div className="container mt-4 " data-aos="fade-up">
 
                 <h2 className="section-title  text-center my-3">Products</h2>
                 <div className="row">
 
                     {
-                            products.map((ele, index) => (
-                        <div className="col-lg-3 col-md-4 col-sm-4 mb-4" key={index}>
-                            <div className="hidden" hidden>{ele._id}</div>
+                        products.map((ele, index) => (
+                            <div className="col-lg-3 col-md-4 col-sm-4 mb-4 " data-aos="fade-up" data-aos-duration="2000" key={index}>
+                                <div className="hidden" hidden>{ele._id}</div>
                                 <div className="product-card">
                                     <div className="product-image">
                                         <img
@@ -31,12 +31,8 @@ console.log(products)
                                     </div>
                                 </div>
                             </div>
-                            ))
+                        ))
                     }
-
-
-
-
                 </div>
             </div>
 

@@ -4,7 +4,7 @@ import shopimg from "../img/shop.png"
 const Aboutsect = () => {
     return (
         <>
-            <section className="restaurant-section">
+            <section className="restaurant-section" data-aos="fade-up" data-aos-duration="1000">
                 <div className="container">
                     <h2 className="section-title">Shop</h2>
                     <div className="row align-items-center">

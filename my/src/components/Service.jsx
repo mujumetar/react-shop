@@ -2,7 +2,7 @@ import React from 'react'
 const Service = () => {
     return (
         <>
-            <section className="popular-section">
+            <section className="popular-section" data-aos="fade-up" data-aos-duration="1000">
                 <div className="container">
                     <h2 className="section-title">Most popular</h2>
                     <p className="text-center mb-5">Do not even be covered unless used the end of month.</p>

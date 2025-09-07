@@ -7,7 +7,7 @@ const Contact = () => {
     return (
         <>
 
-            <div className="container">
+            <div className="container" data-aos="fade-up" data-aos-duration="1000">
                     <h2 className="section-title text-center my-3">Contact</h2>
                 <section className="py-3 py-md-5 py-xl-8">
                   

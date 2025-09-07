@@ -1,11 +1,11 @@
 import React from 'react'
-import white from "../img/white.jpeg"
+import white from "../img/white.jpg"
 import black from "../img/black.jpeg"
 
 const Slider = () => {
     return (
         <>
-            <div id="heroCarousel" className="carousel slide carousel-fade" data-bs-ride="carousel">
+            <div id="heroCarousel"  className="carousel slide carousel-fade" data-bs-ride="carousel">
                 <div className="carousel-indicators">
                     <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" className="active" aria-current="true"
                         aria-label="Slide 1"></button>

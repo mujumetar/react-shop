@@ -12,7 +12,7 @@ const Navbars = () => {
                         <div className="container-fluid">
                             <a className="navbar-brand logo" >
                                 <i className="fas fa-shopping-basket"></i>
-                                <img src={logo} className='img-fluid' style={{ width: '6rem' }} alt="" />
+                                <img src={logo} data-aos="flip-left" data-aos-duration="3000" className='img-fluid' style={{ width: '6rem' }} alt="" />
                             </a>
                             <button className="navbar-toggler btn-sm border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
