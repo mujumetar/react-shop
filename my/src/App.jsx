@@ -59,6 +59,7 @@ function App() {
       element: (
         <>
           <Navbars />
+          <Eachprod />
           {/* <Checkout /> */}
           <Home products={products} />
           <Footer />
