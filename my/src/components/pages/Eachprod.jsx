@@ -9,6 +9,16 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [showCheckout, setShowCheckout] = useState(false);
     const navigate = useNavigate()
+    const [address, setAddress] = useState({
+        pincode: "",
+        address1: "",
+        address2: "",
+        city: "",
+        state: "",
+        phone: "",
+        email: "",
+    });
+
     const deliveryCharge = 40;
     const isFirstOrder = true;
 
@@ -16,7 +26,17 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
 
     if (!selectedProduct) return null;
 
+
     const productTotal = (selectedProduct.price || 0) * quantity;
+
+    const handleAddressChange = (e) => {
+        const { name, value } = e.target;
+        setAddress((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
 
     let discount = 0;
     if (isFirstOrder) {
@@ -34,6 +54,36 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
             setAppliedCoupon("INVALID");
         }
     };
+
+    const sendToWhatsApp = () => {
+        // Collect order details from state
+        const orderDetails = `
+            *New Order Received! 📦*
+
+            *Product*: ${selectedProduct.name}
+            *Variant*: ${selectedProduct.varient}
+            *Quantity*: ${quantity} KG
+            *Unit Price*: ₹ ${selectedProduct.price}
+            *Delivery Charges*: ₹ ${deliveryCharge}
+            *Discount*: ₹ ${discount.toFixed(2)}
+            *Grand Total*: *₹ ${grandTotal.toFixed(2)}*
+
+            *Delivery Info:*
+            *Pincode*: ${address.pincode}
+            *Address*: ${address.address1}, ${address.address2}
+            *City*: ${address.city}, State: ${address.state}
+            *Phone*: ${address.phone}
+            *Email*: ${address.email || "N/A"}
+                `;
+
+     
+        const adminNumber = "+917874536227";
+        const url = `https://wa.me/${adminNumber}?text=${encodeURIComponent(orderDetails)}`;
+
+       
+        window.open(url, "_blank");
+    };
+
 
     return (
         <>
@@ -197,34 +247,87 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                                 <form className="row g-3">
                                     <div className="col-md-6">
                                         <label className="form-label">Pincode</label>
-                                        <input type="text" className="form-control" required />
-                                    </div>
-                                    <div className="col-md-12">
-                                        <label className="form-label">Address Line 1</label>
-                                        <input type="text" className="form-control" required />
-                                    </div>
-                                    <div className="col-md-12">
-                                        <label className="form-label">Address Line 2</label>
-                                        <input type="text" className="form-control" />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label">City</label>
-                                        <input type="text" className="form-control" required />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label">State</label>
-                                        <input type="text" className="form-control" required />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label">Phone Number</label>
-                                        <input type="tel" className="form-control" required />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label">Email (optional)</label>
-                                        <input type="email" className="form-control" />
+                                        <input
+                                            type="text"
+                                            name="pincode"
+                                            className="form-control"
+                                            value={address.pincode}
+                                            onChange={handleAddressChange}
+                                            required
+                                        />
                                     </div>
 
+                                    <div className="col-md-12">
+                                        <label className="form-label">Address Line 1</label>
+                                        <input
+                                            type="text"
+                                            name="address1"
+                                            className="form-control"
+                                            value={address.address1}
+                                            onChange={handleAddressChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="col-md-12">
+                                        <label className="form-label">Address Line 2</label>
+                                        <input
+                                            type="text"
+                                            name="address2"
+                                            className="form-control"
+                                            value={address.address2}
+                                            onChange={handleAddressChange}
+                                        />
+                                    </div>
+
+                                    <div className="col-md-6">
+                                        <label className="form-label">City</label>
+                                        <input
+                                            type="text"
+                                            name="city"
+                                            className="form-control"
+                                            value={address.city}
+                                            onChange={handleAddressChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="col-md-6">
+                                        <label className="form-label">State</label>
+                                        <input
+                                            type="text"
+                                            name="state"
+                                            className="form-control"
+                                            value={address.state}
+                                            onChange={handleAddressChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="col-md-6">
+                                        <label className="form-label">Phone Number</label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            className="form-control"
+                                            value={address.phone}
+                                            onChange={handleAddressChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="col-md-6">
+                                        <label className="form-label">Email (optional)</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            className="form-control"
+                                            value={address.email}
+                                            onChange={handleAddressChange}
+                                        />
+                                    </div>
                                 </form>
+
                             </div>
                             <div className="modal-footer">
                                 <button
@@ -236,8 +339,9 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => {
-                                        setShowCheckout(false);
-                                        setSelectedProduct(null);
+                                        sendToWhatsApp();
+                                        // setShowCheckout(false);
+                                        // setSelectedProduct(null);
                                         navigate("/order-success");
                                     }}
                                 >
