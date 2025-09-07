@@ -13,6 +13,7 @@ import Eachprod from './components/pages/Eachprod.jsx';
 import Loading from './components/Loading.jsx';
 import Checkout from './components/Checkout.jsx';
 import axios from 'axios'; // You forgot this import
+import OrderSuccess from './components/pages/OrderSuccess.jsx';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -63,6 +64,16 @@ function App() {
           {/* <Checkout /> */}
           <Home products={products} />
           <Footer />
+        </>
+      ),
+    },
+    {
+      path: "/order-success",
+      element: (
+        <>
+          <Navbars />
+          <OrderSuccess />
+          {/* <Footer /> */}
         </>
       ),
     },

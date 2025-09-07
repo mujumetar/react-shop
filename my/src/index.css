@@ -1,9 +1,8 @@
-
 :root {
   /* --primary-color: #4CAF50; */
   --primary-color: #4CAF50;
 
-  
+
   --secondary-color: #8BC34A;
   /* --secondary-color: #4CAF50; */
 
@@ -14,7 +13,7 @@
   --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -22,7 +21,7 @@
 }
 
 body {
-  background-color:white;
+  background-color: white;
   color: var(--dark-text);
   line-height: 1.6;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -30,8 +29,8 @@ body {
 
 /* Header */
 header {
-  background:white;
-  color:black;
+  background: white;
+  color: black;
   padding: 20px 0;
   box-shadow: var(--shadow);
 }
@@ -352,4 +351,18 @@ footer {
   .carousel-caption {
     padding: 15px;
   }
+}
+
+.zoom-container {
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.zoom-image {
+  transition: transform 0.4s ease;
+  cursor: zoom-in;
+}
+
+.zoom-image:hover {
+  transform: scale(1.2);
 }

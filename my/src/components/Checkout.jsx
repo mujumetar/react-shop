@@ -5,11 +5,7 @@ const Checkout = () => {
     return (
         <>
         {/* checkout */}
-            <DotLottieReact
-                src="https://lottie.host/4cd9cae9-5e75-4984-be70-ac193552b082/rMNXmUNLK0.lottie"
-                loop
-                autoplay
-            />
+            
 
 
             {/* why we ? */}
