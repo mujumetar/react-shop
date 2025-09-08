@@ -376,7 +376,7 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => {
-                                        sendToWhatsApp();
+                                        // sendToWhatsApp();
                                         // setShowCheckout(false);
                                         // setSelectedProduct(null);
                                         navigate("/order-success");
