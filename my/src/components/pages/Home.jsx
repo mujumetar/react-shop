@@ -13,7 +13,7 @@ const Home = ({ products }) => {
     return (
         <>
             <Slider />
-            <Productcard products={products} />
+            {/* <Productcard products={products} /> */}
             {/* <Service/> */}
             <Qna />
             <Aboutsect />
@@ -27,7 +27,7 @@ const Home = ({ products }) => {
                 className="whatsapp-fab"
                 title="get chat now"
             >
-                <i class="ri-whatsapp-line"></i>
+                <i className="ri-whatsapp-line"></i>
             </a>
 
             {/* ✅ CSS for FAB */}
