@@ -19,6 +19,12 @@ const Productcard = ({ products }) => {
 
   return (
     <>
+
+      {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+        <path fill="#0099ff" fill-opacity="1" d="M0,0L30,53.3C60,107,120,213,180,224C240,235,300,149,360,144C420,139,480,213,540,224C600,235,660,181,720,154.7C780,128,840,128,900,112C960,96,1020,64,1080,74.7C1140,85,1200,139,1260,165.3C1320,192,1380,192,1410,192L1440,192L1440,320L1410,320C1380,320,1320,320,1260,320C1200,320,1140,320,1080,320C1020,320,960,320,900,320C840,320,780,320,720,320C660,320,600,320,540,320C480,320,420,320,360,320C300,320,240,320,180,320C120,320,60,320,30,320L0,320Z"></path>
+
+
+      </svg> */}
       <div className="container mt-4" data-aos="fade-up">
         <h2 className="section-title text-center my-3">Products</h2>
         <div className="row">
@@ -58,7 +64,7 @@ const Productcard = ({ products }) => {
 
       </div>
 
-        <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} />
+      <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} />
     </>
 
   );

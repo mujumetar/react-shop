@@ -13,8 +13,8 @@ const Home = ({ products }) => {
     return (
         <>
             <Slider />
-            {/* <Productcard products={products} /> */}
-            {/* <Service/> */}
+            <Productcard products={products} />
+            <Service/>
             <Qna />
             <Aboutsect />
             <Contact />

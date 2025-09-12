@@ -1,4 +1,3 @@
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import React, { useEffect } from "react";
 import logo from "../../img/logo.png"
 import { useNavigate } from "react-router-dom";
@@ -43,11 +42,7 @@ Hello! I just placed an order:
 
   return (
     <div className="container text-center py-5">
-      <DotLottieReact
-        src="https://lottie.host/3b0b1e9f-c4b5-4a83-ac91-a684ae861f27/cgY4CSU3Wl.lottie"
-        loop
-        autoplay
-      />
+    
       <h1 className="text-success">🎉 Order Placed Successfully!</h1>
       <p className="mt-3">
         Thank you for your purchase. Your order has been confirmed and will be delivered soon.

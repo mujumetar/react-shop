@@ -30,7 +30,11 @@
     import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
     createChat({
-      webhookUrl: 'https://n8n-32uz.onrender.com/webhook/f289b7c9-e97f-47ae-85ea-ace18cd6a042/chat'
+      webhookUrl: 'https://n8n-32uz.onrender.com/webhook/f289b7c9-e97f-47ae-85ea-ace18cd6a042/chat',
+      initialMessages: [
+		'Hi there! 👋',
+		'My name is Dilkhush AI. How can I assist you today?'
+	],
     });
   </script>
   <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>

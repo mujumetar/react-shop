@@ -20,35 +20,35 @@ function App() {
   const [formData, setFormData] = useState({});
   const [isloading, setIsLoading] = useState(true);
 
-  // const handleChange = (e) => {
-  //   setFormData({ ...formData, [e.target.name]: e.target.value });
-  // };
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const res = await axios.post("http://localhost:3000/admin/api", formData);
-  //     alert(res.data.message);
-  //   } catch (err) {
-  //     alert("Error adding product ❌");
-  //     console.log(err);
-  //   }
-  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:3000/admin/api", formData);
+      alert(res.data.message);
+    } catch (err) {
+      alert("Error adding product ❌");
+      console.log(err);
+    }
+  };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await fetch('http://localhost:3000/admin/api');
-  //       const data = await res.json();
-  //       setProducts(data.product);
-  //     } catch (error) {
-  //       console.error("Error fetching products:", error);
-  //     } finally {
-  //       setIsLoading(false); // ✅ stop loading after data is fetched
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/admin/api');
+        const data = await res.json();
+        setProducts(data.product);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setIsLoading(false); // ✅ stop loading after data is fetched
+      }
+    };
+    fetchData();
+  }, []);
 
   
 
