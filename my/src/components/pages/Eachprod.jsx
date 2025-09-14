@@ -97,10 +97,10 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                 aria-hidden="true "
                 style={{ display: "block" }}
             >
-                <div className="modal-dialog  position-relative">
+                <div className="modal-dialog   position-relative">
 
                     <div className="modal-content">
-                        <div className="modal-header">
+                        <div className="modal-header border-0">
 
                             <h5 className="modal-title">{selectedProduct.name}</h5>
                             <button
@@ -112,7 +112,7 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                             ></button>
                         </div>
 
-                        <div className="modal-body ">
+                        <div className="modal-body border-0">
                             <div className="row g-3">
                                 {/* Image */}
                                 <div className="col-lg-12 col-md-12 d-flex justify-content-center align-items-center">

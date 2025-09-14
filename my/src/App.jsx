@@ -42,7 +42,8 @@ function App() {
       element: (
         <>
           <Navbars />
-          <Eachprod />
+
+          {/* <Eachprod /> */}
           {/* <Checkout /> */}
           <Home products={products} />
           <Footer />
