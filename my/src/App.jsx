@@ -14,43 +14,23 @@ import Loading from './components/Loading.jsx';
 import Checkout from './components/Checkout.jsx';
 import axios from 'axios'; // You forgot this import
 import OrderSuccess from './components/pages/OrderSuccess.jsx';
+import ProductData from "./components/Products.json"
 
 function App() {
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({});
   const [isloading, setIsLoading] = useState(true);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("http://localhost:3000/admin/api", formData);
-      alert(res.data.message);
-    } catch (err) {
-      alert("Error adding product ❌");
-      console.log(err);
-    }
-  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('http://localhost:3000/admin/api');
-        const data = await res.json();
-        setProducts(data.product);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setIsLoading(false); // ✅ stop loading after data is fetched
-      }
-    };
-    fetchData();
+    // Simulate API call delay
+    setTimeout(() => {
+      setProducts(ProductData);
+      setIsLoading(false);
+    }, 1000);
   }, []);
 
-  
+
 
   if (isloading) {
     return <Loading />; // ✅ Show loading while fetching

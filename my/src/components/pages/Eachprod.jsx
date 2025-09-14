@@ -90,14 +90,14 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
         <>
             {/* Product Modal */}
             <div
-                className="modal modal-fullscreen fade border-2 show"
+                className="modal fade border-2 show"
                 id="productModal"
-                data-bs-backdrop="false"
+                data-bs-backdrop="true"
                 tabIndex="-1"
-                aria-hidden="true"
+                aria-hidden="true "
                 style={{ display: "block" }}
             >
-                <div className="modal-dialog modal-fullscreen">
+                <div className="modal-dialog  position-relative">
 
                     <div className="modal-content">
                         <div className="modal-header">
@@ -112,10 +112,10 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                             ></button>
                         </div>
 
-                        <div className="modal-body">
+                        <div className="modal-body ">
                             <div className="row g-3">
                                 {/* Image */}
-                                <div className="col-lg-6 col-md-12 d-flex justify-content-center align-items-center">
+                                <div className="col-lg-12 col-md-12 d-flex justify-content-center align-items-center">
                                     <div className="zoom-container">
                                         <img
                                             src={imageMap[selectedProduct.img_url] || white}
@@ -126,7 +126,7 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                                 </div>
 
                                 {/* Details */}
-                                <div className="col-lg-6 col-md-12">
+                                <div className="col-lg-12 col-md-12">
                                     <p className="fw-bold">Price: ₹ {selectedProduct.price}</p>
                                     <p className="p-0 my-3">
                                         {selectedProduct.description || "No description available"}
@@ -245,7 +245,7 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                         </div>
 
                         {/* Footer */}
-                        <div className="modal-footer">
+                        <div className="modal-footer fixed-bottom bg-white"> 
                             <h5 className="fw-bold">
                                 Grand Total: ₹ {grandTotal.toFixed(2)}
                             </h5>

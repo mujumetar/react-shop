@@ -1,0 +1,28 @@
+[
+    {
+        "id": "68b809329574d0bbd587cc2e",
+        "name": "white sani",
+        "varient": [
+            "dryfruit",
+            "plain"
+        ],
+        "slug": "whitesani",
+        "img_url": "white",
+        "price": 340,
+        "stock": "1000kg",
+        "description": "lorem ipsum sit amet"
+    },
+    {
+        "id": "68b809329574d0bbd587cc2f",
+        "name": "black sani",
+        "varient": [
+            "dryfruit",
+            "plain"
+        ],
+        "slug": "blacksani",
+        "img_url": "black",
+        "price": 360,
+        "stock": "1000kg",
+        "description": "lorem ipsum sit amet"
+    }
+]
