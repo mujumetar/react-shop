@@ -16,6 +16,8 @@ import axios from 'axios'; // You forgot this import
 import OrderSuccess from './components/pages/OrderSuccess.jsx';
 import ProductData from "./components/Products.json"
 
+import Gallery from "./components/pages/Gallery.jsx"
+
 function App() {
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({});
@@ -42,7 +44,7 @@ function App() {
       element: (
         <>
           <Navbars />
-
+<Gallery/>
           {/* <Eachprod /> */}
           {/* <Checkout /> */}
           <Home products={products} />

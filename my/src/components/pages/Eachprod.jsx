@@ -77,7 +77,6 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
             *Email*: ${address.email || "N/A"}
                 `;
 
-
         const adminNumber = "+917874536227";
         const url = `https://wa.me/${adminNumber}?text=${encodeURIComponent(orderDetails)}`;
 
@@ -90,7 +89,7 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
         <>
             {/* Product Modal */}
             <div
-                className="modal fade border-2 show"
+                className="modal fade border-0 show"
                 id="productModal"
                 data-bs-backdrop="true"
                 tabIndex="-1"
@@ -245,18 +244,21 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
                         </div>
 
                         {/* Footer */}
-                        <div className="modal-footer fixed-bottom bg-white"> 
-                            <h5 className="fw-bold">
-                                Grand Total: ₹ {grandTotal.toFixed(2)}
-                            </h5>
+                        <div className="modal-footer fixed-bottom bg-white d-flex justify-content-center">
+                            <div className="container-sm d-flex flex-column w-25  justify-content-center">
+                                <h5 className="fw-bold mx-2">
+                                    Grand Total: ₹ {grandTotal.toFixed(2)}
+                                </h5>
 
-                            <button
-                                type="button"
-                                className="btn btn-success"
-                                onClick={() => setShowCheckout(true)}
-                            >
-                                Buy Now
-                            </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-success"
+                                    onClick={() => setShowCheckout(true)}
+                                >
+                                    Buy Now
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
