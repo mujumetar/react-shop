@@ -6,7 +6,7 @@ import Contactpage from './components/pages/Contactpage.jsx';
 import Aboutpage from './components/pages/Aboutpage';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Productpage from './components/pages/Productpage';
-import Offerspage from './components/pages/offerspage';
+// import Offerspage from './components/pages/offerspage';
 import Home from './components/pages/Home.jsx';
 import { useEffect, useState } from 'react';
 import Eachprod from './components/pages/Eachprod.jsx';
@@ -23,7 +23,7 @@ function App() {
 
 
   useEffect(() => {
-    // Simulate API call delay
+
     setTimeout(() => {
       setProducts(ProductData);
       setIsLoading(false);
@@ -64,7 +64,7 @@ function App() {
       element: (
         <>
           <Navbars />
-          {/* <Productpage products={products} /> */}
+          <Productpage products={products} />
           <Footer />
         </>
       ),
@@ -94,7 +94,7 @@ function App() {
       element: (
         <>
           <Navbars />
-          <Offerspage />
+          {/* <Offerspage /> */}
           <Footer />
         </>
       ),
