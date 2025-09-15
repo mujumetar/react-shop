@@ -44,7 +44,6 @@ function App() {
       element: (
         <>
           <Navbars />
-<Gallery/>
           {/* <Eachprod /> */}
           {/* <Checkout /> */}
           <Home products={products} />
