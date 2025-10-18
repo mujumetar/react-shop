@@ -127,7 +127,7 @@ const upload = multer({
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:5175', 'http://localhost:5173'] }));
+app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:5175', 'https://dilkhush-api.vercel.app', 'http://localhost:5174', 'http://localhost:5173'] }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Global Error Handler
