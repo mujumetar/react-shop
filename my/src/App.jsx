@@ -2,7 +2,7 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import white from './img/white.jpeg';
 import black from './img/black.jpeg';
-
+import Navbars from "./components/Navbar"
 // Cart Context
 const CartContext = createContext();
 
@@ -49,17 +49,8 @@ const CartProvider = ({ children }) => {
 const useCart = () => useContext(CartContext);
 
 // Navbars Component
-const Navbars = () => (
-  <nav className="navbar navbar-expand-lg navbar-light bg-light">
-    <div className="container">
-      <a className="navbar-brand" href="/">Shop</a>
-      <div className="navbar-nav">
-        <a className="nav-link" href="/">Home</a>
-        <a className="nav-link" href="/cart">Cart</a>
-        <a className="nav-link" href="/contact">Contact</a>
-      </div>
-    </div>
-  </nav>
+const Navbar= () => (
+  <Navbars/>
 );
 
 // Footer Component
