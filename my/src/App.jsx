@@ -81,7 +81,7 @@ const Productcard = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://dilkhush-api.vercel.app/products');
+        const response = await fetch('https://dilkhush-api-49h6.onrender.com/products');
         if (!response.ok) {
           throw new Error(`Failed to fetch products: ${response.statusText}`);
         }
@@ -294,7 +294,7 @@ const Contact = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch('https://dilkhush-api.vercel.app/contact', {
+      const response = await fetch('https://dilkhush-api-49h6.onrender.com/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -460,7 +460,7 @@ const Checkout = () => {
     console.log('Sending order data:', orderData);
 
     try {
-      const response = await fetch('https://dilkhush-api.vercel.app/orders', {
+      const response = await fetch('https://dilkhush-api-49h6.onrender.com/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
