@@ -2,44 +2,18 @@ const mongoose = require('mongoose');
 const moment = require("moment")
 
 
-const productSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
+const productSchema = new mongoose.Schema(
+    {
+        name: { type: String, required: true },
+        slug: { type: String, required: true, unique: true },
+        category: { type: String },
+        price: { type: Number, required: true },
+        stock: { type: Number, default: 0 },
+        description: { type: String },
+        img_url: { type: String }
     },
-    price: {
-        type: Number,
-        required: true
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    image: {
-        type: String,
-        required: true      
-    },
-    category: {
-        type: String,
-        required: true
-    },
-    status: {
-        type: Boolean,
-        default: true,
-        required: true
-    },
-    createdAt: {
-        type: String,
-        default: moment().format('MMMM Do YYYY, h:mm:ss a')
-    },
-    updatedAt: {
-        type: String,
-        default: moment().format('MMMM Do YYYY, h:mm:ss a')
-
-
-    }
-})
-
+    { timestamps: true }
+)
 const product = mongoose.model("product", productSchema)
 
 

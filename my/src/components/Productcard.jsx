@@ -1,15 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import white from "../img/white.jpeg";
 import black from "../img/black.jpeg";
 import Eachprod from "./pages/Eachprod";
 
-const Productcard = ({ products }) => {
+const Productcard = () => {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/products');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch products: ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log('Fetched products:', data);
+        setProducts(data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const openPage = (product) => {
-    setSelectedProduct(product); // set the clicked product
+    setSelectedProduct(product); // Set the clicked product for modal
+    // Navigate to checkout with productId
+    navigate('/', { state: { productId: product._id } });
   };
 
   const imageMap = {
@@ -21,6 +46,9 @@ const Productcard = ({ products }) => {
     <>
       <div className="container mt-4" data-aos="fade-up">
         <h2 className="section-title text-center my-3">Products</h2>
+        {loading && <p>Loading products...</p>}
+        {error && <p>Error: {error}</p>}
+        {!loading && !error && products.length === 0 && <p>No products available</p>}
         <div className="row">
           {products.map((ele, index) => (
             <div
@@ -53,14 +81,10 @@ const Productcard = ({ products }) => {
             </div>
           ))}
         </div>
-
-        {/* Modal */}
-
       </div>
 
-        <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} />
+      <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} />
     </>
-
   );
 };
 

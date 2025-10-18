@@ -21,6 +21,7 @@ const Contactpage = () => {
                 />
             </div>
                 <Contact />
+                
             {/* <Footer/> */}
         </>
     )
