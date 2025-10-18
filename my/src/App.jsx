@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from
 import white from './img/white.jpeg';
 import black from './img/black.jpeg';
 import Navbars from "./components/Navbar"
+import Footers from "./components/Footer"
+import Slider from "./components/Slider"
+import About from "./components/Aboutsect"
 // Cart Context
 const CartContext = createContext();
 
@@ -48,17 +51,7 @@ const CartProvider = ({ children }) => {
 
 const useCart = () => useContext(CartContext);
 
-// Navbars Component
-const Navbar= () => (
-  <Navbars/>
-);
 
-// Footer Component
-const Footer = () => (
-  <footer className="bg-light text-center py-3">
-    <p>&copy; 2025 Your Shop. All rights reserved.</p>
-  </footer>
-);
 
 // Productcard Component
 const Productcard = () => {
@@ -179,7 +172,7 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
               <img src={`https://dilkhush-api.vercel.app${selectedProduct.img_url}`} alt={selectedProduct.name} className="img-fluid" />
             )}
           </div>
-          <div className="modal-footer">
+          <div className="modal-Footers">
             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={() => setSelectedProduct(null)}>Close</button>
             <button type="button" className="btn btn-primary" onClick={handleAddToCart}>Add to Cart</button>
           </div>
@@ -717,8 +710,29 @@ function App() {
             element={
               <>
                 <Navbars />
+                <Slider/>
                 <Productcard />
-                <Footer />
+                <Footers />
+              </>
+            }
+          />
+          <Route
+            path="/Products"
+            element={
+              <>
+                <Navbars />
+                <Productcard /> 
+                <Footers />
+              </>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <>
+                <Navbars />
+                <About /> 
+                <Footers />
               </>
             }
           />
@@ -728,7 +742,7 @@ function App() {
               <>
                 <Navbars />
                 <Cart />
-                <Footer />
+                <Footers />
               </>
             }
           />
@@ -738,7 +752,7 @@ function App() {
               <>
                 <Navbars />
                 <Checkout />
-                <Footer />
+                <Footers />
               </>
             }
           />
@@ -748,7 +762,7 @@ function App() {
               <>
                 <Navbars />
                 <Contact />
-                <Footer />
+                <Footers />
               </>
             }
           />
@@ -761,7 +775,7 @@ function App() {
                   <h2>Order Placed Successfully!</h2>
                   <p>Thank you for your purchase. You will receive a confirmation email soon.</p>
                 </div>
-                <Footer />
+                <Footers />
               </>
             }
           />
@@ -774,7 +788,7 @@ function App() {
                   <h2>Order Failed</h2>
                   <p>Something went wrong. Please try again.</p>
                 </div>
-                <Footer />
+                <Footers />
               </>
             }
           />

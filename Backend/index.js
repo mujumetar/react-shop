@@ -1,19 +1,38 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
-const cors = require('cors'); // Import CORS
+const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
 
-// Enable CORS for your frontend origin
+// Define allowed origins
+const allowedOrigins = [
+  'https://dilkhush-kirana.vercel.app',
+  'http://localhost:5173', // Allow local development
+];
+
+
+// CORS setup
 app.use(cors({
-  origin: 'https://dilkhush-kirana.vercel.app', // Allow only your frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
-  credentials: true, // Allow cookies if needed
+  origin: (origin, callback) => {
+    if (!origin || origin.match(/^http:\/\/localhost:\d+$/) ||
+      origin === 'https://dilkhush-kirana.vercel.app' ||
+      origin === 'https://dilkhush-admin.vercel.app') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
 }));
+
+
+// Handle CORS preflight requests
+app.options('*', cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -92,6 +111,7 @@ app.get('/products', async (req, res) => {
     const products = await Product.find();
     res.json(products);
   } catch (err) {
+    console.error('Error fetching products:', err);
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
@@ -111,6 +131,7 @@ app.post('/admin', async (req, res) => {
     await product.save();
     res.status(201).json({ message: 'Product added successfully' });
   } catch (err) {
+    console.error('Error adding product:', err);
     res.status(500).json({ error: 'Failed to add product' });
   }
 });
@@ -129,6 +150,7 @@ app.put('/admin/:id', async (req, res) => {
     await Product.findByIdAndUpdate(req.params.id, updateData);
     res.json({ message: 'Product updated successfully' });
   } catch (err) {
+    console.error('Error updating product:', err);
     res.status(500).json({ error: 'Failed to update product' });
   }
 });
@@ -138,6 +160,7 @@ app.delete('/admin/:id', async (req, res) => {
     await Product.findByIdAndDelete(req.params.id);
     res.json({ message: 'Product deleted successfully' });
   } catch (err) {
+    console.error('Error deleting product:', err);
     res.status(500).json({ error: 'Failed to delete product' });
   }
 });
@@ -149,6 +172,7 @@ app.post('/contact', async (req, res) => {
     await contact.save();
     res.status(201).json({ message: 'Contact message saved successfully' });
   } catch (err) {
+    console.error('Error saving contact:', err);
     res.status(500).json({ error: 'Failed to save contact message' });
   }
 });
@@ -158,6 +182,7 @@ app.get('/contact', async (req, res) => {
     const contacts = await Contact.find();
     res.json(contacts);
   } catch (err) {
+    console.error('Error fetching contacts:', err);
     res.status(500).json({ error: 'Failed to fetch contacts' });
   }
 });
@@ -220,6 +245,7 @@ app.get('/orders', async (req, res) => {
     const orders = await Order.find().populate('products.productId');
     res.json(orders);
   } catch (err) {
+    console.error('Error fetching orders:', err);
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 });
@@ -230,6 +256,7 @@ app.get('/orders/:id', async (req, res) => {
     if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(order);
   } catch (err) {
+    console.error('Error fetching order:', err);
     res.status(500).json({ error: 'Failed to fetch order' });
   }
 });
@@ -241,6 +268,7 @@ app.put('/orders/:id', async (req, res) => {
     if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(order);
   } catch (err) {
+    console.error('Error updating order:', err);
     res.status(500).json({ error: 'Failed to update order status' });
   }
 });
