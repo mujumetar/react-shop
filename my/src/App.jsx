@@ -6,6 +6,7 @@ import Navbars from "./components/Navbar"
 import Footers from "./components/Footer"
 import Slider from "./components/Slider"
 import About from "./components/Aboutsect"
+
 // Cart Context
 const CartContext = createContext();
 
@@ -65,7 +66,7 @@ const Productcard = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://dilkhush-api-49h6.onrender.com/products');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/products`);
         if (!response.ok) {
           throw new Error(`Failed to fetch products: ${response.statusText}`);
         }
@@ -111,7 +112,7 @@ const Productcard = () => {
               <div className="product-card">
                 <div className="product-image">
                   <img
-                    src={ele.img_url ? `https://dilkhush-api.vercel.app${ele.img_url}` : imageMap.black}
+                    src={ele.img_url ? `${import.meta.env.VITE_API_URL}${ele.img_url}` : imageMap.black}
                     alt={ele.name}
                     className="img-fluid"
                   />
@@ -169,10 +170,10 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
             <p>Price: ₹{selectedProduct.price}</p>
             <p>{selectedProduct.description}</p>
             {selectedProduct.img_url && (
-              <img src={`https://dilkhush-api.vercel.app${selectedProduct.img_url}`} alt={selectedProduct.name} className="img-fluid" />
+              <img src={`${import.meta.env.VITE_API_URL}${selectedProduct.img_url}`} alt={selectedProduct.name} className="img-fluid" />
             )}
           </div>
-          <div className="modal-Footers">
+          <div className="modal-footer">
             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={() => setSelectedProduct(null)}>Close</button>
             <button type="button" className="btn btn-primary" onClick={handleAddToCart}>Add to Cart</button>
           </div>
@@ -278,7 +279,7 @@ const Contact = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch('https://dilkhush-api-49h6.onrender.com/contact', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -351,8 +352,12 @@ const Contact = () => {
 };
 
 // Checkout Component
+// Checkout Component (Updated for Razorpay)
+
+
 const Checkout = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // ✅ Added this line
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -421,7 +426,6 @@ const Checkout = () => {
   const placeOrder = async () => {
     if (!cart || cart.length === 0) {
       alert('Your cart is empty. Please add products.');
-      console.error('No cart provided');
       return;
     }
 
@@ -432,6 +436,8 @@ const Checkout = () => {
     }
 
     setLoading(true);
+    setError(null); // ✅ Reset error before new order attempt
+
     const orderData = {
       customerName: formData.customerName,
       customerEmail: formData.customerEmail,
@@ -441,37 +447,99 @@ const Checkout = () => {
       products: cart.map((item) => ({ productId: item.productId, quantity: item.quantity })),
       notes: formData.notes,
     };
-    console.log('Sending order data:', orderData);
 
     try {
-      const response = await fetch('https://dilkhush-api-49h6.onrender.com/orders', {
+      // Step 1: Create order in backend
+      const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
       });
 
-      console.log('Response status:', response.status);
-      const responseData = await response.json();
-      console.log('Response data:', responseData);
-
-      if (!response.ok) {
-        throw new Error(`Failed to create order: ${response.status} - ${responseData.error || response.statusText}`);
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        throw new Error(errorData.error || 'Failed to create order');
       }
 
-      alert('Order placed successfully!');
-      navigate('/success', { state: { orderId: responseData.orderId } });
+      const { orderId } = await orderResponse.json();
+
+      // Step 2: Create Razorpay order
+      const razorpayResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!razorpayResponse.ok) {
+        const errorData = await razorpayResponse.json();
+        throw new Error(errorData.error || 'Failed to create payment order');
+      }
+
+      const razorpayOrder = await razorpayResponse.json();
+
+      // Step 3: Load Razorpay script and open checkout
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => {
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          name: 'Dilkhush Kirana',
+          description: 'Order Payment',
+          order_id: razorpayOrder.id,
+          handler: async (paymentResponse) => {
+            // Step 4: Verify payment
+            const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_signature: paymentResponse.razorpay_signature,
+              }),
+            });
+
+            if (!verifyResponse.ok) {
+              const errorData = await verifyResponse.json();
+              throw new Error(errorData.error || 'Payment verification failed');
+            }
+
+            alert('Payment successful!');
+            navigate('/success', { state: { orderId } });
+          },
+          prefill: {
+            name: formData.customerName,
+            email: formData.customerEmail,
+            contact: formData.customerPhone,
+          },
+          theme: { color: '#3399cc' },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      };
+
+      script.onerror = () => {
+        setLoading(false);
+        alert('Failed to load payment gateway');
+      };
+
+      document.body.appendChild(script);
     } catch (error) {
       console.error('Error placing order:', error);
-      alert(`Error placing order: ${error.message}`);
-      navigate('/cancel');
-    } finally {
+      setError(error.message); // ✅ sets the error properly
       setLoading(false);
+    } finally {
+      setLoading(false); // ✅ ensures loading always resets
     }
   };
 
   return (
     <div className="container mt-4">
       <h2 className="section-title text-center my-3">Checkout</h2>
+
+      {error && <div className="alert alert-danger">{error}</div>}
+
       {!cart || cart.length === 0 ? (
         <p>Your cart is empty.</p>
       ) : (
@@ -483,8 +551,11 @@ const Checkout = () => {
             </div>
           ))}
           <h5>Total: ₹{cart.reduce((total, item) => total + item.price * item.quantity, 0)}</h5>
+
+          {/* --- Customer & Address Form --- */}
           <h4 className="mt-4">Customer Details</h4>
           <div className="card p-4 mb-4">
+            {/* Full Name */}
             <div className="mb-3">
               <label htmlFor="customerName" className="form-label">Full Name</label>
               <input
@@ -498,6 +569,8 @@ const Checkout = () => {
               />
               {formErrors.customerName && <div className="invalid-feedback">{formErrors.customerName}</div>}
             </div>
+
+            {/* Email */}
             <div className="mb-3">
               <label htmlFor="customerEmail" className="form-label">Email</label>
               <input
@@ -511,6 +584,8 @@ const Checkout = () => {
               />
               {formErrors.customerEmail && <div className="invalid-feedback">{formErrors.customerEmail}</div>}
             </div>
+
+            {/* Phone */}
             <div className="mb-3">
               <label htmlFor="customerPhone" className="form-label">Phone</label>
               <input
@@ -524,72 +599,30 @@ const Checkout = () => {
               />
               {formErrors.customerPhone && <div className="invalid-feedback">{formErrors.customerPhone}</div>}
             </div>
+
+            {/* Shipping Address */}
             <h5>Shipping Address</h5>
-            <div className="mb-3">
-              <label htmlFor="shippingAddress.street" className="form-label">Street</label>
-              <input
-                type="text"
-                className={`form-control ${formErrors['shippingAddress.street'] ? 'is-invalid' : ''}`}
-                id="shippingAddress.street"
-                name="shippingAddress.street"
-                value={formData.shippingAddress.street}
-                onChange={handleInputChange}
-                placeholder="Enter street address"
-              />
-              {formErrors['shippingAddress.street'] && <div className="invalid-feedback">{formErrors['shippingAddress.street']}</div>}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="shippingAddress.city" className="form-label">City</label>
-              <input
-                type="text"
-                className={`form-control ${formErrors['shippingAddress.city'] ? 'is-invalid' : ''}`}
-                id="shippingAddress.city"
-                name="shippingAddress.city"
-                value={formData.shippingAddress.city}
-                onChange={handleInputChange}
-                placeholder="Enter city"
-              />
-              {formErrors['shippingAddress.city'] && <div className="invalid-feedback">{formErrors['shippingAddress.city']}</div>}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="shippingAddress.state" className="form-label">State</label>
-              <input
-                type="text"
-                className={`form-control ${formErrors['shippingAddress.state'] ? 'is-invalid' : ''}`}
-                id="shippingAddress.state"
-                name="shippingAddress.state"
-                value={formData.shippingAddress.state}
-                onChange={handleInputChange}
-                placeholder="Enter state"
-              />
-              {formErrors['shippingAddress.state'] && <div className="invalid-feedback">{formErrors['shippingAddress.state']}</div>}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="shippingAddress.zip" className="form-label">Zip Code</label>
-              <input
-                type="text"
-                className={`form-control ${formErrors['shippingAddress.zip'] ? 'is-invalid' : ''}`}
-                id="shippingAddress.zip"
-                name="shippingAddress.zip"
-                value={formData.shippingAddress.zip}
-                onChange={handleInputChange}
-                placeholder="Enter zip code"
-              />
-              {formErrors['shippingAddress.zip'] && <div className="invalid-feedback">{formErrors['shippingAddress.zip']}</div>}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="shippingAddress.country" className="form-label">Country</label>
-              <input
-                type="text"
-                className={`form-control ${formErrors['shippingAddress.country'] ? 'is-invalid' : ''}`}
-                id="shippingAddress.country"
-                name="shippingAddress.country"
-                value={formData.shippingAddress.country}
-                onChange={handleInputChange}
-                placeholder="Enter country"
-              />
-              {formErrors['shippingAddress.country'] && <div className="invalid-feedback">{formErrors['shippingAddress.country']}</div>}
-            </div>
+            {['street', 'city', 'state', 'zip', 'country'].map((field) => (
+              <div className="mb-3" key={field}>
+                <label htmlFor={`shippingAddress.${field}`} className="form-label">
+                  {field.charAt(0).toUpperCase() + field.slice(1)}
+                </label>
+                <input
+                  type="text"
+                  className={`form-control ${formErrors[`shippingAddress.${field}`] ? 'is-invalid' : ''}`}
+                  id={`shippingAddress.${field}`}
+                  name={`shippingAddress.${field}`}
+                  value={formData.shippingAddress[field]}
+                  onChange={handleInputChange}
+                  placeholder={`Enter ${field}`}
+                />
+                {formErrors[`shippingAddress.${field}`] && (
+                  <div className="invalid-feedback">{formErrors[`shippingAddress.${field}`]}</div>
+                )}
+              </div>
+            ))}
+
+            {/* Same Address Checkbox */}
             <div className="mb-3 form-check">
               <input
                 type="checkbox"
@@ -602,76 +635,34 @@ const Checkout = () => {
                 Use same address for billing
               </label>
             </div>
+
+            {/* Billing Address (if unchecked) */}
             {!formData.useSameAddress && (
               <>
                 <h5>Billing Address</h5>
-                <div className="mb-3">
-                  <label htmlFor="billingAddress.street" className="form-label">Street</label>
-                  <input
-                    type="text"
-                    className={`form-control ${formErrors['billingAddress.street'] ? 'is-invalid' : ''}`}
-                    id="billingAddress.street"
-                    name="billingAddress.street"
-                    value={formData.billingAddress.street}
-                    onChange={handleInputChange}
-                    placeholder="Enter street address"
-                  />
-                  {formErrors['billingAddress.street'] && <div className="invalid-feedback">{formErrors['billingAddress.street']}</div>}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="billingAddress.city" className="form-label">City</label>
-                  <input
-                    type="text"
-                    className={`form-control ${formErrors['billingAddress.city'] ? 'is-invalid' : ''}`}
-                    id="billingAddress.city"
-                    name="billingAddress.city"
-                    value={formData.billingAddress.city}
-                    onChange={handleInputChange}
-                    placeholder="Enter city"
-                  />
-                  {formErrors['billingAddress.city'] && <div className="invalid-feedback">{formErrors['billingAddress.city']}</div>}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="billingAddress.state" className="form-label">State</label>
-                  <input
-                    type="text"
-                    className={`form-control ${formErrors['billingAddress.state'] ? 'is-invalid' : ''}`}
-                    id="billingAddress.state"
-                    name="billingAddress.state"
-                    value={formData.billingAddress.state}
-                    onChange={handleInputChange}
-                    placeholder="Enter state"
-                  />
-                  {formErrors['billingAddress.state'] && <div className="invalid-feedback">{formErrors['billingAddress.state']}</div>}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="billingAddress.zip" className="form-label">Zip Code</label>
-                  <input
-                    type="text"
-                    className={`form-control ${formErrors['billingAddress.zip'] ? 'is-invalid' : ''}`}
-                    id="billingAddress.zip"
-                    name="billingAddress.zip"
-                    value={formData.billingAddress.zip}
-                    onChange={handleInputChange}
-                    placeholder="Enter zip code"
-                  />
-                  {formErrors['billingAddress.zip'] && <div className="invalid-feedback">{formErrors['billingAddress.zip']}</div>}
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="billingAddress.country" className="form-label">Country</label>
-                  <input
-                    type="text"
-                    className={`form-control ${formErrors['billingAddress.country'] ? 'is-invalid' : ''}`}
-                    id="billingAddress.country"
-                    name="billingAddress.country"
-                    value={formData.billingAddress.country}
-                    onChange={handleInputChange}
-                    placeholder="Enter country"
-                  />
-                  {formErrors['billingAddress.country'] && <div className="invalid-feedback">{formErrors['billingAddress.country']}</div>}
-                </div>
+                {['street', 'city', 'state', 'zip', 'country'].map((field) => (
+                  <div className="mb-3" key={field}>
+                    <label htmlFor={`billingAddress.${field}`} className="form-label">
+                      {field.charAt(0).toUpperCase() + field.slice(1)}
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${formErrors[`billingAddress.${field}`] ? 'is-invalid' : ''}`}
+                      id={`billingAddress.${field}`}
+                      name={`billingAddress.${field}`}
+                      value={formData.billingAddress[field]}
+                      onChange={handleInputChange}
+                      placeholder={`Enter ${field}`}
+                    />
+                    {formErrors[`billingAddress.${field}`] && (
+                      <div className="invalid-feedback">{formErrors[`billingAddress.${field}`]}</div>
+                    )}
+                  </div>
+                ))}
               </>
             )}
+
+            {/* Notes */}
             <div className="mb-3">
               <label htmlFor="notes" className="form-label">Order Notes (Optional)</label>
               <textarea
@@ -686,6 +677,7 @@ const Checkout = () => {
               {formErrors.notes && <div className="invalid-feedback">{formErrors.notes}</div>}
             </div>
           </div>
+
           <button
             onClick={placeOrder}
             disabled={loading || !cart || cart.length === 0}
@@ -699,6 +691,9 @@ const Checkout = () => {
   );
 };
 
+
+
+
 // Main App Component
 function App() {
   return (
@@ -710,7 +705,7 @@ function App() {
             element={
               <>
                 <Navbars />
-                <Slider/>
+                <Slider />
                 <Productcard />
                 <Footers />
               </>
@@ -721,7 +716,7 @@ function App() {
             element={
               <>
                 <Navbars />
-                <Productcard /> 
+                <Productcard />
                 <Footers />
               </>
             }
@@ -731,7 +726,7 @@ function App() {
             element={
               <>
                 <Navbars />
-                <About /> 
+                <About />
                 <Footers />
               </>
             }

@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -7,6 +6,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
+// const jwt = require('jsonwebtoken');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const helmet = require('helmet');
@@ -28,22 +29,19 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Allowed origins (comma-separated env or defaults)
-const defaultAllowed = [
+// Allowed origins
+const ALLOWED_ORIGINS = [
   'https://dilkhush-kirana.vercel.app',
   'https://dilkhush-admin.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
 ];
-const envAllowed = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
-  : [];
-const ALLOWED_ORIGINS = [...defaultAllowed, ...envAllowed];
 
 // CORS
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || origin.match(/^http:\/\/localhost:\d+$/) ||
-      origin === 'https://dilkhush-kirana.vercel.app' ||
-      origin === 'https://dilkhush-admin.vercel.app') {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -52,58 +50,60 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
 }));
-// app.use(cors({ origin: '*' }));
+
 // Serve uploads
 app.use('/uploads', express.static(UPLOAD_DIR));
 
 // MongoDB connection
-const mongoUri = process.env.MONGO_URI;
-if (!mongoUri) {
-  console.error('❌ MONGO_URI is not set in environment variables');
-  process.exit(1);
-}
-mongoose.connect(mongoUri, {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 30000,
-}).then(() => {
-  console.log('✅ MongoDB connected successfully.');
-}).catch(err => {
-  console.error('❌ MongoDB connection failed:', err);
-  process.exit(1);
-});
+}).then(() => console.log('✅ MongoDB connected successfully.'))
+  .catch(err => {
+    console.error('❌ MongoDB connection failed:', err);
+    process.exit(1);
+  });
 
-mongoose.connection.on('disconnected', () => {
-  console.warn('⚠️ MongoDB disconnected.');
-});
-
-// Nodemailer transporter
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-  console.warn('⚠️ EMAIL_USER or EMAIL_PASS is not set — email sending will fail.');
-}
+// Nodemailer transporter (✅ FIXED)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-// Verify transporter at startup (non-blocking)
-transporter.verify()
-  .then(() => console.log('✅ Email transporter verified.'))
-  .catch(err => console.warn('⚠️ Email transporter verify failed:', err.message || err));
 
 // Razorpay init
-if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-  console.warn('⚠️ Razorpay keys not set. Payment endpoints will fail.');
-}
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// ======= Schemas & Models =======
+// JWT secret validation
+// if (!process.env.JWT_SECRET) {
+//   console.error('❌ JWT_SECRET is not set in environment variables');
+//   process.exit(1);
+// }
+
+// // Middleware for JWT authentication
+// cons = (req, res, next) => {
+//   const authHeader = req.headers['authorization'];
+//   const token = authHeader && authHeader.split(' ')[1];
+//   if (!token) return res.status(401).json({ error: 'Access token required' });
+//   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+//     if (err) return res.status(403).json({ error: 'Invalid token' });
+//     if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+//     req.user = user;
+//     next();
+//   });
+// };
+
+// Schemas
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   slug: { type: String, required: true, unique: true },
@@ -154,14 +154,8 @@ const orderSchema = new mongoose.Schema({
     quantity: { type: Number, required: true, default: 1 },
   }],
   totalAmount: { type: Number, required: true },
-  status: { type: String, default: 'Pending' }, // Pending, Paid, Shipped, Cancelled, etc.
+  status: { type: String, enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'], default: 'Pending' },
   notes: { type: String },
-  payment: {
-    method: { type: String },
-    razorpayOrderId: { type: String },
-    razorpayPaymentId: { type: String },
-    razorpaySignature: { type: String },
-  },
   createdAt: { type: Date, default: Date.now },
 }, { versionKey: false });
 const Order = mongoose.model('Order', orderSchema);
@@ -169,16 +163,8 @@ const Order = mongoose.model('Order', orderSchema);
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // ideally hashed outside or before save
-  address: {
-    street: { type: String },
-    city: { type: String },
-    state: { type: String },
-    zip: { type: String },
-    country: { type: String },
-  },
-  phone: { type: String },
-  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
+  password: { type: String, required: true },
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
   createdAt: { type: Date, default: Date.now },
 }, { versionKey: false });
 const User = mongoose.model('User', userSchema);
@@ -195,27 +181,24 @@ const blogSchema = new mongoose.Schema({
 }, { versionKey: false });
 const Blog = mongoose.model('Blog', blogSchema);
 
-// ======= Multer Setup =======
+// Multer Setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
-    cb(null, uniqueName);
-  },
+  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
 });
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    const allowed = /\.(jpeg|jpg|png|webp)$/i;
-    if (allowed.test(file.originalname)) cb(null, true);
-    else cb(new Error('Only images (jpeg, jpg, png, webp) are allowed'));
+    const allowed = /jpeg|jpg|png|webp/;
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.test(ext)) cb(null, true);
+    else cb(new Error('Only images are allowed'));
   },
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// ======= Utilities =======
-function sendOrderConfirmationEmail(order, totalAmount) {
-  if (!transporter) return Promise.resolve();
+// Utility: Send Order Confirmation Email
+const sendOrderConfirmationEmail = async (order, totalAmount) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: order.customerEmail,
@@ -228,133 +211,139 @@ function sendOrderConfirmationEmail(order, totalAmount) {
       <p>We will notify you once your order is shipped.</p>
     `,
   };
-  return transporter.sendMail(mailOptions);
-}
+  await transporter.sendMail(mailOptions);
+};
 
-// ======= Routes =======
+// Routes
 
-// --- Product Admin ---
-app.post('/admin/products', upload.single('image'), async (req, res, next) => {
+// === Products ===
+app.get('/products', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+app.get('/products/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
+// Admin: Products
+app.post('/admin/products', upload.single('image'), async (req, res) => {
   try {
     const { name, slug, category, price, stock, description } = req.body;
-    if (!name || !slug || !category || !price) {
-      return res.status(400).json({ error: 'Missing required fields: name, slug, category, price' });
+    if (!name || !slug || !category || !price || !stock) {
+      return res.status(400).json({ error: 'Missing required fields' });
     }
-
     const product = new Product({
       name,
       slug,
       category,
       price: Number(price),
-      stock: Number(stock || 0),
+      stock: Number(stock),
       description,
       img_url: req.file ? `/uploads/${req.file.filename}` : null,
     });
-
     await product.save();
     res.status(201).json({ message: 'Product added successfully', product });
   } catch (err) {
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.slug) {
-      return res.status(409).json({ error: 'Product slug already exists' });
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Slug already exists' });
     }
-    next(err);
+    res.status(500).json({ error: 'Failed to add product' });
   }
 });
 
-app.get('/products', async (req, res, next) => {
-  try {
-    // Simple query params: ?category= & ?limit= & ?search=
-    const q = {};
-    if (req.query.category) q.category = req.query.category;
-    if (req.query.search) q.name = { $regex: req.query.search, $options: 'i' };
-
-    const limit = parseInt(req.query.limit, 10) || 100;
-    const products = await Product.find(q).limit(limit);
-    res.json(products);
-  } catch (err) {
-    next(err);
-  }
-});
-
-app.put('/admin/products/:id', upload.single('image'), async (req, res, next) => {
+app.put('/admin/products/:id', upload.single('image'), async (req, res) => {
   try {
     const { name, slug, category, price, stock, description } = req.body;
-    const updateData = {};
-    if (name) updateData.name = name;
-    if (slug) updateData.slug = slug;
-    if (category) updateData.category = category;
-    if (price !== undefined) updateData.price = Number(price);
-    if (stock !== undefined) updateData.stock = Number(stock);
-    if (description) updateData.description = description;
+    const updateData = { name, slug, category, price: Number(price), stock: Number(stock), description };
     if (req.file) updateData.img_url = `/uploads/${req.file.filename}`;
-    updateData.updatedAt = Date.now();
-
-    const updated = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!updated) return res.status(404).json({ error: 'Product not found' });
-    res.json({ message: 'Product updated successfully', product: updated });
+    const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    res.json({ message: 'Product updated successfully', product });
   } catch (err) {
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.slug) {
-      return res.status(409).json({ error: 'Product slug already exists' });
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Slug already exists' });
     }
-    next(err);
+    res.status(500).json({ error: 'Failed to update product' });
   }
 });
 
-app.delete('/admin/products/:id', async (req, res, next) => {
+app.delete('/admin/products/:id', async (req, res) => {
   try {
-    const removed = await Product.findByIdAndDelete(req.params.id);
-    if (!removed) return res.status(404).json({ error: 'Product not found' });
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json({ message: 'Product deleted successfully' });
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 });
 
-// --- Contact ---
-app.post('/contact', async (req, res, next) => {
+// === Contacts ===
+app.post('/contact', async (req, res) => {
   try {
     const { name, email, message } = req.body;
-    if (!name || !email || !message) return res.status(400).json({ error: 'Missing fields' });
+    if (!name || !email || !message) return res.status(400).json({ error: 'Missing required fields' });
     const contact = new Contact({ name, email, message });
     await contact.save();
-    res.status(201).json({ message: 'Contact message saved successfully', contact });
+    res.status(201).json({ message: 'Contact message saved successfully' });
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to save contact message' });
   }
 });
 
-app.get('/contact', async (req, res, next) => {
+app.get('/contact', async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
     res.json(contacts);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to fetch contacts' });
   }
 });
 
-// --- Orders: create & list & single & update status ---
-// NOTE: clients send `products: [{ productId, quantity }]`
-app.post('/orders', async (req, res, next) => {
+app.put('/admin/contacts/:id', async (req, res) => {
   try {
-    const {
-      customerName, customerEmail, customerPhone,
-      shippingAddress, billingAddress, products, notes, paymentMethod,
-    } = req.body;
+    const { name, email, message } = req.body;
+    const contact = await Contact.findByIdAndUpdate(req.params.id, { name, email, message }, { new: true });
+    if (!contact) return res.status(404).json({ error: 'Contact not found' });
+    res.json({ message: 'Contact updated successfully', contact });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update contact' });
+  }
+});
 
-    if (!customerName || !customerEmail || !customerPhone || !shippingAddress || !Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ error: 'Missing required order fields' });
-    }
+app.delete('/admin/contacts/:id', async (req, res) => {
+  try {
+    const contact = await Contact.findByIdAndDelete(req.params.id);
+    if (!contact) return res.status(404).json({ error: 'Contact not found' });
+    res.json({ message: 'Contact deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete contact' });
+  }
+});
 
+// === Orders ===
+app.post('/orders', async (req, res) => {
+  try {
+    const { customerName, customerEmail, customerPhone, shippingAddress, billingAddress, products, notes } = req.body;
     const productIds = products.map(p => p.productId);
     const dbProducts = await Product.find({ _id: { $in: productIds } });
-
     let totalAmount = 0;
     const orderProducts = products.map((p) => {
-      const product = dbProducts.find(dbP => dbP._id.toString() === p.productId);
+      const product = dbProducts.find((dbP) => dbP._id.toString() === p.productId);
       if (!product) throw new Error(`Product not found: ${p.productId}`);
       if (product.stock < p.quantity) throw new Error(`Insufficient stock for ${product.name}`);
       totalAmount += product.price * p.quantity;
-      return { product: product._id, quantity: Number(p.quantity) };
+      return { product: product._id, quantity: p.quantity };
     });
 
     const order = new Order({
@@ -366,239 +355,229 @@ app.post('/orders', async (req, res, next) => {
       products: orderProducts,
       totalAmount,
       notes,
-      status: paymentMethod === 'offline' ? 'Pending' : 'Pending',
-      payment: { method: paymentMethod || 'unknown' },
     });
-
     await order.save();
 
     // Update stock
-    const bulkOps = products.map(p => ({
-      updateOne: {
-        filter: { _id: p.productId },
-        update: { $inc: { stock: -Math.max(0, Number(p.quantity)) } },
-      },
-    }));
-    if (bulkOps.length > 0) await Product.bulkWrite(bulkOps);
-
-    // Send confirmation email (best-effort)
-    try {
-      await sendOrderConfirmationEmail(order, totalAmount);
-    } catch (mailErr) {
-      console.warn('⚠️ Failed to send order confirmation email:', mailErr.message || mailErr);
+    for (const p of products) {
+      await Product.findByIdAndUpdate(p.productId, { $inc: { stock: -p.quantity } });
     }
 
-    res.status(201).json({ message: 'Order placed successfully', orderId: order._id, totalAmount });
+    // Send email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: customerEmail,
+      subject: `Order Confirmation #${order._id.toString().slice(-8)}`,
+      html: `
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your order, ${customerName}!</p>
+        <p>Order ID: ${order._id.toString().slice(-8)}</p>
+        <p>Total Amount: ₹${totalAmount}</p>
+        <p>We will notify you once your order is shipped.</p>
+      `,
+    };
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({ message: 'Order placed successfully', orderId: order._id });
   } catch (err) {
     console.error('Error submitting order:', err);
-    // Return user-friendly message but include err.message for debugging
     res.status(500).json({ error: `Failed to create order: ${err.message}` });
   }
 });
 
-app.get('/orders', async (req, res, next) => {
+app.get('/orders', async (req, res) => {
   try {
     const orders = await Order.find().populate('products.product').sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to fetch orders' });
   }
 });
 
-app.get('/orders/:id', async (req, res, next) => {
+app.get('/orders/:id', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate('products.product');
     if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(order);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to fetch order' });
   }
 });
 
-app.put('/orders/:id', async (req, res, next) => {
+app.put('/admin/orders/:id', async (req, res) => {
   try {
     const { status, notes } = req.body;
-    const update = {};
-    if (status) update.status = status;
-    if (notes) update.notes = notes;
-    const order = await Order.findByIdAndUpdate(req.params.id, update, { new: true });
+    const order = await Order.findByIdAndUpdate(req.params.id, { status, notes }, { new: true });
     if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(order);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to update order' });
   }
 });
 
-// --- Razorpay Integration ---
-// Create razorpay order (amount in rupees)
-app.post('/orders/:id/razorpay/create', async (req, res, next) => {
+app.delete('/admin/orders/:id', async (req, res) => {
   try {
-    const orderId = req.params.id;
-    const order = await Order.findById(orderId).populate('products.product');
+    const order = await Order.findByIdAndDelete(req.params.id);
     if (!order) return res.status(404).json({ error: 'Order not found' });
-
-    // amount in paise
-    const amountPaise = Math.round(order.totalAmount * 100);
-
-    const options = {
-      amount: amountPaise,
-      currency: 'INR',
-      receipt: order._id.toString(),
-      payment_capture: 1, // auto-capture
-    };
-
-    const razorOrder = await razorpay.orders.create(options);
-    // Save razorpay order id on our order record (for later verification)
-    order.payment = {
-      ...order.payment,
-      razorpayOrderId: razorOrder.id,
-      method: 'razorpay',
-    };
-    await order.save();
-
-    res.json({ razorOrder, order });
+    res.json({ message: 'Order deleted successfully' });
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to delete order' });
   }
 });
 
-// Verify razorpay payment (client should POST payment_id, order_id, signature)
-app.post('/orders/:id/razorpay/verify', async (req, res, next) => {
-  try {
-    const orderId = req.params.id;
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res.status(400).json({ error: 'Missing required verification fields' });
-    }
-
-    // Compute expected signature
-    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '');
-    hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
-    const expectedSignature = hmac.digest('hex');
-
-    if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({ error: 'Invalid signature' });
-    }
-
-    // Mark order as paid
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-
-    order.status = 'Paid';
-    order.payment = {
-      ...order.payment,
-      razorpayOrderId: razorpay_order_id,
-      razorpayPaymentId: razorpay_payment_id,
-      razorpaySignature: razorpay_signature,
-      method: 'razorpay',
-    };
-    await order.save();
-
-    // send confirmation email (best-effort)
-    try {
-      await sendOrderConfirmationEmail(order, order.totalAmount);
-    } catch (mailErr) {
-      console.warn('⚠️ Failed to send payment confirmation email:', mailErr.message || mailErr);
-    }
-
-    res.json({ message: 'Payment verified and order marked as Paid', order });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// --- Blog routes ---
-app.get('/blogs', async (req, res, next) => {
+// === Blogs ===
+app.get('/blogs', async (req, res) => {
   try {
     const blogs = await Blog.find().sort({ createdAt: -1 });
     res.json(blogs);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to fetch blogs' });
   }
 });
 
-app.post('/admin/blogs', upload.single('image'), async (req, res, next) => {
-  try {
-    const { title, slug, content, author, tags } = req.body;
-    if (!title || !slug || !content || !author) return res.status(400).json({ error: 'Missing fields' });
-
-    const blog = new Blog({
-      title,
-      slug,
-      content,
-      author,
-      tags: Array.isArray(tags) ? tags : (typeof tags === 'string' && tags.length ? tags.split(',').map(t => t.trim()) : []),
-      image: req.file ? `/uploads/${req.file.filename}` : null,
-    });
-
-    await blog.save();
-    res.status(201).json({ message: 'Blog added successfully', blog });
-  } catch (err) {
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.slug) {
-      return res.status(409).json({ error: 'Blog slug already exists' });
-    }
-    next(err);
-  }
-});
-
-app.put('/admin/blogs/:id', upload.single('image'), async (req, res, next) => {
-  try {
-    const { title, slug, content, author, tags } = req.body;
-    const updateData = {};
-    if (title) updateData.title = title;
-    if (slug) updateData.slug = slug;
-    if (content) updateData.content = content;
-    if (author) updateData.author = author;
-    if (tags) {
-      updateData.tags = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : []);
-    }
-    if (req.file) updateData.image = `/uploads/${req.file.filename}`;
-    updateData.updatedAt = Date.now();
-
-    const updated = await Blog.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!updated) return res.status(404).json({ error: 'Blog not found' });
-
-    res.json({ message: 'Blog updated successfully', blog: updated });
-  } catch (err) {
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.slug) {
-      return res.status(409).json({ error: 'Blog slug already exists' });
-    }
-    next(err);
-  }
-});
-
-app.delete('/admin/blogs/:id', async (req, res, next) => {
-  try {
-    const removed = await Blog.findByIdAndDelete(req.params.id);
-    if (!removed) return res.status(404).json({ error: 'Blog not found' });
-    res.json({ message: 'Blog deleted successfully' });
-  } catch (err) {
-    next(err);
-  }
-});
-
-app.get('/blogs/:id', async (req, res, next) => {
+app.get('/blogs/:id', async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ error: 'Blog not found' });
     res.json(blog);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: 'Failed to fetch blog' });
   }
 });
 
-// ======= Global error handler =======
-app.use((err, req, res, next) => {
-  console.error('Global error:', err && err.stack ? err.stack : err);
-  const status = err.status || 500;
-  res.status(status).json({
-    error: err.message || 'Internal Server Error',
-    // remove stack trace in production — exposed here for debugging
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
-  });
+app.post('/admin/blogs', upload.single('image'), async (req, res) => {
+  try {
+    const { title, slug, content, author, tags } = req.body;
+    if (!title || !slug || !content || !author) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const blog = new Blog({
+      title,
+      slug,
+      content,
+      author,
+      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+      image: req.file ? `/uploads/${req.file.filename}` : null,
+    });
+    await blog.save();
+    res.status(201).json({ message: 'Blog added successfully', blog });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Slug already exists' });
+    }
+    res.status(500).json({ error: 'Failed to add blog' });
+  }
 });
 
-// Start
+app.put('/admin/blogs/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { title, slug, content, author, tags } = req.body;
+    const updateData = { title, slug, content, author, tags: tags ? tags.split(',').map(tag => tag.trim()) : [] };
+    if (req.file) updateData.image = `/uploads/${req.file.filename}`;
+    updateData.updatedAt = Date.now();
+    const blog = await Blog.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!blog) return res.status(404).json({ error: 'Blog not found' });
+    res.json({ message: 'Blog updated successfully', blog });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Slug already exists' });
+    }
+    res.status(500).json({ error: 'Failed to update blog' });
+  }
+});
+
+app.delete('/admin/blogs/:id', async (req, res) => {
+  try {
+    const blog = await Blog.findByIdAndDelete(req.params.id);
+    if (!blog) return res.status(404).json({ error: 'Blog not found' });
+    res.json({ message: 'Blog deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete blog' });
+  }
+});
+
+// // === Admin Authentication ===
+// app.post('/admin/login', async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+//     const user = await User.findOne({ email, role: 'admin' });
+//     if (!user || !await bcrypt.compare(password, user.password)) {
+//       return res.status(401).json({ error: 'Invalid credentials' });
+//     }
+//     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+//     res.json({ message: 'Login successful', token });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Login failed' });
+//   }
+// });
+
+app.post('/admin/signup', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'All fields required' });
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(400).json({ error: 'Email already registered' });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ name, email, password: hashedPassword, role: 'admin' });
+    await user.save();
+    res.status(201).json({ message: 'Admin registered successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Signup failed' });
+  }
+});
+
+// === Razorpay Routes ===
+app.post('/orders/:id/razorpay/create', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    const options = {
+      amount: Math.round(order.totalAmount * 100), // paise
+      currency: 'INR',
+      receipt: `receipt#${order._id}`,
+    };
+    const razorOrder = await razorpay.orders.create(options);
+    order.razorpayOrderId = razorOrder.id;
+    await order.save();
+    res.json(razorOrder);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create Razorpay order' });
+  }
+});
+
+app.post('/orders/:id/razorpay/verify', async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    const body = razorpay_order_id + '|' + razorpay_payment_id;
+    const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body).digest('hex');
+    if (expectedSignature === razorpay_signature) {
+      order.status = 'Paid';
+      order.razorpayPaymentId = razorpay_payment_id;
+      await order.save();
+      res.json({ message: 'Payment verified successfully' });
+    } else {
+      res.status(400).json({ error: 'Invalid signature' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+// Error handler (must be last)
+app.use((err, req, res, next) => {
+  console.error('Global error:', err.stack);
+  res.status(500).json({ error: 'Internal Server Error', message: err.message });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Endpoint not found' });
+});
+
+// Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
