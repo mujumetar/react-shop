@@ -239,6 +239,198 @@ const Cart = () => {
   );
 };
 
+
+import React from 'react';
+import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Package } from 'lucide-react';
+
+// Mock cart context hook for demo
+const useCart = () => {
+  const [cart, setCart] = React.useState([
+    { productId: 1, name: 'Wireless Headphones', price: 2499, quantity: 2, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=150&h=150&fit=crop' },
+    { productId: 2, name: 'Smart Watch', price: 4999, quantity: 1, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop' },
+    { productId: 3, name: 'Laptop Stand', price: 1299, quantity: 1, image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=150&h=150&fit=crop' }
+  ]);
+
+  const removeFromCart = (id) => {
+    setCart(cart.filter(item => item.productId !== id));
+  };
+
+  const updateQuantity = (id, qty) => {
+    setCart(cart.map(item => 
+      item.productId === id ? { ...item, quantity: Math.max(1, qty) } : item
+    ));
+  };
+
+  return { cart, removeFromCart, updateQuantity };
+};
+
+// 
+\
+
+
+//   const { cart, removeFromCart, updateQuantity } = useCart();
+
+//   const handleCheckout = () => {
+//     alert('Proceeding to checkout...');
+//   };
+
+//   const subtotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+//   const tax = subtotal * 0.18;
+//   const shipping = cart.length > 0 ? 99 : 0;
+//   const total = subtotal + tax + shipping;
+
+//   const handleQuantityChange = (id, delta) => {
+//     const item = cart.find(i => i.productId === id);
+//     if (item) {
+//       updateQuantity(id, item.quantity + delta);
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+//       <div className="max-w-6xl mx-auto">
+//         {/* Header */}
+//         <div className="flex items-center gap-3 mb-8">
+//           <ShoppingCart className="w-8 h-8 text-blue-600" />
+//           <h1 className="text-3xl font-bold text-gray-800">Shopping Cart</h1>
+//           {cart.length > 0 && (
+//             <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold">
+//               {cart.length} {cart.length === 1 ? 'item' : 'items'}
+//             </span>
+//           )}
+//         </div>
+
+//         {cart.length === 0 ? (
+//           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+//             <Package className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+//             <h2 className="text-2xl font-semibold text-gray-700 mb-2">Your cart is empty</h2>
+//             <p className="text-gray-500 mb-6">Add some items to get started!</p>
+//             <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+//               Continue Shopping
+//             </button>
+//           </div>
+//         ) : (
+//           <div className="grid lg:grid-cols-3 gap-6">
+//             {/* Cart Items */}
+//             <div className="lg:col-span-2 space-y-4">
+//               {cart.map((item) => (
+//                 <div key={item.productId} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+//                   <div className="p-6 flex gap-4">
+//                     {/* Product Image */}
+//                     <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+//                       <img 
+//                         src={item.image} 
+//                         alt={item.name}
+//                         className="w-full h-full object-cover"
+//                       />
+//                     </div>
+
+//                     {/* Product Details */}
+//                     <div className="flex-grow flex flex-col justify-between">
+//                       <div>
+//                         <h3 className="text-lg font-semibold text-gray-800 mb-1">{item.name}</h3>
+//                         <p className="text-xl font-bold text-blue-600">₹{item.price.toLocaleString()}</p>
+//                       </div>
+
+//                       <div className="flex items-center justify-between mt-4">
+//                         {/* Quantity Controls */}
+//                         <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+//                           <button
+//                             onClick={() => handleQuantityChange(item.productId, -1)}
+//                             disabled={item.quantity <= 1}
+//                             className="w-8 h-8 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+//                           >
+//                             <Minus className="w-4 h-4 text-gray-600" />
+//                           </button>
+//                           <span className="w-12 text-center font-semibold text-gray-800">
+//                             {item.quantity}
+//                           </span>
+//                           <button
+//                             onClick={() => handleQuantityChange(item.productId, 1)}
+//                             className="w-8 h-8 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 transition-colors"
+//                           >
+//                             <Plus className="w-4 h-4 text-gray-600" />
+//                           </button>
+//                         </div>
+
+//                         {/* Remove Button */}
+//                         <button
+//                           onClick={() => removeFromCart(item.productId)}
+//                           className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+//                         >
+//                           <Trash2 className="w-4 h-4" />
+//                           <span className="font-medium">Remove</span>
+//                         </button>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   {/* Item Subtotal */}
+//                   <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+//                     <div className="flex justify-between items-center">
+//                       <span className="text-sm text-gray-600">Item Total</span>
+//                       <span className="text-lg font-bold text-gray-800">
+//                         ₹{(item.price * item.quantity).toLocaleString()}
+//                       </span>
+//                     </div>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+
+//             {/* Order Summary */}
+//             <div className="lg:col-span-1">
+//               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+//                 <h2 className="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
+                
+//                 <div className="space-y-3 mb-4">
+//                   <div className="flex justify-between text-gray-600">
+//                     <span>Subtotal</span>
+//                     <span className="font-medium">₹{subtotal.toLocaleString()}</span>
+//                   </div>
+//                   <div className="flex justify-between text-gray-600">
+//                     <span>Tax (18%)</span>
+//                     <span className="font-medium">₹{tax.toFixed(0).toLocaleString()}</span>
+//                   </div>
+//                   <div className="flex justify-between text-gray-600">
+//                     <span>Shipping</span>
+//                     <span className="font-medium">₹{shipping}</span>
+//                   </div>
+//                 </div>
+
+//                 <div className="border-t border-gray-200 pt-4 mb-6">
+//                   <div className="flex justify-between items-center">
+//                     <span className="text-lg font-semibold text-gray-800">Total</span>
+//                     <span className="text-2xl font-bold text-blue-600">
+//                       ₹{total.toFixed(0).toLocaleString()}
+//                     </span>
+//                   </div>
+//                 </div>
+
+//                 <button
+//                   onClick={handleCheckout}
+//                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 group"
+//                 >
+//                   Proceed to Checkout
+//                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+//                 </button>
+
+//                 <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+//                   <p className="text-sm text-green-700 text-center">
+//                     🎉 Free shipping on orders over ₹5000
+//                   </p>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+
+
 // Contact Component
 const Contact = () => {
   const [formData, setFormData] = useState({
