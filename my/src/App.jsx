@@ -1150,6 +1150,7 @@ function App() {
             element={
               <>
                 <Navbars />
+                <OrderSuccess/>
                 <div className="container mt-4">
                   <h2>Order Placed Successfully!</h2>
                   <p>Thank you for your purchase. You will receive a confirmation email soon.</p>
