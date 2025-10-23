@@ -1,11 +1,11 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import white from './img/white.jpeg';
 import black from './img/black.jpeg';
-import Navbars from "./components/Navbar"
-import Footers from "./components/Footer"
-import Slider from "./components/Slider"
-import About from "./components/Aboutsect"
+import Navbars from "./components/Navbar";
+import Footers from "./components/Footer";
+import Slider from "./components/Slider";
+import About from "./components/Aboutsect";
 
 // Cart Context
 const CartContext = createContext();
@@ -51,8 +51,6 @@ const CartProvider = ({ children }) => {
 };
 
 const useCart = () => useContext(CartContext);
-
-
 
 // Productcard Component
 const Productcard = () => {
@@ -239,198 +237,6 @@ const Cart = () => {
   );
 };
 
-
-import React from 'react';
-import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Package } from 'lucide-react';
-
-// Mock cart context hook for demo
-const useCart = () => {
-  const [cart, setCart] = React.useState([
-    { productId: 1, name: 'Wireless Headphones', price: 2499, quantity: 2, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=150&h=150&fit=crop' },
-    { productId: 2, name: 'Smart Watch', price: 4999, quantity: 1, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150&h=150&fit=crop' },
-    { productId: 3, name: 'Laptop Stand', price: 1299, quantity: 1, image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=150&h=150&fit=crop' }
-  ]);
-
-  const removeFromCart = (id) => {
-    setCart(cart.filter(item => item.productId !== id));
-  };
-
-  const updateQuantity = (id, qty) => {
-    setCart(cart.map(item => 
-      item.productId === id ? { ...item, quantity: Math.max(1, qty) } : item
-    ));
-  };
-
-  return { cart, removeFromCart, updateQuantity };
-};
-
-// 
-\
-
-
-//   const { cart, removeFromCart, updateQuantity } = useCart();
-
-//   const handleCheckout = () => {
-//     alert('Proceeding to checkout...');
-//   };
-
-//   const subtotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-//   const tax = subtotal * 0.18;
-//   const shipping = cart.length > 0 ? 99 : 0;
-//   const total = subtotal + tax + shipping;
-
-//   const handleQuantityChange = (id, delta) => {
-//     const item = cart.find(i => i.productId === id);
-//     if (item) {
-//       updateQuantity(id, item.quantity + delta);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
-//       <div className="max-w-6xl mx-auto">
-//         {/* Header */}
-//         <div className="flex items-center gap-3 mb-8">
-//           <ShoppingCart className="w-8 h-8 text-blue-600" />
-//           <h1 className="text-3xl font-bold text-gray-800">Shopping Cart</h1>
-//           {cart.length > 0 && (
-//             <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold">
-//               {cart.length} {cart.length === 1 ? 'item' : 'items'}
-//             </span>
-//           )}
-//         </div>
-
-//         {cart.length === 0 ? (
-//           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-//             <Package className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-//             <h2 className="text-2xl font-semibold text-gray-700 mb-2">Your cart is empty</h2>
-//             <p className="text-gray-500 mb-6">Add some items to get started!</p>
-//             <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-//               Continue Shopping
-//             </button>
-//           </div>
-//         ) : (
-//           <div className="grid lg:grid-cols-3 gap-6">
-//             {/* Cart Items */}
-//             <div className="lg:col-span-2 space-y-4">
-//               {cart.map((item) => (
-//                 <div key={item.productId} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
-//                   <div className="p-6 flex gap-4">
-//                     {/* Product Image */}
-//                     <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-//                       <img 
-//                         src={item.image} 
-//                         alt={item.name}
-//                         className="w-full h-full object-cover"
-//                       />
-//                     </div>
-
-//                     {/* Product Details */}
-//                     <div className="flex-grow flex flex-col justify-between">
-//                       <div>
-//                         <h3 className="text-lg font-semibold text-gray-800 mb-1">{item.name}</h3>
-//                         <p className="text-xl font-bold text-blue-600">₹{item.price.toLocaleString()}</p>
-//                       </div>
-
-//                       <div className="flex items-center justify-between mt-4">
-//                         {/* Quantity Controls */}
-//                         <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-//                           <button
-//                             onClick={() => handleQuantityChange(item.productId, -1)}
-//                             disabled={item.quantity <= 1}
-//                             className="w-8 h-8 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-//                           >
-//                             <Minus className="w-4 h-4 text-gray-600" />
-//                           </button>
-//                           <span className="w-12 text-center font-semibold text-gray-800">
-//                             {item.quantity}
-//                           </span>
-//                           <button
-//                             onClick={() => handleQuantityChange(item.productId, 1)}
-//                             className="w-8 h-8 flex items-center justify-center rounded-md bg-white hover:bg-gray-50 transition-colors"
-//                           >
-//                             <Plus className="w-4 h-4 text-gray-600" />
-//                           </button>
-//                         </div>
-
-//                         {/* Remove Button */}
-//                         <button
-//                           onClick={() => removeFromCart(item.productId)}
-//                           className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-//                         >
-//                           <Trash2 className="w-4 h-4" />
-//                           <span className="font-medium">Remove</span>
-//                         </button>
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                   {/* Item Subtotal */}
-//                   <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
-//                     <div className="flex justify-between items-center">
-//                       <span className="text-sm text-gray-600">Item Total</span>
-//                       <span className="text-lg font-bold text-gray-800">
-//                         ₹{(item.price * item.quantity).toLocaleString()}
-//                       </span>
-//                     </div>
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-
-//             {/* Order Summary */}
-//             <div className="lg:col-span-1">
-//               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
-//                 <h2 className="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
-                
-//                 <div className="space-y-3 mb-4">
-//                   <div className="flex justify-between text-gray-600">
-//                     <span>Subtotal</span>
-//                     <span className="font-medium">₹{subtotal.toLocaleString()}</span>
-//                   </div>
-//                   <div className="flex justify-between text-gray-600">
-//                     <span>Tax (18%)</span>
-//                     <span className="font-medium">₹{tax.toFixed(0).toLocaleString()}</span>
-//                   </div>
-//                   <div className="flex justify-between text-gray-600">
-//                     <span>Shipping</span>
-//                     <span className="font-medium">₹{shipping}</span>
-//                   </div>
-//                 </div>
-
-//                 <div className="border-t border-gray-200 pt-4 mb-6">
-//                   <div className="flex justify-between items-center">
-//                     <span className="text-lg font-semibold text-gray-800">Total</span>
-//                     <span className="text-2xl font-bold text-blue-600">
-//                       ₹{total.toFixed(0).toLocaleString()}
-//                     </span>
-//                   </div>
-//                 </div>
-
-//                 <button
-//                   onClick={handleCheckout}
-//                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 group"
-//                 >
-//                   Proceed to Checkout
-//                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-//                 </button>
-
-//                 <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-//                   <p className="text-sm text-green-700 text-center">
-//                     🎉 Free shipping on orders over ₹5000
-//                   </p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-
-
 // Contact Component
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -544,12 +350,9 @@ const Contact = () => {
 };
 
 // Checkout Component
-// Checkout Component (Updated for Razorpay)
-
-
 const Checkout = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // ✅ Added this line
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -628,7 +431,7 @@ const Checkout = () => {
     }
 
     setLoading(true);
-    setError(null); // ✅ Reset error before new order attempt
+    setError(null);
 
     const orderData = {
       customerName: formData.customerName,
@@ -641,7 +444,6 @@ const Checkout = () => {
     };
 
     try {
-      // Step 1: Create order in backend
       const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -655,7 +457,6 @@ const Checkout = () => {
 
       const { orderId } = await orderResponse.json();
 
-      // Step 2: Create Razorpay order
       const razorpayResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -668,7 +469,6 @@ const Checkout = () => {
 
       const razorpayOrder = await razorpayResponse.json();
 
-      // Step 3: Load Razorpay script and open checkout
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.onload = () => {
@@ -680,7 +480,6 @@ const Checkout = () => {
           description: 'Order Payment',
           order_id: razorpayOrder.id,
           handler: async (paymentResponse) => {
-            // Step 4: Verify payment
             const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -719,10 +518,10 @@ const Checkout = () => {
       document.body.appendChild(script);
     } catch (error) {
       console.error('Error placing order:', error);
-      setError(error.message); // ✅ sets the error properly
+      setError(error.message);
       setLoading(false);
     } finally {
-      setLoading(false); // ✅ ensures loading always resets
+      setLoading(false);
     }
   };
 
@@ -744,10 +543,8 @@ const Checkout = () => {
           ))}
           <h5>Total: ₹{cart.reduce((total, item) => total + item.price * item.quantity, 0)}</h5>
 
-          {/* --- Customer & Address Form --- */}
           <h4 className="mt-4">Customer Details</h4>
           <div className="card p-4 mb-4">
-            {/* Full Name */}
             <div className="mb-3">
               <label htmlFor="customerName" className="form-label">Full Name</label>
               <input
@@ -761,8 +558,6 @@ const Checkout = () => {
               />
               {formErrors.customerName && <div className="invalid-feedback">{formErrors.customerName}</div>}
             </div>
-
-            {/* Email */}
             <div className="mb-3">
               <label htmlFor="customerEmail" className="form-label">Email</label>
               <input
@@ -776,8 +571,6 @@ const Checkout = () => {
               />
               {formErrors.customerEmail && <div className="invalid-feedback">{formErrors.customerEmail}</div>}
             </div>
-
-            {/* Phone */}
             <div className="mb-3">
               <label htmlFor="customerPhone" className="form-label">Phone</label>
               <input
@@ -791,8 +584,6 @@ const Checkout = () => {
               />
               {formErrors.customerPhone && <div className="invalid-feedback">{formErrors.customerPhone}</div>}
             </div>
-
-            {/* Shipping Address */}
             <h5>Shipping Address</h5>
             {['street', 'city', 'state', 'zip', 'country'].map((field) => (
               <div className="mb-3" key={field}>
@@ -813,8 +604,6 @@ const Checkout = () => {
                 )}
               </div>
             ))}
-
-            {/* Same Address Checkbox */}
             <div className="mb-3 form-check">
               <input
                 type="checkbox"
@@ -827,8 +616,6 @@ const Checkout = () => {
                 Use same address for billing
               </label>
             </div>
-
-            {/* Billing Address (if unchecked) */}
             {!formData.useSameAddress && (
               <>
                 <h5>Billing Address</h5>
@@ -853,8 +640,6 @@ const Checkout = () => {
                 ))}
               </>
             )}
-
-            {/* Notes */}
             <div className="mb-3">
               <label htmlFor="notes" className="form-label">Order Notes (Optional)</label>
               <textarea
@@ -869,7 +654,6 @@ const Checkout = () => {
               {formErrors.notes && <div className="invalid-feedback">{formErrors.notes}</div>}
             </div>
           </div>
-
           <button
             onClick={placeOrder}
             disabled={loading || !cart || cart.length === 0}
@@ -883,8 +667,389 @@ const Checkout = () => {
   );
 };
 
+// Blog Component
+const BlogPage = () => {
+  const navigate = useNavigate();
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch blogs: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setBlogs(data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+    fetchBlogs();
+  }, []);
 
+  const handleViewDetails = (blog) => {
+    navigate(`/blogs/${blog._id}`);
+  };
+
+  return (
+    <div className="container mt-4" data-aos="fade-up">
+      <h2 className="section-title text-center my-3">Blog</h2>
+      {loading && <p>Loading blogs...</p>}
+      {error && <p className="text-danger">Error: {error}</p>}
+      {!loading && !error && blogs.length === 0 && <p>No blogs available</p>}
+      <div className="row">
+        {blogs.map((blog, index) => (
+          <div
+            className="col-lg-4 col-md-6 mb-4"
+            data-aos="fade-up"
+            data-aos-duration="2000"
+            key={blog._id || index}
+            onClick={() => handleViewDetails(blog)}
+          >
+            <div className="card h-100">
+              <div className="card-img-top">
+                <img
+                  src={blog.image ? `${import.meta.env.VITE_API_URL}${blog.image}` : 'https://via.placeholder.com/400x200'}
+                  alt={blog.title}
+                  className="img-fluid"
+                  style={{ height: '200px', objectFit: 'cover' }}
+                />
+              </div>
+              <div className="card-body">
+                <h3 className="card-title">{blog.title || 'Untitled Blog'}</h3>
+                <p className="card-text">{blog.content?.substring(0, 100)}...</p>
+                <div className="d-flex justify-content-between">
+                  <span className="text-muted">{blog.author || 'Anonymous'}</span>
+                  <span className="text-muted">{new Date(blog.createdAt).toLocaleDateString()}</span>
+                </div>
+                {blog.tags && blog.tags.length > 0 && (
+                  <div className="mt-2">
+                    {blog.tags.map((tag, idx) => (
+                      <span key={idx} className="badge bg-primary me-1">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Comments Component
+const Comments = ({ blogId }) => {
+  const [comments, setComments] = useState([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    comment: '',
+  });
+  const [formErrors, setFormErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch comments: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setComments(data);
+      } catch (err) {
+        console.error('Error fetching comments:', err);
+        setError(err.message);
+      }
+    };
+    fetchComments();
+  }, [blogId]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.name.trim()) errors.name = 'Name is required';
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Invalid email format';
+    }
+    if (!formData.comment.trim()) errors.comment = 'Comment is required';
+    return errors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          createdAt: new Date().toISOString(),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to submit comment');
+      setComments((prev) => [...prev, { ...formData, createdAt: new Date().toISOString(), _id: data._id }]);
+      setFormData({ name: '', email: '', comment: '' });
+      setSuccess('Comment submitted successfully!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mt-5">
+      <h4 className="mb-3">Comments</h4>
+      {error && <div className="alert alert-danger mb-3">{error}</div>}
+      {success && <div className="alert alert-success mb-3">{success}</div>}
+      {comments.length === 0 ? (
+        <p>No comments yet. Be the first to comment!</p>
+      ) : (
+        <div className="mb-4">
+          {comments.map((comment, index) => (
+            <div key={comment._id || index} className="card mb-3">
+              <div className="card-body">
+                <div className="d-flex justify-content-between">
+                  <h6 className="card-title">{comment.name}</h6>
+                  <small className="text-muted">{new Date(comment.createdAt).toLocaleString()}</small>
+                </div>
+                <p className="card-text">{comment.comment}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <h5 className="mb-3">Leave a Comment</h5>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="commentName" className="form-label">Name</label>
+          <input
+            type="text"
+            className={`form-control ${formErrors.name ? 'is-invalid' : ''}`}
+            id="commentName"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Enter your name"
+          />
+          {formErrors.name && <div className="invalid-feedback">{formErrors.name}</div>}
+        </div>
+        <div className="mb-3">
+          <label htmlFor="commentEmail" className="form-label">Email</label>
+          <input
+            type="email"
+            className={`form-control ${formErrors.email ? 'is-invalid' : ''}`}
+            id="commentEmail"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder="Enter your email"
+          />
+          {formErrors.email && <div className="invalid-feedback">{formErrors.email}</div>}
+        </div>
+        <div className="mb-3">
+          <label htmlFor="commentText" className="form-label">Comment</label>
+          <textarea
+            className={`form-control ${formErrors.comment ? 'is-invalid' : ''}`}
+            id="commentText"
+            name="comment"
+            value={formData.comment}
+            onChange={handleInputChange}
+            placeholder="Enter your comment"
+            rows="4"
+          />
+          {formErrors.comment && <div className="invalid-feedback">{formErrors.comment}</div>}
+        </div>
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? 'Submitting...' : 'Submit Comment'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+// Blog Details Component
+const BlogDetails = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${id}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch blog: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setBlog(data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching blog:', err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+    fetchBlog();
+  }, [id]);
+
+  if (loading) {
+    return <div className="container mt-4"><p>Loading blog...</p></div>;
+  }
+
+  if (error || !blog) {
+    return (
+      <div className="container mt-4">
+        <p className="text-danger">{error || 'Blog not found'}</p>
+        <button className="btn btn-primary" onClick={() => navigate('/blogs')}>
+          Back to Blogs
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mt-4">
+      <button className="btn btn-secondary mb-3" onClick={() => navigate('/blogs')}>
+        Back to Blogs
+      </button>
+      <div className="card">
+        {blog.image && (
+          <img
+            src={`${import.meta.env.VITE_API_URL}${blog.image}`}
+            alt={blog.title}
+            className="card-img-top"
+            style={{ height: '300px', objectFit: 'cover' }}
+          />
+        )}
+        <div className="card-body">
+          <h1 className="card-title">{blog.title}</h1>
+          <div className="d-flex justify-content-between mb-3">
+            <span className="text-muted">{blog.author || 'Anonymous'}</span>
+            <span className="text-muted">{new Date(blog.createdAt).toLocaleDateString()}</span>
+          </div>
+          <p className="card-text">{blog.content}</p>
+          {blog.tags && blog.tags.length > 0 && (
+            <div className="mt-3">
+              {blog.tags.map((tag, idx) => (
+                <span key={idx} className="badge bg-primary me-1">{tag}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <Comments blogId={id} />
+    </div>
+  );
+};
+
+// Blog Component
+const Blog = () => {
+  const navigate = useNavigate();
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch blogs: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setBlogs(data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+    fetchBlogs();
+  }, []);
+
+  const handleViewDetails = (blog) => {
+    navigate(`/blogs/${blog._id}`);
+  };
+
+  return (
+    <div className="container mt-4" data-aos="fade-up">
+      <h2 className="section-title text-center my-3">Blog</h2>
+      {loading && <p>Loading blogs...</p>}
+      {error && <p className="text-danger">Error: {error}</p>}
+      {!loading && !error && blogs.length === 0 && <p>No blogs available</p>}
+      <div className="row">
+        {blogs.map((blog, index) => (
+          <div
+            className="col-lg-4 col-md-6 mb-4"
+            data-aos="fade-up"
+            data-aos-duration="2000"
+            key={blog._id || index}
+            onClick={() => handleViewDetails(blog)}
+          >
+            <div className="card h-100">
+              <div className="card-img-top">
+                <img
+                  src={blog.image ? `${import.meta.env.VITE_API_URL}${blog.image}` : 'https://via.placeholder.com/400x200'}
+                  alt={blog.title}
+                  className="img-fluid"
+                  style={{ height: '200px', objectFit: 'cover' }}
+                />
+              </div>
+              <div className="card-body">
+                <h3 className="card-title">{blog.title || 'Untitled Blog'}</h3>
+                <p className="card-text">{blog.content?.substring(0, 100)}...</p>
+                <div className="d-flex justify-content-between">
+                  <span className="text-muted">{blog.author || 'Anonymous'}</span>
+                  <span className="text-muted">{new Date(blog.createdAt).toLocaleDateString()}</span>
+                </div>
+                {blog.tags && blog.tags.length > 0 && (
+                  <div className="mt-2">
+                    {blog.tags.map((tag, idx) => (
+                      <span key={idx} className="badge bg-primary me-1">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 // Main App Component
 function App() {
@@ -899,12 +1064,13 @@ function App() {
                 <Navbars />
                 <Slider />
                 <Productcard />
+                <Blog />
                 <Footers />
               </>
             }
           />
           <Route
-            path="/Products"
+            path="/products"
             element={
               <>
                 <Navbars />
@@ -949,6 +1115,26 @@ function App() {
               <>
                 <Navbars />
                 <Contact />
+                <Footers />
+              </>
+            }
+          />
+          <Route
+            path="/blogs"
+            element={
+              <>
+                <Navbars />
+                <BlogPage />
+                <Footers />
+              </>
+            }
+          />
+          <Route
+            path="/blogs/:id"
+            element={
+              <>
+                <Navbars />
+                <BlogDetails />
                 <Footers />
               </>
             }
