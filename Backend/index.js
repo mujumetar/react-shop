@@ -7,14 +7,14 @@ const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
-// const jwt = require('jsonwebtoken');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const { body, validationResult } = require('express-validator');
 
 // Create uploads dir if not exists
-const UPLOAD_DIR = path.join(__dirname, 'uploads');
+const UPLOAD_DIR = path.join(__dirname, 'Uploads');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
@@ -66,7 +66,7 @@ mongoose.connect(process.env.MONGO_URI, {
     process.exit(1);
   });
 
-// Nodemailer transporter (✅ FIXED)
+// Nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   host: 'smtp.gmail.com',
@@ -78,31 +78,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
 // Razorpay init
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
-
-// JWT secret validation
-// if (!process.env.JWT_SECRET) {
-//   console.error('❌ JWT_SECRET is not set in environment variables');
-//   process.exit(1);
-// }
-
-// // Middleware for JWT authentication
-// cons = (req, res, next) => {
-//   const authHeader = req.headers['authorization'];
-//   const token = authHeader && authHeader.split(' ')[1];
-//   if (!token) return res.status(401).json({ error: 'Access token required' });
-//   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-//     if (err) return res.status(403).json({ error: 'Invalid token' });
-//     if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
-//     req.user = user;
-//     next();
-//   });
-// };
 
 // Schemas
 const productSchema = new mongoose.Schema({
@@ -179,6 +159,12 @@ const blogSchema = new mongoose.Schema({
   tags: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  comments: [{
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    comment: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+  }],
 }, { versionKey: false });
 const Blog = mongoose.model('Blog', blogSchema);
 
@@ -197,6 +183,13 @@ const upload = multer({
   },
   limits: { fileSize: 5 * 1024 * 1024 },
 });
+
+// Validation middleware for comment submission
+const validateComment = [
+  body('name').trim().notEmpty().withMessage('Name is required'),
+  body('email').isEmail().normalizeEmail().withMessage('Invalid email format'),
+  body('comment').trim().notEmpty().withMessage('Comment is required'),
+];
 
 // Utility: Send Order Confirmation Email
 const sendOrderConfirmationEmail = async (order, totalAmount) => {
@@ -237,7 +230,6 @@ app.get('/products/:id', async (req, res) => {
   }
 });
 
-// Admin: Products
 app.post('/admin/products', upload.single('image'), async (req, res) => {
   try {
     const { name, slug, category, price, stock, description } = req.body;
@@ -365,19 +357,7 @@ app.post('/orders', async (req, res) => {
     }
 
     // Send email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: customerEmail,
-      subject: `Order Confirmation #${order._id.toString().slice(-8)}`,
-      html: `
-        <h1>Order Confirmation</h1>
-        <p>Thank you for your order, ${customerName}!</p>
-        <p>Order ID: ${order._id.toString().slice(-8)}</p>
-        <p>Total Amount: ₹${totalAmount}</p>
-        <p>We will notify you once your order is shipped.</p>
-      `,
-    };
-    await transporter.sendMail(mailOptions);
+    await sendOrderConfirmationEmail(order, totalAmount);
 
     res.status(201).json({ message: 'Order placed successfully', orderId: order._id });
   } catch (err) {
@@ -497,22 +477,52 @@ app.delete('/admin/blogs/:id', async (req, res) => {
   }
 });
 
-// // === Admin Authentication ===
-// app.post('/admin/login', async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-//     const user = await User.findOne({ email, role: 'admin' });
-//     if (!user || !await bcrypt.compare(password, user.password)) {
-//       return res.status(401).json({ error: 'Invalid credentials' });
-//     }
-//     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
-//     res.json({ message: 'Login successful', token });
-//   } catch (err) {
-//     res.status(500).json({ error: 'Login failed' });
-//   }
-// });
+// === Blog Comments ===
+app.get('/blogs/:id/comments', async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id, 'comments').lean();
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+    res.json(blog.comments || []);
+  } catch (err) {
+    console.error('Error fetching comments:', err);
+    res.status(500).json({ error: 'Failed to fetch comments' });
+  }
+});
 
+app.post('/blogs/:id/comments', validateComment, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0].msg });
+    }
+
+    const { name, email, comment, createdAt } = req.body;
+
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+
+    const newComment = {
+      name,
+      email,
+      comment,
+      createdAt: createdAt || new Date(),
+    };
+
+    blog.comments.push(newComment);
+    await blog.save();
+
+    res.status(201).json({ _id: blog.comments[blog.comments.length - 1]._id });
+  } catch (err) {
+    console.error('Error adding comment:', err);
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+});
+
+// === Admin Authentication ===
 app.post('/admin/signup', async (req, res) => {
   try {
     const { name, email, password } = req.body;
