@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate, useParams, useLocation } from 'react-router-dom';
 import white from './img/white.jpeg';
 import black from './img/black.jpeg';
 import Navbars from "./components/Navbar";
@@ -66,7 +66,9 @@ const Productcard = () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/products`);
         if (!response.ok) {
-          throw new Error(`Failed to fetch products: ${response.statusText}`);
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
         console.log('Fetched products:', data);
@@ -110,7 +112,7 @@ const Productcard = () => {
               <div className="product-card">
                 <div className="product-image">
                   <img
-                    src={ele.img_url ? `${import.meta.env.VITE_API_URL}${ele.img_url}` : imageMap.black}
+                    src={ele.img_url || imageMap.black} // Use Cloudinary URL directly or fallback
                     alt={ele.name}
                     className="img-fluid"
                   />
@@ -168,7 +170,7 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
             <p>Price: ₹{selectedProduct.price}</p>
             <p>{selectedProduct.description}</p>
             {selectedProduct.img_url && (
-              <img src={`${import.meta.env.VITE_API_URL}${selectedProduct.img_url}`} alt={selectedProduct.name} className="img-fluid" />
+              <img src={selectedProduct.img_url} alt={selectedProduct.name} className="img-fluid" /> // Use Cloudinary URL directly
             )}
           </div>
           <div className="modal-footer">
@@ -282,10 +284,15 @@ const Contact = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error(`Failed to submit contact form: ${response.status} ${response.statusText}`);
+      }
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to submit contact form');
       setSuccess('Your message has been sent successfully!');
       setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error('Error submitting contact form:', error);
       setFormErrors({ submit: error.message });
@@ -364,8 +371,8 @@ const Checkout = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const navigate = useNavigate();
-  const location = useLocation();
-  const { cart } = location.state || {};
+  const { state } = useLocation();
+  const { cart } = state || {};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -420,7 +427,7 @@ const Checkout = () => {
 
   const placeOrder = async () => {
     if (!cart || cart.length === 0) {
-      alert('Your cart is empty. Please add products.');
+      setError('Your cart is empty. Please add products.');
       return;
     }
 
@@ -444,6 +451,7 @@ const Checkout = () => {
     };
 
     try {
+      console.log('Placing order with data:', orderData);
       const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -451,8 +459,9 @@ const Checkout = () => {
       });
 
       if (!orderResponse.ok) {
-        const errorData = await orderResponse.json();
-        throw new Error(errorData.error || 'Failed to create order');
+        const text = await orderResponse.text();
+        console.error('Order creation failed:', text);
+        throw new Error(`Failed to create order: ${orderResponse.status} ${orderResponse.statusText}`);
       }
 
       const { orderId } = await orderResponse.json();
@@ -463,64 +472,101 @@ const Checkout = () => {
       });
 
       if (!razorpayResponse.ok) {
-        const errorData = await razorpayResponse.json();
-        throw new Error(errorData.error || 'Failed to create payment order');
+        const text = await razorpayResponse.text();
+        console.error('Razorpay order creation failed:', text);
+        throw new Error(`Failed to create payment order: ${razorpayResponse.status} ${orderResponse.statusText}`);
       }
 
       const razorpayOrder = await razorpayResponse.json();
+      console.log('Razorpay order created:', razorpayOrder);
 
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => {
-        const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-          amount: razorpayOrder.amount,
-          currency: razorpayOrder.currency,
-          name: 'Dilkhush Kirana',
-          description: 'Order Payment',
-          order_id: razorpayOrder.id,
-          handler: async (paymentResponse) => {
-            const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: paymentResponse.razorpay_order_id,
-                razorpay_payment_id: paymentResponse.razorpay_payment_id,
-                razorpay_signature: paymentResponse.razorpay_signature,
-              }),
-            });
-
-            if (!verifyResponse.ok) {
-              const errorData = await verifyResponse.json();
-              throw new Error(errorData.error || 'Payment verification failed');
-            }
-
-            alert('Payment successful!');
-            navigate('/success', { state: { orderId } });
-          },
-          prefill: {
-            name: formData.customerName,
-            email: formData.customerEmail,
-            contact: formData.customerPhone,
-          },
-          theme: { color: '#3399cc' },
+      // Ensure Razorpay script is loaded only once
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        script.onload = () => {
+          console.log('Razorpay script loaded');
+          openRazorpayCheckout(razorpayOrder, orderId);
         };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      };
-
-      script.onerror = () => {
-        setLoading(false);
-        alert('Failed to load payment gateway');
-      };
-
-      document.body.appendChild(script);
+        script.onerror = () => {
+          console.error('Failed to load Razorpay script');
+          setError('Failed to load payment gateway');
+          setLoading(false);
+        };
+        document.body.appendChild(script);
+      } else {
+        openRazorpayCheckout(razorpayOrder, orderId);
+      }
     } catch (error) {
       console.error('Error placing order:', error);
       setError(error.message);
       setLoading(false);
-    } finally {
+    }
+  };
+
+  const openRazorpayCheckout = (razorpayOrder, orderId) => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      name: 'Dilkhush Kirana',
+      description: 'Order Payment',
+      order_id: razorpayOrder.id,
+      handler: async (paymentResponse) => {
+        try {
+          console.log('Payment response:', paymentResponse);
+          const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+            }),
+          });
+
+          if (!verifyResponse.ok) {
+            const text = await verifyResponse.text();
+            console.error('Payment verification failed:', text);
+            throw new Error(`Payment verification failed: ${verifyResponse.status} ${verifyResponse.statusText}`);
+          }
+
+          const verifyData = await verifyResponse.json();
+          console.log('Payment verified:', verifyData);
+          navigate('/success', { state: { orderId } });
+        } catch (error) {
+          console.error('Error verifying payment:', error);
+          setError(error.message);
+          navigate('/cancel');
+        }
+      },
+      prefill: {
+        name: formData.customerName,
+        email: formData.customerEmail,
+        contact: formData.customerPhone,
+      },
+      theme: { color: '#3399cc' },
+      modal: {
+        ondismiss: () => {
+          console.log('Razorpay modal dismissed');
+          setLoading(false);
+        },
+      },
+    };
+
+    try {
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (response) => {
+        console.error('Payment failed:', response.error);
+        setError(`Payment failed: ${response.error.description}`);
+        setLoading(false);
+        navigate('/cancel');
+      });
+      rzp.open();
+    } catch (error) {
+      console.error('Error opening Razorpay checkout:', error);
+      setError('Failed to open payment gateway');
       setLoading(false);
     }
   };
@@ -667,83 +713,6 @@ const Checkout = () => {
   );
 };
 
-// Blog Component
-const BlogPage = () => {
-  const navigate = useNavigate();
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch blogs: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setBlogs(data);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching blogs:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-    fetchBlogs();
-  }, []);
-
-  const handleViewDetails = (blog) => {
-    navigate(`/blogs/${blog._id}`);
-  };
-
-  return (
-    <div className="container mt-4" data-aos="fade-up">
-      <h2 className="section-title text-center my-3">Blog</h2>
-      {loading && <p>Loading blogs...</p>}
-      {error && <p className="text-danger">Error: {error}</p>}
-      {!loading && !error && blogs.length === 0 && <p>No blogs available</p>}
-      <div className="row">
-        {blogs.map((blog, index) => (
-          <div
-            className="col-lg-4 col-md-6 mb-4"
-            data-aos="fade-up"
-            data-aos-duration="2000"
-            key={blog._id || index}
-            onClick={() => handleViewDetails(blog)}
-          >
-            <div className="card h-100">
-              <div className="card-img-top">
-                <img
-                  src={blog.image ? `${import.meta.env.VITE_API_URL}${blog.image}` : 'https://via.placeholder.com/400x200'}
-                  alt={blog.title}
-                  className="img-fluid"
-                  style={{ height: '200px', objectFit: 'cover' }}
-                />
-              </div>
-              <div className="card-body">
-                <h3 className="card-title">{blog.title || 'Untitled Blog'}</h3>
-                <p className="card-text">{blog.content?.substring(0, 100)}...</p>
-                <div className="d-flex justify-content-between">
-                  <span className="text-muted">{blog.author || 'Anonymous'}</span>
-                  <span className="text-muted">{new Date(blog.createdAt).toLocaleDateString()}</span>
-                </div>
-                {blog.tags && blog.tags.length > 0 && (
-                  <div className="mt-2">
-                    {blog.tags.map((tag, idx) => (
-                      <span key={idx} className="badge bg-primary me-1">{tag}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 // Comments Component
 const Comments = ({ blogId }) => {
   const [comments, setComments] = useState([]);
@@ -759,16 +728,30 @@ const Comments = ({ blogId }) => {
 
   useEffect(() => {
     const fetchComments = async () => {
+      if (!blogId || !/^[0-9a-fA-F]{24}$/.test(blogId)) {
+        console.error('Invalid blog ID:', blogId);
+        setError('Invalid blog ID');
+        return;
+      }
+      setLoading(true);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`);
+        console.log('Fetching comments for blog ID:', blogId);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
         if (!response.ok) {
-          throw new Error(`Failed to fetch comments: ${response.statusText}`);
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Failed to fetch comments: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
         setComments(data);
       } catch (err) {
         console.error('Error fetching comments:', err);
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchComments();
@@ -801,9 +784,14 @@ const Comments = ({ blogId }) => {
       setFormErrors(errors);
       return;
     }
+    if (!blogId || !/^[0-9a-fA-F]{24}$/.test(blogId)) {
+      setError('Invalid blog ID');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
+      console.log('Submitting comment for blog ID:', blogId, 'Data:', formData);
       const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -812,8 +800,12 @@ const Comments = ({ blogId }) => {
           createdAt: new Date().toISOString(),
         }),
       });
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error(`Failed to submit comment: ${response.status} ${response.statusText}`);
+      }
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to submit comment');
       setComments((prev) => [...prev, { ...formData, createdAt: new Date().toISOString(), _id: data._id }]);
       setFormData({ name: '', email: '', comment: '' });
       setSuccess('Comment submitted successfully!');
@@ -829,11 +821,13 @@ const Comments = ({ blogId }) => {
   return (
     <div className="mt-5">
       <h4 className="mb-3">Comments</h4>
+      {loading && <p>Loading comments...</p>}
       {error && <div className="alert alert-danger mb-3">{error}</div>}
       {success && <div className="alert alert-success mb-3">{success}</div>}
-      {comments.length === 0 ? (
+      {!loading && !error && comments.length === 0 && (
         <p>No comments yet. Be the first to comment!</p>
-      ) : (
+      )}
+      {!loading && comments.length > 0 && (
         <div className="mb-4">
           {comments.map((comment, index) => (
             <div key={comment._id || index} className="card mb-3">
@@ -907,10 +901,19 @@ const BlogDetails = () => {
 
   useEffect(() => {
     const fetchBlog = async () => {
+      if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
+        console.error('Invalid blog ID:', id);
+        setError('Invalid blog ID');
+        setLoading(false);
+        return;
+      }
       try {
+        console.log('Fetching blog with ID:', id);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${id}`);
         if (!response.ok) {
-          throw new Error(`Failed to fetch blog: ${response.statusText}`);
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Failed to fetch blog: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
         setBlog(data);
@@ -947,7 +950,7 @@ const BlogDetails = () => {
       <div className="card">
         {blog.image && (
           <img
-            src={`${import.meta.env.VITE_API_URL}${blog.image}`}
+            src={blog.image} // Use Cloudinary URL directly
             alt={blog.title}
             className="card-img-top"
             style={{ height: '300px', objectFit: 'cover' }}
@@ -984,9 +987,12 @@ const Blog = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
+        console.log('Fetching blogs from:', `${import.meta.env.VITE_API_URL}/blogs`);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs`);
         if (!response.ok) {
-          throw new Error(`Failed to fetch blogs: ${response.statusText}`);
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error(`Failed to fetch blogs: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
         setBlogs(data);
@@ -1022,7 +1028,7 @@ const Blog = () => {
             <div className="card h-100">
               <div className="card-img-top">
                 <img
-                  src={blog.image ? `${import.meta.env.VITE_API_URL}${blog.image}` : 'https://via.placeholder.com/400x200'}
+                  src={blog.image || 'https://via.placeholder.com/400x200'} // Use Cloudinary URL or placeholder
                   alt={blog.title}
                   className="img-fluid"
                   style={{ height: '200px', objectFit: 'cover' }}
@@ -1124,7 +1130,7 @@ function App() {
             element={
               <>
                 <Navbars />
-                <BlogPage />
+                <Blog />
                 <Footers />
               </>
             }
