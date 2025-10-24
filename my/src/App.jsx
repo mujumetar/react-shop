@@ -6,7 +6,7 @@ import Navbars from "./components/Navbar";
 import Footers from "./components/Footer";
 import Slider from "./components/Slider";
 import About from "./components/Aboutsect";
-
+import OrderSuccess from "./components/pages/OrderSuccess"
 // Cart Context
 const CartContext = createContext();
 
