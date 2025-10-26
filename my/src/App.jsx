@@ -7,11 +7,22 @@ import Footers from "./components/Footer";
 import Slider from "./components/Slider";
 import About from "./components/Aboutsect";
 import OrderSuccess from "./components/pages/OrderSuccess"
+import { ArrowLeft, ArrowLeftSquare, ArrowRight, Heart, Minus, Package, Plus, Share2, Shield, ShoppingBag, Star, Tag, Trash2, Truck } from 'lucide-react';
+
 // Cart Context
 const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) setCart(JSON.parse(storedCart));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
 
   const addToCart = (product) => {
     setCart((prevCart) => {
@@ -96,7 +107,7 @@ const Productcard = () => {
 
   return (
     <>
-      <div className="container mt-4" data-aos="fade-up">
+      <div className="container mt-4" data-aos="fade-up" >
         <h2 className="section-title text-center my-3">Products</h2>
         {loading && <p>Loading products...</p>}
         {error && <p className="text-danger">Error: {error}</p>}
@@ -106,6 +117,7 @@ const Productcard = () => {
             <div
               className="col-lg-3 col-md-4 col-sm-6 mb-4"
               data-aos="fade-up"
+              onClick={() => navigate(`/product/${ele._id}`)}
               data-aos-duration="2000"
               key={ele._id || index}
             >
@@ -120,14 +132,7 @@ const Productcard = () => {
                 <div className="product-content">
                   <h3 className="product-title">{ele.name || 'Unnamed Product'}</h3>
                   <p className="product-description">₹{ele.price || 0}</p>
-                  <button
-                    className="btn btn-sm btn-primary me-2"
-                    data-bs-toggle="modal"
-                    data-bs-target="#productModal"
-                    onClick={() => openPage(ele)}
-                  >
-                    View Details
-                  </button>
+                 
                   <button
                     className="btn btn-sm btn-success"
                     onClick={() => handleAddToCart(ele)}
@@ -140,42 +145,373 @@ const Productcard = () => {
           ))}
         </div>
       </div>
-      <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} />
+      {/* <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} /> */}
     </>
   );
 };
 
 // Eachprod Component
-const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
-  const navigate = useNavigate();
-  const { addToCart } = useCart();
+const ProductDetail = ({ product, onClose }) => {
+  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(product.img_url);
+  const [showToast, setShowToast] = useState(false);
 
-  if (!selectedProduct) return null;
+  if (!product) return null;
 
   const handleAddToCart = () => {
-    addToCart(selectedProduct);
-    setSelectedProduct(null);
-    navigate('/cart');
+    // addToCart logic (will be passed from parent)
+    for (let i = 0; i < quantity; i++) {
+      window.dispatchEvent(new CustomEvent('addToCart', { detail: product }));
+    }
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   };
 
+  const increment = () => setQuantity(q => q + 1);
+  const decrement = () => setQuantity(q => Math.max(1, q - 1));
+
+  const averageRating = 4.5;
+  const totalReviews = 128;
+
   return (
-    <div className="modal fade" id="productModal" tabIndex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title" id="productModalLabel">{selectedProduct.name}</h5>
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick={() => setSelectedProduct(null)}></button>
+    <>
+      <div className='container'>
+        {/* Toast */}
+        {showToast && (
+          <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
+            <div className="toast show align-items-center text-white bg-success border-0">
+              <div className="d-flex">
+                <div className="toast-body">
+                  <ShoppingBag size={18} className="me-2" />
+                  {quantity} × {product.name} added to cart!
+                </div>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white me-2 m-auto"
+                  onClick={() => setShowToast(false)}
+                />
+              </div>
+            </div>
           </div>
-          <div className="modal-body">
-            <p>Price: ₹{selectedProduct.price}</p>
-            <p>{selectedProduct.description}</p>
-            {selectedProduct.img_url && (
-              <img src={selectedProduct.img_url} alt={selectedProduct.name} className="img-fluid" /> // Use Cloudinary URL directly
+        )}
+
+        <div className="container-fluid py-4 py-md-5">
+          {/* Back Button */}
+          <div className="mb-4">
+            <button
+              onClick={onClose}
+              className="btn text-decoration-none d-flex align-items-center p-2"
+            >
+              <ArrowLeft size={20} className="me-2 " />
+              Back to Products
+            </button>
+          </div>
+
+          <div className="row g-4 g-xl-5">
+            {/* Image Gallery */}
+            <div className="col-lg-6">
+              <div className="sticky-top" style={{ top: '1rem' }}>
+                <div className="mb-3">
+                  <img
+                    src={selectedImage || 'https://via.placeholder.com/600'}
+                    alt={product.name}
+                    className="img-fluid rounded shadow-sm"
+                    style={{ height: '500px', width: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+                {/* <div className="d-flex gap-2 flex-wrap">
+                  {[product.img_url, 'https://via.placeholder.com/150?text=2', 'https://via.placeholder.com/150?text=3'].map((img, i) => (
+                    <img
+                      key={i}
+                      src={img}
+                      alt={`Thumbnail ${i + 1}`}
+                      className={`rounded cursor-pointer ${selectedImage === img ? 'border border-primary border-3' : 'border'}`}
+                      style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                      onClick={() => setSelectedImage(img)}
+                    />
+                  ))}
+                </div> */}
+              </div>
+            </div>
+
+            {/* Product Info */}
+            <div className="col-lg-6">
+              <div className="h-100 d-flex flex-column">
+                <div className="mb-4">
+                  <h1 className="display-5 fw-bold mb-3">{product.name}</h1>
+
+                  {/* Rating */}
+                  <div className="d-flex align-items-center mb-3">
+                    <div className="me-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={20}
+                          className={i < Math.floor(averageRating) ? 'text-warning fill-warning' : 'text-muted'}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-muted small">
+                      {averageRating} ({totalReviews} reviews)
+                    </span>
+                  </div>
+
+                  <div className="d-flex-align-items-baseline mb-4">
+                    <h2 className="text-primary me-3">₹{product.price?.toLocaleString()}</h2>
+                    <del className="text-muted">₹{(product.price * 1.3).toFixed(0)}</del>
+                    <span className="badge bg-success ms-2">23% OFF</span>
+                  </div>
+
+                  <p className="lead text-muted">
+                    {product.description || 'High-quality product with premium materials. Perfect for daily use.'}
+                  </p>
+                </div>
+
+                {/* Quantity */}
+                <div className="mb-4">
+                  <div className="d-flex align-items-center mb-3">
+                    <span className="me-3 fw-semibold">Quantity:</span>
+                    <div className="input-group" style={{ width: '150px' }}>
+                      <button className="btn btn-outline-secondary" onClick={decrement}>
+                        <Minus size={16} />
+                      </button>
+                      <input
+                        type="text"
+                        className="form-control text-center fw-bold"
+                        value={quantity}
+                        readOnly
+                      />
+                      <button className="btn btn-outline-secondary" onClick={increment}>
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="d-grid d-md-flex gap-2">
+                    <button
+                      onClick={handleAddToCart}
+                      className="btn btn-primary btn-lg flex-grow-1 d-flex align-items-center justify-content-center"
+                    >
+                      <ShoppingBag className="me-2" size={20} />
+                      Add to Cart
+                    </button>
+                    <button className="btn btn-outline-danger btn-lg d-flex align-items-center justify-content-center">
+                      <Heart size={20} />
+                    </button>
+                    <button className="btn btn-outline-secondary btn-lg d-flex align-items-center justify-content-center">
+                      <Share2 size={20} />
+                    </button>
+                  </div>
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+    </>
+  );
+};
+
+
+// Cart Component
+
+const Cart = () => {
+  const { cart, removeFromCart, updateQuantity } = useCart();
+  const navigate = useNavigate();
+
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shipping = subtotal > 5000 ? 0 : 99;
+  const discount = 0; // You can add coupon logic later
+  const total = subtotal + shipping - discount;
+
+  const handleCheckout = () => {
+    navigate('/checkout', { state: { cart } });
+  };
+
+  const increment = (id) => {
+    const item = cart.find(i => i.productId === id);
+    updateQuantity(id, item.quantity + 1);
+  };
+
+  const decrement = (id) => {
+    const item = cart.find(i => i.productId === id);
+    if (item.quantity > 1) {
+      updateQuantity(id, item.quantity - 1);
+    }
+  };
+
+  if (cart.length === 0) {
+    return (
+      <div className="container py-5 text-center">
+        <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style={{ width: 120, height: 120 }}>
+          <ShoppingBag size={60} className="text-primary" />
+        </div>
+        <h3 className="mb-3">Your cart is empty</h3>
+        <p className="text-muted mb-4">Looks like you haven't added anything yet.</p>
+        <button onClick={() => navigate('/products')} className="btn btn-primary btn-lg px-5">
+          Continue Shopping
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container py-4 py-md-5">
+      <h2 className="text-center mb-4 fw-bold text-primary">Your Cart</h2>
+
+      {/* Free Shipping Alert */}
+      <div className="alert alert-success d-flex align-items-center mb-4 shadow-sm rounded">
+        <Truck className="me-3" size={24} />
+        <div>
+          <strong>
+            {subtotal >= 5000 ? (
+              <>Free Shipping Unlocked!</>
+            ) : (
+              <>Add <span className="text-danger">₹{(5000 - subtotal).toLocaleString()}</span> more for FREE shipping</>
             )}
+          </strong>
+          <div className="progress mt-2" style={{ height: '6px' }}>
+            <div
+              className="progress-bar bg-success"
+              style={{ width: `${Math.min((subtotal / 5000) * 100, 100)}%` }}
+            />
           </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={() => setSelectedProduct(null)}>Close</button>
-            <button type="button" className="btn btn-primary" onClick={handleAddToCart}>Add to Cart</button>
+        </div>
+      </div>
+
+      <div className="row g-4">
+        {/* Cart Items */}
+        <div className="col-lg-8">
+          <div className="card shadow-sm border-0">
+            {cart.map((item) => (
+              <div key={item.productId} className="card-body border-bottom">
+                <div className="row align-items-center g-3">
+                  {/* Product Image */}
+                  <div className="col-4 col-md-3 col-lg-2">
+                    <img
+                      src={item.image || 'https://via.placeholder.com/150'}
+                      alt={item.name}
+                      className="img-fluid rounded shadow-sm"
+                      style={{ height: 90, objectFit: 'cover' }}
+                    />
+                  </div>
+
+                  {/* Product Details */}
+                  <div className="col-8 col-md-9 col-lg-10">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <div>
+                        <h6 className="mb-1 fw-bold">{item.name}</h6>
+                        <p className="text-muted small mb-0">₹{item.price.toLocaleString()} each</p>
+                      </div>
+                      <button
+                        onClick={() => removeFromCart(item.productId)}
+                        className="btn btn-sm btn-outline-danger d-flex align-items-center"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    {/* Quantity & Total */}
+                    <div className="d-flex justify-content-between align-items-center mt-3">
+                      <div className="input-group" style={{ width: '140px' }}>
+                        <button
+                          className="btn btn-outline-secondary"
+                          onClick={() => decrement(item.productId)}
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <input
+                          type="text"
+                          className="form-control text-center fw-bold"
+                          value={item.quantity}
+                          readOnly
+                        />
+                        <button
+                          className="btn btn-outline-secondary"
+                          onClick={() => increment(item.productId)}
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+
+                      <div className="text-end">
+                        <p className="text-muted small mb-0">Item Total</p>
+                        <h5 className="text-primary mb-0">
+                          ₹{(item.price * item.quantity).toLocaleString()}
+                        </h5>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Order Summary */}
+        <div className="col-lg-4">
+          <div className="card shadow-sm sticky-top" style={{ top: '1rem' }}>
+            <div className="card-header bg-primary text-white">
+              <h5 className="mb-0">Order Summary</h5>
+            </div>
+            <div className="card-body">
+              <ul className="list-group list-group-flush mb-3">
+                <li className="list-group-item d-flex justify-content-between py-2">
+                  <span>Subtotal</span>
+                  <strong>₹{subtotal.toLocaleString()}</strong>
+                </li>
+                <li className="list-group-item d-flex justify-content-between py-2 text-success">
+                  <span>Discount</span>
+                  <strong>-₹{discount.toLocaleString()}</strong>
+                </li>
+                <li className="list-group-item d-flex justify-content-between py-2">
+                  <span>Shipping</span>
+                  <strong>
+                    {shipping === 0 ? (
+                      <span className="text-success">FREE</span>
+                    ) : (
+                      `₹${shipping}`
+                    )}
+                  </strong>
+                </li>
+              </ul>
+
+              <div className="border-top pt-3 mb-3">
+                <div className="d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0">Total</h5>
+                  <h4 className="text-primary mb-0">₹{total.toLocaleString()}</h4>
+                </div>
+                <small className="text-muted">Inclusive of all taxes</small>
+              </div>
+
+              {/* Coupon Input */}
+              <div className="input-group mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Coupon code"
+                  aria-label="Coupon code"
+                />
+                <button className="btn btn-outline-primary" type="button">
+                  Apply
+                </button>
+              </div>
+
+              {/* Checkout Button */}
+              <button
+                onClick={handleCheckout}
+                className="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center shadow-sm"
+              >
+                Proceed to Checkout
+                <ArrowRight className="ms-2" size={18} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -183,62 +519,32 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
   );
 };
 
-// Cart Component
-const Cart = () => {
-  const { cart, removeFromCart, updateQuantity } = useCart();
+const ProductDetailWrapper = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleCheckout = () => {
-    navigate('/checkout', { state: { cart } });
-  };
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/products/${id}`);
+        const data = await res.json();
+        setProduct(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
-  const totalAmount = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  if (loading) return <div className="container py-5 text-center"><div className="spinner-border"></div></div>;
+  if (!product) return <div className="container py-5 text-center"><h3>Product not found</h3></div>;
 
-  return (
-    <div className="container mt-4">
-      <h2 className="section-title text-center my-3">Your Cart</h2>
-      {cart.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <>
-          <div className="row">
-            {cart.map((item) => (
-              <div className="col-md-6 mb-3" key={item.productId}>
-                <div className="card">
-                  <div className="card-body">
-                    <h5 className="card-title">{item.name}</h5>
-                    <p className="card-text">Price: ₹{item.price}</p>
-                    <p className="card-text">
-                      Quantity:
-                      <input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateQuantity(item.productId, parseInt(e.target.value) || 1)}
-                        style={{ width: '60px', margin: '0 10px' }}
-                      />
-                    </p>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => removeFromCart(item.productId)}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <h4 className="mt-3">Total: ₹{totalAmount}</h4>
-          <button className="btn btn-primary mt-3" onClick={handleCheckout}>
-            Proceed to Checkout
-          </button>
-        </>
-      )}
-    </div>
-  );
+  return <ProductDetail product={product} onClose={() => navigate(-1)} />;
 };
-
 // Contact Component
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -1071,7 +1377,10 @@ function App() {
                 <Slider />
                 <Productcard />
                 <Blog />
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
@@ -1081,7 +1390,10 @@ function App() {
               <>
                 <Navbars />
                 <Productcard />
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
@@ -1091,7 +1403,10 @@ function App() {
               <>
                 <Navbars />
                 <About />
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
@@ -1101,7 +1416,10 @@ function App() {
               <>
                 <Navbars />
                 <Cart />
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
@@ -1111,7 +1429,10 @@ function App() {
               <>
                 <Navbars />
                 <Checkout />
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
@@ -1121,7 +1442,10 @@ function App() {
               <>
                 <Navbars />
                 <Contact />
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
@@ -1131,6 +1455,33 @@ function App() {
               <>
                 <Navbars />
                 <Blog />
+                <div className="">
+                  <Footers />
+                </div>
+
+              </>
+            }
+          />
+          <Route
+            path="/offers"
+            element={
+              <>
+                <Navbars />
+                {/* <Blog /> */}
+                {/* <Offerspage/> */}
+                <div className="">
+                  <Footers />
+                </div>
+
+              </>
+            }
+          />
+          <Route
+            path="/product/:id"
+            element={
+              <>
+                <Navbars />
+                <ProductDetailWrapper />
                 <Footers />
               </>
             }
@@ -1141,7 +1492,10 @@ function App() {
               <>
                 <Navbars />
                 <BlogDetails />
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
@@ -1150,12 +1504,15 @@ function App() {
             element={
               <>
                 <Navbars />
-                <OrderSuccess/>
+                <OrderSuccess />
                 <div className="container mt-4">
                   <h2>Order Placed Successfully!</h2>
                   <p>Thank you for your purchase. You will receive a confirmation email soon.</p>
                 </div>
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
@@ -1168,7 +1525,10 @@ function App() {
                   <h2>Order Failed</h2>
                   <p>Something went wrong. Please try again.</p>
                 </div>
-                <Footers />
+                <div className="">
+                  <Footers />
+                </div>
+
               </>
             }
           />
