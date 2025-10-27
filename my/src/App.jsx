@@ -7,7 +7,7 @@ import Footers from "./components/Footer";
 import Slider from "./components/Slider";
 import About from "./components/Aboutsect";
 import OrderSuccess from "./components/pages/OrderSuccess"
-import { ArrowLeft, ArrowLeftSquare, ArrowRight, Heart, Minus, Package, Plus, Share2, Shield, ShoppingBag, Star, Tag, Trash2, Truck } from 'lucide-react';
+import { ArrowLeft, ArrowLeftSquare, ArrowRight, Heart, Home, Minus, Package, Plus, RefreshCw, Share2, Shield, ShoppingBag, Star, Tag, Trash2, Truck, XCircle } from 'lucide-react';
 
 // Cart Context
 const CartContext = createContext();
@@ -132,13 +132,13 @@ const Productcard = () => {
                 <div className="product-content">
                   <h3 className="product-title">{ele.name || 'Unnamed Product'}</h3>
                   <p className="product-description">₹{ele.price || 0}</p>
-                 
-                  <button
+
+                  {/* <button
                     className="btn btn-sm btn-success"
                     onClick={() => handleAddToCart(ele)}
                   >
                     Add to Cart
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
@@ -155,6 +155,7 @@ const ProductDetail = ({ product, onClose }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(product.img_url);
   const [showToast, setShowToast] = useState(false);
+  const navigate = useNavigate();   // <-- Add this line
 
   if (!product) return null;
 
@@ -165,6 +166,7 @@ const ProductDetail = ({ product, onClose }) => {
     }
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
+    navigate('/cart');
   };
 
   const increment = () => setQuantity(q => q + 1);
@@ -269,7 +271,7 @@ const ProductDetail = ({ product, onClose }) => {
 
                 {/* Quantity */}
                 <div className="mb-4">
-                  <div className="d-flex align-items-center mb-3">
+                  {/* <div className="d-flex align-items-center mb-3">
                     <span className="me-3 fw-semibold">Quantity:</span>
                     <div className="input-group" style={{ width: '150px' }}>
                       <button className="btn btn-outline-secondary" onClick={decrement}>
@@ -285,7 +287,8 @@ const ProductDetail = ({ product, onClose }) => {
                         <Plus size={16} />
                       </button>
                     </div>
-                  </div>
+                    <span className="ms-3 fw-semibold">In KGs</span>
+                  </div> */}
 
                   <div className="d-grid d-md-flex gap-2">
                     <button
@@ -1283,6 +1286,86 @@ const BlogDetails = () => {
   );
 };
 
+
+// failde order components 
+
+const OrderFailed = ({ errorMessage = "We couldn't process your payment. Please try again." }) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center px-4 py-8">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* Header - Red Gradient */}
+        <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white text-center">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm mb-4 animate-pulse">
+            <XCircle size={48} className="text-white" />
+          </div>
+          <h1 className="text-2xl font-bold">Order Failed</h1>
+          <p className="text-red-100 mt-2 text-sm">Something went wrong with your payment</p>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-5">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <p className="text-red-800 text-sm leading-relaxed">
+              <strong>Error:</strong> {errorMessage}
+            </p>
+          </div>
+
+          <div className="text-center text-gray-600 text-sm">
+            <p>Don't worry — no money was charged.</p>
+            <p className="mt-1">You can try again or contact support.</p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg"
+            >
+              <RefreshCw size={18} />
+              Try Again
+            </button>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate('/cart')}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <ArrowLeft size={16} />
+                Back to Cart
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="flex-1 bg-gray-100 hover:bg-gray- ág-200 text-gray-800 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <Home size={16} />
+                Home
+              </button>
+            </div>
+          </div>
+
+          {/* Support Info */}
+          <div className="border-t pt-4 text-center">
+            <p className="text-xs text-gray-500">
+              Need help?{' '}
+              <a href="mailto:support@yoursite.com" className="text-red-600 hover:underline font-medium">
+                Contact Support
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Optional: Decorative background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-red-100 rounded-full filter blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-100 rounded-full filter blur-3xl opacity-30 translate-x-1/2 translate-y-1/2"></div>
+      </div>
+    </div>
+  );
+};
+
 // Blog Component
 const Blog = () => {
   const navigate = useNavigate();
@@ -1521,10 +1604,7 @@ function App() {
             element={
               <>
                 <Navbars />
-                <div className="container mt-4">
-                  <h2>Order Failed</h2>
-                  <p>Something went wrong. Please try again.</p>
-                </div>
+                <OrderFailed />
                 <div className="">
                   <Footers />
                 </div>
