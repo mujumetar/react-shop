@@ -12,6 +12,7 @@ import {
   Clock, CheckCircle, Package as PackageIcon,
   MapPin, Calendar, IndianRupee, User, Phone, Mail
 } from 'lucide-react';
+import Eachprod from './components/pages/Eachprod';
 // Cart Context
 const CartContext = createContext();
 
@@ -545,7 +546,7 @@ const Productcard = () => {
                         }}
                       >
                         <button className="btn btn-light btn-sm rounded-pill shadow">
-                          <i className="bi bi-eye me-2"></i>Quick View
+                          <i className="bi bi-eye me-2"></i>See more
                         </button>
                       </div>
                     </div>
@@ -757,6 +758,7 @@ const ProductDetail = ({ product, onClose }) => {
 
                 {/* Quantity */}
                 <div className="mb-4">
+
                   {/* <div className="d-flex align-items-center mb-3">
                     <span className="me-3 fw-semibold">Quantity:</span>
                     <div className="input-group" style={{ width: '150px' }}>
@@ -784,16 +786,75 @@ const ProductDetail = ({ product, onClose }) => {
                       <ShoppingBag className="me-2" size={20} />
                       Add to Cart
                     </button>
-                    <button className="btn btn-outline-danger btn-lg d-flex align-items-center justify-content-center">
-                      <Heart size={20} />
-                    </button>
-                    <button className="btn btn-outline-secondary btn-lg d-flex align-items-center justify-content-center">
-                      <Share2 size={20} />
+
+                    <button
+                      className="btn btn-outline-secondary btn-lg d-flex align-items-center justify-content-center"
+                      onClick={async () => {
+                        const url = window.location.href; // current page URL
+                        const shareData = {
+                          title: product.name,
+                          text: `Check out this product: ${product.name}`,
+                          url,
+                        };
+
+                        try {
+                          if (navigator.share) {
+                            await navigator.share(shareData);
+                            console.log('Product shared successfully');
+                          } else {
+                            // Fallback: copy link to clipboard
+                            await navigator.clipboard.writeText(url);
+                            alert('Link copied to clipboard!');
+                          }
+                        } catch (err) {
+                          console.error('Error sharing:', err);
+                        }
+                      }}
+                    >
+                      <Share2 size={20} className="me-1" /> Share
                     </button>
                   </div>
+                  <div>
+                    <marquee className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background" behavior="" direction="">  <b>25 years of trust</b></marquee>
+                    <marquee behavior="" direction="">   <b>we belive in quality not in quantity</b></marquee>
+                    <p> <b>Latest Products</b>
+                      <br />
+                      {product.name} kachariyu/saani
+
+
+                      <ul>
+                        <li> No added flavours.</li>
+                        <li> No harmful Chemicals.</li>
+                        <li>Best for winters.</li>
+                        <li> No additional colours.</li>
+                        <li>  100% natural and healthy.</li>
+                        <li> Healthy for everyone ☺️.</li>
+                      </ul>
+                    </p>
+                    <b> It contains</b>
+                    {/* <img className="img-fluid" src={contains} alt="" /> */}
+
+                    <b>✅ Health Review</b>
+                    <br />
+                    Energy-dense (~474 kcal per 100 g) → great for winters, boosts energy.
+                    <br />
+                    Balanced macros → Carbs from jaggery + healthy fats & protein from sesame.
+                    <br />
+                    Rich in minerals → especially Calcium (good for bones), Iron (blood health), Magnesium, and Potassium.
+                    <br />
+                    Fiber content (6 g/100 g) → supports digestion.
+                    <br />
+                    Antioxidants → Sesamin & sesamolin from sesame + minerals from jaggery.
+                    <br />
+                    <b>🏆 Why This Mixture is Powerful</b>
+                    <br />
+                    Gives instant energy (from jaggery).
+                    <br />
+                    Provides long-lasting satiety & strength (from sesame protein & fats).
+                    <br />
+                    Traditional wisdom = perfect winter superfood 🌿.
+                  </div>
                 </div>
-
-
               </div>
             </div>
           </div>

@@ -56,34 +56,7 @@ const Eachprod = ({ selectedProduct, setSelectedProduct }) => {
         }
     };
 
-    const sendToWhatsApp = () => {
-        // Collect order details from state
-        const orderDetails = `
-            *New Order Received! 📦*
-
-            *Product*: ${selectedProduct.name}
-            *Variant*: ${selectedProduct.varient}
-            *Quantity*: ${quantity} KG
-            *Unit Price*: ₹ ${selectedProduct.price}
-            *Delivery Charges*: ₹ ${deliveryCharge}
-            *Discount*: ₹ ${discount.toFixed(2)}
-            *Grand Total*: *₹ ${grandTotal.toFixed(2)}*
-
-            *Delivery Info:*
-            *Pincode*: ${address.pincode}
-            *Address*: ${address.address1}, ${address.address2}
-            *City*: ${address.city}, State: ${address.state}
-            *Phone*: ${address.phone}
-            *Email*: ${address.email || "N/A"}
-                `;
-
-
-        const adminNumber = "+917874536227";
-        const url = `https://wa.me/${adminNumber}?text=${encodeURIComponent(orderDetails)}`;
-
-
-        window.open(url, "_blank");
-    };
+  
 
 
     return (
