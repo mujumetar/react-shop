@@ -793,8 +793,8 @@ const ProductDetail = ({ product, onClose }) => {
                       onClick={async () => {
                         const url = window.location.href; // current page URL
                         const shareData = {
-                          title: product.name,
-                          text: `Check out this product: ${product.name}`,
+                          title: `🔥 ${product.name} is a must-have! 🔥`,
+                          text: `✨ Your next favorite purchase is here: ${product.name} ✨\nGrab it now 👉 ${url}`,
                           url,
                         };
 
