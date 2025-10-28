@@ -12,6 +12,7 @@ import {
   Clock, CheckCircle, Package as PackageIcon,
   MapPin, Calendar, IndianRupee, User, Phone, Mail
 } from 'lucide-react';
+import contains from "./img/contains.png"
 import Eachprod from './components/pages/Eachprod';
 // Cart Context
 const CartContext = createContext();
@@ -386,7 +387,7 @@ const Productcard = () => {
           throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
-        console.log('Fetched products:', data);
+        // console.log('Fetched products:', data);
         setProducts(data);
         setLoading(false);
       } catch (err) {
@@ -800,7 +801,7 @@ const ProductDetail = ({ product, onClose }) => {
                         try {
                           if (navigator.share) {
                             await navigator.share(shareData);
-                            console.log('Product shared successfully');
+                            // console.log('Product shared successfully');
                           } else {
                             // Fallback: copy link to clipboard
                             await navigator.clipboard.writeText(url);
@@ -814,46 +815,165 @@ const ProductDetail = ({ product, onClose }) => {
                       <Share2 size={20} className="me-1" /> Share
                     </button>
                   </div>
-                  <div>
-                    <marquee className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background" behavior="" direction="">  <b>25 years of trust</b></marquee>
-                    <marquee behavior="" direction="">   <b>we belive in quality not in quantity</b></marquee>
-                    <p> <b>Latest Products</b>
+                  <div className=" my-5">
+
+                    {/* <div>
+                      <marquee className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background" behavior="" direction="">  <b>25 years of trust</b></marquee>
+                      <marquee behavior="" direction="">   <b>we belive in quality not in quantity</b></marquee>
+                      <p> <b>Latest Products</b>
+                        <br />
+                        {product.name} kachariyu/saani
+
+
+                        <ul>
+                          <li> No added flavours.</li>
+                          <li> No harmful Chemicals.</li>
+                          <li>Best for winters.</li>
+                          <li> No additional colours.</li>
+                          <li>  100% natural and healthy.</li>
+                          <li> Healthy for everyone ☺️.</li>
+                        </ul>
+                      </p>
+                      <b> It contains</b>
+                      <img className="img-fluid" src={contains} alt="" />
+
+                      <b>✅ Health Review</b>
                       <br />
-                      {product.name} kachariyu/saani
+                      Energy-dense (~474 kcal per 100 g) → great for winters, boosts energy.
+                      <br />
+                      Balanced macros → Carbs from jaggery + healthy fats & protein from sesame.
+                      <br />
+                      Rich in minerals → especially Calcium (good for bones), Iron (blood health), Magnesium, and Potassium.
+                      <br />
+                      Fiber content (6 g/100 g) → supports digestion.
+                      <br />
+                      Antioxidants → Sesamin & sesamolin from sesame + minerals from jaggery.
+                      <br />
+                      <b>🏆 Why This Mixture is Powerful</b>
+                      <br />
+                      Gives instant energy (from jaggery).
+                      <br />
+                      Provides long-lasting satiety & strength (from sesame protein & fats).
+                      <br />
+                      Traditional wisdom = perfect winter superfood 🌿.
+                    </div> */}
+                    {/* Trust Banner */}
+                    <div className="alert alert-success text-center mb-4" role="alert">
+                      <strong>🏆 25 years of trust</strong> | We believe in quality, not in quantity
+                    </div>
 
+                    {/* Product Header */}
+                    <div className="card shadow-sm mb-4">
+                      <div className="card-body">
+                        <h2 className="card-title text-primary mb-3">
+                          {/* <span className="badge bg-primary me-2">Latest</span> */}
+                          {product.name} Kachariyu/Saani
+                        </h2>
 
-                      <ul>
-                        <li> No added flavours.</li>
-                        <li> No harmful Chemicals.</li>
-                        <li>Best for winters.</li>
-                        <li> No additional colours.</li>
-                        <li>  100% natural and healthy.</li>
-                        <li> Healthy for everyone ☺️.</li>
-                      </ul>
-                    </p>
-                    <b> It contains</b>
-                    {/* <img className="img-fluid" src={contains} alt="" /> */}
+                        {/* Key Features */}
+                        <div className="row g-3">
+                          <div className="col-md-6">
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">✓ No added flavours</li>
+                              <li className="list-group-item">✓ No harmful chemicals</li>
+                              <li className="list-group-item">✓ Best for winters</li>
+                            </ul>
+                          </div>
+                          <div className="col-md-6">
+                            <ul className="list-group list-group-flush">
+                              <li className="list-group-item">✓ No additional colours</li>
+                              <li className="list-group-item">✓ 100% natural and healthy</li>
+                              <li className="list-group-item">✓ Healthy for everyone ☺️</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                    <b>✅ Health Review</b>
-                    <br />
-                    Energy-dense (~474 kcal per 100 g) → great for winters, boosts energy.
-                    <br />
-                    Balanced macros → Carbs from jaggery + healthy fats & protein from sesame.
-                    <br />
-                    Rich in minerals → especially Calcium (good for bones), Iron (blood health), Magnesium, and Potassium.
-                    <br />
-                    Fiber content (6 g/100 g) → supports digestion.
-                    <br />
-                    Antioxidants → Sesamin & sesamolin from sesame + minerals from jaggery.
-                    <br />
-                    <b>🏆 Why This Mixture is Powerful</b>
-                    <br />
-                    Gives instant energy (from jaggery).
-                    <br />
-                    Provides long-lasting satiety & strength (from sesame protein & fats).
-                    <br />
-                    Traditional wisdom = perfect winter superfood 🌿.
+                    {/* Ingredients Section */}
+                    <div className="card shadow-sm mb-4">
+                      <div className="card-header bg-success text-white">
+                        <h4 className="mb-0">📦 It Contains</h4>
+                      </div>
+                      <div className="card-body text-center">
+                        <img className="img-fluid rounded" src={contains} alt="Product ingredients" />
+                      </div>
+                    </div>
+
+                    {/* Health Review */}
+                    <div className="card shadow-sm mb-4">
+                      <div className="card-header bg-info text-white">
+                        <h4 className="mb-0">✅ Health Review</h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="row g-3">
+                          <div className="col-lg-6">
+                            <div className="p-3 border rounded bg-light">
+                              <strong>⚡ Energy-dense</strong>
+                              <p className="mb-0 small">~474 kcal per 100g - great for winters, boosts energy</p>
+                            </div>
+                          </div>
+                          <div className="col-lg-6">
+                            <div className="p-3 border rounded bg-light">
+                              <strong>⚖️ Balanced macros</strong>
+                              <p className="mb-0 small">Carbs from jaggery + healthy fats & protein from sesame</p>
+                            </div>
+                          </div>
+                          <div className="col-lg-6">
+                            <div className="p-3 border rounded bg-light">
+                              <strong>💎 Rich in minerals</strong>
+                              <p className="mb-0 small">Calcium (bones), Iron (blood), Magnesium, Potassium</p>
+                            </div>
+                          </div>
+                          <div className="col-lg-6">
+                            <div className="p-3 border rounded bg-light">
+                              <strong>🌾 Fiber content</strong>
+                              <p className="mb-0 small">6g/100g - supports healthy digestion</p>
+                            </div>
+                          </div>
+                          <div className="col-12">
+                            <div className="p-3 border rounded bg-light">
+                              <strong>🛡️ Antioxidants</strong>
+                              <p className="mb-0 small">Sesamin & sesamolin from sesame + minerals from jaggery</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Why This Mixture is Powerful */}
+                    <div className="card shadow-sm border-warning">
+                      <div className="card-header bg-warning">
+                        <h4 className="mb-0">🏆 Why This Mixture is Powerful</h4>
+                      </div>
+                      <div className="card-body">
+                        <div className="list-group list-group-flush">
+                          <div className="list-group-item d-flex align-items-start">
+                            <span className="badge bg-success me-3 mt-1">1</span>
+                            <div>
+                              <strong>Instant Energy</strong>
+                              <p className="mb-0 text-muted">Quick energy boost from natural jaggery</p>
+                            </div>
+                          </div>
+                          <div className="list-group-item d-flex align-items-start">
+                            <span className="badge bg-success me-3 mt-1">2</span>
+                            <div>
+                              <strong>Long-lasting Satiety & Strength</strong>
+                              <p className="mb-0 text-muted">From sesame protein & healthy fats</p>
+                            </div>
+                          </div>
+                          <div className="list-group-item d-flex align-items-start">
+                            <span className="badge bg-success me-3 mt-1">3</span>
+                            <div>
+                              <strong>Traditional Wisdom</strong>
+                              <p className="mb-0 text-muted">Perfect winter superfood 🌿</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -1268,7 +1388,7 @@ const Checkout = () => {
     if (!addr.street.trim()) errors['shippingAddress.street'] = 'Street is required';
     if (!addr.city.trim()) errors['shippingAddress.city'] = 'City is required';
     if (!addr.state.trim()) errors['shippingAddress.state'] = 'State is required';
-    if (!addr.zip.trim()) errors['shippingAddress.zip'] = 'Zip code is required';
+    if (!addr.zip.trim()) errors['shippingAddress.zip'] = 'Pin code is required';
     if (!addr.country.trim()) errors['shippingAddress.country'] = 'Country is required';
     if (!formData.useSameAddress) {
       const billAddr = formData.billingAddress;
@@ -1309,7 +1429,7 @@ const Checkout = () => {
     };
 
     try {
-      console.log('Placing order with data:', orderData);
+      // console.log('Placing order with data:', orderData);
       const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1336,7 +1456,7 @@ const Checkout = () => {
       }
 
       const razorpayOrder = await razorpayResponse.json();
-      console.log('Razorpay order created:', razorpayOrder);
+      // console.log('Razorpay order created:', razorpayOrder);
 
       // Ensure Razorpay script is loaded only once
       if (!window.Razorpay) {
@@ -1344,7 +1464,7 @@ const Checkout = () => {
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         script.async = true;
         script.onload = () => {
-          console.log('Razorpay script loaded');
+          // console.log('Razorpay script loaded');
           openRazorpayCheckout(razorpayOrder, orderId);
         };
         script.onerror = () => {
@@ -1444,7 +1564,7 @@ const Checkout = () => {
       order_id: razorpayOrder.id,
       handler: async (paymentResponse) => {
         try {
-          console.log('Payment response:', paymentResponse);
+          // console.log('Payment response:', paymentResponse);
           const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1462,7 +1582,7 @@ const Checkout = () => {
           }
 
           const verifyData = await verifyResponse.json();
-          console.log('Payment verified:', verifyData);
+          // console.log('Payment verified:', verifyData);
           navigate('/success', {
             state: {
               orderId,
@@ -1521,7 +1641,7 @@ const Checkout = () => {
       theme: { color: '#3399cc' },
       modal: {
         ondismiss: () => {
-          console.log('Razorpay modal dismissed');
+          // console.log('Razorpay modal dismissed');
           setLoading(false);
         },
       },
@@ -1637,7 +1757,7 @@ const Checkout = () => {
             {!formData.useSameAddress && (
               <>
                 <h5>Billing Address</h5>
-                {['street', 'city', 'state', 'zip', 'country'].map((field) => (
+                {['street', 'city', 'state', 'Pin Code', 'country'].map((field) => (
                   <div className="mb-3" key={field}>
                     <label htmlFor={`billingAddress.${field}`} className="form-label">
                       {field.charAt(0).toUpperCase() + field.slice(1)}
@@ -1707,7 +1827,7 @@ const Comments = ({ blogId }) => {
       }
       setLoading(true);
       try {
-        console.log('Fetching comments for blog ID:', blogId);
+        // console.log('Fetching comments for blog ID:', blogId);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -1763,7 +1883,7 @@ const Comments = ({ blogId }) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Submitting comment for blog ID:', blogId, 'Data:', formData);
+      // console.log('Submitting comment for blog ID:', blogId, 'Data:', formData);
       const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1880,7 +2000,7 @@ const BlogDetails = () => {
         return;
       }
       try {
-        console.log('Fetching blog with ID:', id);
+        // console.log('Fetching blog with ID:', id);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${id}`);
         if (!response.ok) {
           const text = await response.text();
@@ -2096,7 +2216,7 @@ const Blog = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        console.log('Fetching blogs from:', `${import.meta.env.VITE_API_URL}/blogs`);
+        // console.log('Fetching blogs from:', `${import.meta.env.VITE_API_URL}/blogs`);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs`);
         if (!response.ok) {
           const text = await response.text();
