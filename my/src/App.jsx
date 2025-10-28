@@ -8,61 +8,364 @@ import Slider from "./components/Slider";
 import About from "./components/Aboutsect";
 import OrderSuccess from "./components/pages/OrderSuccess"
 import { ArrowLeft, ArrowLeftSquare, ArrowRight, Heart, Home, Minus, Package, Plus, RefreshCw, Share2, Shield, ShoppingBag, Star, Tag, Trash2, Truck, XCircle } from 'lucide-react';
-
+import {
+  Clock, CheckCircle, Package as PackageIcon,
+  MapPin, Calendar, IndianRupee, User, Phone, Mail
+} from 'lucide-react';
 // Cart Context
 const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [savedAddresses, setSavedAddresses] = useState([]);
 
+  // Load from localStorage
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
+    const storedOrders = localStorage.getItem('orders');
+    const storedAddresses = localStorage.getItem('savedAddresses');
     if (storedCart) setCart(JSON.parse(storedCart));
+    if (storedOrders) setOrders(JSON.parse(storedOrders));
+    if (storedAddresses) setSavedAddresses(JSON.parse(storedAddresses));
   }, []);
 
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  useEffect(() => {
+    localStorage.setItem('orders', JSON.stringify(orders));
+  }, [orders]);
+
+  useEffect(() => {
+    localStorage.setItem('savedAddresses', JSON.stringify(savedAddresses));
+  }, [savedAddresses]);
+
   const addToCart = (product) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.productId === product._id);
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item.productId === product._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+    setCart((prev) => {
+      const existing = prev.find((i) => i.productId === product._id);
+      if (existing) {
+        return prev.map((i) =>
+          i.productId === product._id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      return [...prevCart, { productId: product._id, name: product.name, price: product.price, quantity: 1 }];
+      return [...prev, { productId: product._id, name: product.name, price: product.price, quantity: 1, image: product.img_url }];
     });
   };
 
-  const removeFromCart = (productId) => {
-    setCart((prevCart) => prevCart.filter((item) => item.productId !== productId));
+  const removeFromCart = (id) => {
+    setCart((prev) => prev.filter((i) => i.productId !== id));
   };
 
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      setCart((prevCart) =>
-        prevCart.map((item) =>
-          item.productId === productId ? { ...item, quantity } : item
-        )
-      );
+  const updateQuantity = (id, qty) => {
+    if (qty <= 0) removeFromCart(id);
+    else setCart((prev) => prev.map((i) => (i.productId === id ? { ...i, quantity: qty } : i)));
+  };
+
+  const clearCart = () => setCart([]);
+
+  const placeOrder = (orderData) => {
+    const order = {
+      ...orderData,
+      _id: Date.now().toString(),
+      orderId: `ORD-${new Date().getFullYear()}-${String(orders.length + 1).padStart(3, '0')}`,
+      status: 'ordered',
+      createdAt: new Date().toISOString(),
+      tracking: null,
+    };
+    setOrders((prev) => [order, ...prev]);
+    clearCart();
+
+    // Save address for reuse
+    const addrKey = `${order.customerEmail}-${order.shippingAddress.street}`;
+    if (!savedAddresses.find(a => a.key === addrKey)) {
+      setSavedAddresses((prev) => [...prev, {
+        key: addrKey,
+        name: order.customerName,
+        email: order.customerEmail,
+        shippingAddress: order.shippingAddress,
+        billingAddress: order.billingAddress || order.shippingAddress,
+      }]);
     }
   };
 
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrders((prev) =>
+      prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
+    );
+  };
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity }}>
+    <CartContext.Provider value={{
+      cart, addToCart, removeFromCart, updateQuantity, clearCart,
+      orders, placeOrder, updateOrderStatus,
+      savedAddresses
+    }}>
       {children}
     </CartContext.Provider>
   );
 };
 
 const useCart = () => useContext(CartContext);
+export { CartProvider, useCart };
+const MyOrders = () => {
+  const { orders, updateOrderStatus } = useCart();
+  const navigate = useNavigate();
 
+  const getStatusIcon = (status) => {
+    const map = {
+      ordered: { Icon: Clock, color: 'text-warning' },
+      confirmed: { Icon: PackageIcon, color: 'text-info' },
+      shipped: { Icon: Truck, color: 'text-primary' },
+      delivered: { Icon: CheckCircle, color: 'text-success' },
+    };
+    const { Icon, color } = map[status] || map.ordered;
+    return <Icon className={color} size={20} />;
+  };
+
+  const getNextStatus = (current) => {
+    const flow = ['ordered', 'confirmed', 'shipped', 'delivered'];
+    const idx = flow.indexOf(current);
+    return idx < flow.length - 1 ? flow[idx + 1] : null;
+  };
+
+  if (orders.length === 0) {
+    return (
+      <div className="container py-5 text-center">
+        <PackageIcon size={80} className="text-muted mb-3" />
+        <h3>No orders yet</h3>
+        <button onClick={() => navigate('/products')} className="btn btn-primary mt-3">
+          Start Shopping
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container py-4">
+      <h2 className="display-6 fw-bold mb-4">My Orders</h2>
+      <div className="row g-4">
+        {orders.map((order) => (
+          <div key={order._id} className="col-lg-6">
+            <div className="card shadow-sm h-100">
+              <div className="card-body">
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <h5 className="fw-bold">#{order.orderId}</h5>
+                    <p className="text-muted small">
+                      <Calendar size={14} className="me-1" />
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="text-end">
+                    {getStatusIcon(order.status)}
+                    <span className="badge bg-light text-dark ms-2 text-capitalize">
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-top pt-3 mb-3">
+                  <p className="mb-1"><strong>Total:</strong> ₹{order.total}</p>
+                  <p className="mb-1 text-muted small">
+                    {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                  </p>
+                  <p className="mb-0 text-muted small">
+                    <MapPin size={14} className="me-1" />
+                    {order.shippingAddress.city}, {order.shippingAddress.state}
+                  </p>
+                </div>
+
+                {getNextStatus(order.status) && (
+                  <button
+                    onClick={() => updateOrderStatus(order._id, getNextStatus(order.status))}
+                    className="btn btn-sm btn-outline-success w-100 mb-2"
+                  >
+                    Mark as {getNextStatus(order.status)}
+                  </button>
+                )}
+
+                <button
+                  onClick={() => navigate(`/order/${order._id}`)}
+                  className="btn btn-link w-100 mt-2"
+                >
+                  View Details →
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const OrderDetails = () => {
+  const { id } = useParams();
+  const { orders, updateOrderStatus } = useCart();
+  const navigate = useNavigate();
+
+  const order = orders.find(o => o._id === id);
+  if (!order) {
+    return (
+      <div className="container py-5 text-center">
+        <h3>Order not found</h3>
+        <button onClick={() => navigate('/orders')} className="btn btn-primary mt-3">
+          Back to Orders
+        </button>
+      </div>
+    );
+  }
+
+  const statusFlow = [
+    { status: 'ordered', label: 'Order Placed', Icon: Clock },
+    { status: 'confirmed', label: 'Confirmed', Icon: PackageIcon },
+    { status: 'shipped', label: 'Shipped', Icon: Truck },
+    { status: 'delivered', label: 'Delivered', Icon: CheckCircle },
+  ];
+
+  const currentIdx = statusFlow.findIndex(s => s.status === order.status);
+  const nextStatus = currentIdx < statusFlow.length - 1 ? statusFlow[currentIdx + 1].status : null;
+
+  return (
+    <div className="container py-4">
+      {/* Header */}
+      <div className="d-flex align-items-center mb-4">
+        <button onClick={() => navigate(-1)} className="btn btn-outline-secondary me-3">
+          <ArrowLeft size={20} />
+        </button>
+        <h2 className="mb-0">Order #{order.orderId}</h2>
+      </div>
+
+      <div className="row g-4">
+        {/* Tracking Timeline */}
+        <div className="col-lg-8">
+          <div className="card shadow-sm">
+            <div className="card-header bg-primary text-white">
+              <h5 className="mb-0">Tracking</h5>
+            </div>
+            <div className="card-body">
+              <div className="timeline">
+                {statusFlow.map((step, idx) => {
+                  const active = idx <= currentIdx;
+                  const current = idx === currentIdx;
+                  return (
+                    <div key={step.status} className="d-flex align-items-center mb-4">
+                      <div
+                        className={`rounded-circle d-flex align-items-center justify-content-center me-3
+                          ${active ? 'bg-primary text-white' : 'bg-light text-muted'} 
+                          ${current ? 'border border-primary border-3' : ''}`}
+                        style={{ width: 48, height: 48 }}
+                      >
+                        <step.Icon size={22} />
+                      </div>
+                      <div className="flex-grow-1">
+                        <h6 className={`mb-0 ${active ? 'fw-bold' : 'text-muted'}`}>
+                          {step.label}
+                        </h6>
+                        {idx < statusFlow.length - 1 && (
+                          <div
+                            className={`border-start ms-3 ps-3 ${idx < currentIdx ? 'border-primary' : 'border-light'}`}
+                            style={{ height: 40 }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {nextStatus && (
+                <button
+                  onClick={() => updateOrderStatus(order._id, nextStatus)}
+                  className="btn btn-success w-100 mt-4"
+                >
+                  Mark as {statusFlow.find(s => s.status === nextStatus)?.label}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Order Summary */}
+        <div className="col-lg-4">
+          <div className="card shadow-sm sticky-top" style={{ top: '1rem' }}>
+            <div className="card-header bg-light">
+              <h5 className="mb-0">Order Summary</h5>
+            </div>
+            <div className="card-body">
+              <p><strong>Status:</strong> <span className="text-capitalize">{order.status}</span></p>
+              <p><strong>Total:</strong> ₹{order.total}</p>
+              <p><strong>Items:</strong> {order.items.length}</p>
+              <p><strong>Placed on:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
+
+              <hr />
+
+              <h6 className="fw-bold">Shipping Address</h6>
+              <p className="small">
+                {order.shippingAddress.street},<br />
+                {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.zip}<br />
+                {order.shippingAddress.country}
+              </p>
+
+              <h6 className="fw-bold mt-3">Customer</h6>
+              <p className="small">
+                <User size={14} className="me-1" /> {order.customerName}<br />
+                <Mail size={14} className="me-1" /> {order.customerEmail}<br />
+                <Phone size={14} className="me-1" /> {order.customerPhone}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Items Table */}
+      <div className="card shadow-sm mt-4">
+        <div className="card-header">
+          <h5 className="mb-0">Items</h5>
+        </div>
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Product</th>
+                  <th className="text-center">Qty</th>
+                  <th className="text-end">Price</th>
+                  <th className="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {order.items.map((item) => (
+                  <tr key={item.productId}>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <img
+                          src={item.image || 'https://via.placeholder.com/60'}
+                          alt={item.name}
+                          className="me-3 rounded"
+                          style={{ width: 50, height: 50, objectFit: 'cover' }}
+                        />
+                        <div>
+                          <strong>{item.name}</strong>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="text-center">{item.quantity}</td>
+                    <td className="text-end">₹{item.price}</td>
+                    <td className="text-end">₹{item.price * item.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 // Productcard Component
 const Productcard = () => {
   const navigate = useNavigate();
@@ -107,45 +410,228 @@ const Productcard = () => {
 
   return (
     <>
-      <div className="container mt-4" data-aos="fade-up" >
-        <h2 className="section-title text-center my-3">Products</h2>
-        {loading && <p>Loading products...</p>}
-        {error && <p className="text-danger">Error: {error}</p>}
-        {!loading && !error && products.length === 0 && <p>No products available</p>}
-        <div className="row">
-          {products.map((ele, index) => (
-            <div
-              className="col-lg-3 col-md-4 col-sm-6 mb-4"
-              data-aos="fade-up"
-              onClick={() => navigate(`/product/${ele._id}`)}
-              data-aos-duration="2000"
-              key={ele._id || index}
-            >
-              <div className="product-card">
-                <div className="product-image">
-                  <img
-                    src={ele.img_url || imageMap.black} // Use Cloudinary URL directly or fallback
-                    alt={ele.name}
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="product-content">
-                  <h3 className="product-title">{ele.name || 'Unnamed Product'}</h3>
-                  <p className="product-description">₹{ele.price || 0}</p>
+      <div className="container-fluid py-5 bg-light">
+        <div className="container">
+          {/* Header Section */}
+          <div className="text-center mb-5" data-aos="fade-up">
+            <h2 className="display-4 fw-bold mb-3">
+              <span className="text-primary">Our</span> Products
+            </h2>
+            <p className="lead text-muted mb-4">
+              Discover our curated collection of premium products
+            </p>
+            <div className="mx-auto" style={{ width: '80px', height: '4px', background: 'linear-gradient(to right, #0d6efd, #6610f2)', borderRadius: '50px' }}></div>
+          </div>
 
-                  {/* <button
-                    className="btn btn-sm btn-success"
-                    onClick={() => handleAddToCart(ele)}
-                  >
-                    Add to Cart
-                  </button> */}
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-5" data-aos="fade-up">
+              <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3 text-muted fw-semibold">Loading products...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="alert alert-danger shadow-sm border-0 rounded-4" role="alert" data-aos="fade-up">
+              <div className="d-flex align-items-center">
+                <i className="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+                <div>
+                  <h5 className="alert-heading mb-1">Error Loading Products</h5>
+                  <p className="mb-0">{error}</p>
                 </div>
               </div>
             </div>
-          ))}
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && products.length === 0 && (
+            <div className="text-center py-5" data-aos="fade-up">
+              <div className="mb-4">
+                <i className="bi bi-box-seam fs-1 text-muted"></i>
+              </div>
+              <h4 className="text-muted">No products available</h4>
+              <p className="text-muted">Check back soon for new arrivals!</p>
+            </div>
+          )}
+
+          {/* Products Grid */}
+          {!loading && !error && products.length > 0 && (
+            <div className="row g-4">
+              {products.map((ele, index) => (
+                <div
+                  className="col-lg-3 col-md-4 col-sm-6"
+                  data-aos="fade-up"
+                  data-aos-duration="800"
+                  data-aos-delay={index * 50}
+                  key={ele._id || index}
+                >
+                  <div
+                    className="card border-0 shadow-sm h-100 product-card-hover"
+                    onClick={() => navigate(`/product/${ele._id}`)}
+                    style={{
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      borderRadius: '1rem',
+                      overflow: 'hidden'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-8px)';
+                      e.currentTarget.style.boxShadow = '0 1rem 3rem rgba(0,0,0,0.175)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 0.5rem 1rem rgba(0,0,0,0.15)';
+                    }}
+                  >
+                    {/* Image Container */}
+                    <div
+                      className="position-relative overflow-hidden bg-light"
+                      style={{
+                        height: '280px',
+                        background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
+                      }}
+                    >
+                      <img
+                        src={ele.img_url || imageMap.black}
+                        alt={ele.name}
+                        className="w-100 h-100 object-fit-cover"
+                        style={{
+                          transition: 'transform 0.5s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'scale(1.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                      />
+
+                      {/* Overlay Badge */}
+                      <div
+                        className="position-absolute top-0 start-0 m-3"
+                        style={{
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.parentElement.querySelector('.hover-overlay').style.opacity = '1';
+                        }}
+                      >
+                        <span className="badge bg-white text-dark shadow-sm">
+                          <i className="bi bi-heart text-danger"></i>
+                        </span>
+                      </div>
+
+                      {/* Hover Overlay */}
+                      <div
+                        className="position-absolute bottom-0 start-0 end-0 hover-overlay"
+                        style={{
+                          height: '100%',
+                          background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease'
+                        }}
+                      ></div>
+
+                      {/* Quick View Button (appears on hover) */}
+                      <div
+                        className="position-absolute top-50 start-50 translate-middle quick-view-btn"
+                        style={{
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease'
+                        }}
+                      >
+                        <button className="btn btn-light btn-sm rounded-pill shadow">
+                          <i className="bi bi-eye me-2"></i>Quick View
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="card-body p-4">
+                      <h5 className="card-title fw-bold mb-2 text-truncate" style={{ fontSize: '1.1rem' }}>
+                        {ele.name || 'Unnamed Product'}
+                      </h5>
+
+                      {/* Price */}
+                      <div className="d-flex align-items-center justify-content-between mb-3">
+                        <h4 className="mb-0 fw-bold" style={{
+                          background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text'
+                        }}>
+                          ₹{ele.price || 0}
+                        </h4>
+                        <div className="text-muted small">
+                          <i className="bi bi-star-fill text-warning"></i>
+                          <i className="bi bi-star-fill text-warning"></i>
+                          <i className="bi bi-star-fill text-warning"></i>
+                          <i className="bi bi-star-fill text-warning"></i>
+                          <i className="bi bi-star-half text-warning"></i>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="d-grid gap-2">
+                        <button
+                          className="btn btn-primary rounded-pill fw-semibold"
+                          style={{
+                            background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)',
+                            border: 'none',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/product/${ele._id}`);
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                            e.currentTarget.style.boxShadow = '0 0.5rem 1rem rgba(13,110,253,0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        >
+                          <i className="bi bi-cart-plus me-2"></i>
+                          Order Now
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Card Footer (Optional - for additional info) */}
+                    <div className="card-footer bg-transparent border-0 pt-0 pb-3 px-4">
+                      <div className="d-flex justify-content-between align-items-center text-muted small">
+                        <span><i className="bi bi-truck me-1"></i> 5 ⭐⭐⭐⭐⭐</span>
+                        <span><i className="bi bi-shield-check me-1"></i>200+ orders</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      {/* <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} /> */}
+
+      <style jsx>{`
+      .product-card-hover:hover .hover-overlay,
+      .product-card-hover:hover .quick-view-btn {
+        opacity: 1 !important;
+      }
+      
+      .card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      }
+      
+      .object-fit-cover {
+        object-fit: cover;
+      }
+    `}</style>
     </>
   );
 };
@@ -156,14 +642,14 @@ const ProductDetail = ({ product, onClose }) => {
   const [selectedImage, setSelectedImage] = useState(product.img_url);
   const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();   // <-- Add this line
-
+  const { addToCart } = useCart();
   if (!product) return null;
-
   const handleAddToCart = () => {
-    // addToCart logic (will be passed from parent)
+    // Use context instead of event
     for (let i = 0; i < quantity; i++) {
-      window.dispatchEvent(new CustomEvent('addToCart', { detail: product }));
+      addToCart(product);
     }
+
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
     navigate('/cart');
@@ -328,7 +814,7 @@ const Cart = () => {
   const navigate = useNavigate();
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 5000 ? 0 : 99;
+  const shipping = subtotal > 1000 ? 0 : 50;
   const discount = 0; // You can add coupon logic later
   const total = subtotal + shipping - discount;
 
@@ -372,16 +858,16 @@ const Cart = () => {
         <Truck className="me-3" size={24} />
         <div>
           <strong>
-            {subtotal >= 5000 ? (
+            {subtotal >= 1000 ? (
               <>Free Shipping Unlocked!</>
             ) : (
-              <>Add <span className="text-danger">₹{(5000 - subtotal).toLocaleString()}</span> more for FREE shipping</>
+              <>Add <span className="text-danger">₹{(1000 - subtotal).toLocaleString()}</span> more for FREE shipping</>
             )}
           </strong>
           <div className="progress mt-2" style={{ height: '6px' }}>
             <div
               className="progress-bar bg-success"
-              style={{ width: `${Math.min((subtotal / 5000) * 100, 100)}%` }}
+              style={{ width: `${Math.min((subtotal / 1000) * 100, 100)}%` }}
             />
           </div>
         </div>
@@ -734,6 +1220,8 @@ const Checkout = () => {
     return errors;
   };
 
+
+
   const placeOrder = async () => {
     if (!cart || cart.length === 0) {
       setError('Your cart is empty. Please add products.');
@@ -814,6 +1302,77 @@ const Checkout = () => {
     }
   };
 
+
+
+
+  const Checkout = () => {
+    const { cart, placeOrder, savedAddresses } = useCart();
+    const navigate = useNavigate();
+    const [selectedAddress, setSelectedAddress] = useState(null);
+
+    const [formData, setFormData] = useState({
+      customerName: '', customerEmail: '', customerPhone: '',
+      shippingAddress: { street: '', city: '', state: '', zip: '', country: '' },
+      billingAddress: { street: '', city: '', state: '', zip: '', country: '' },
+      useSameAddress: true,
+    });
+
+    // Auto-fill from saved address
+    useEffect(() => {
+      if (selectedAddress) {
+        setFormData(prev => ({
+          ...prev,
+          customerName: selectedAddress.name,
+          customerEmail: selectedAddress.email,
+          shippingAddress: selectedAddress.shippingAddress,
+          billingAddress: selectedAddress.billingAddress,
+          useSameAddress: selectedAddress.shippingAddress.street === selectedAddress.billingAddress.street,
+        }));
+      }
+    }, [selectedAddress]);
+
+    const handleSubmit = () => {
+      const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      placeOrder({
+        ...formData,
+        items: cart,
+        total,
+      });
+      navigate('/success');
+    };
+
+    return (
+      <div className="container py-4">
+        <h2>Checkout</h2>
+
+        {/* Saved Addresses */}
+        {savedAddresses.length > 0 && (
+          <div className="card mb-4">
+            <div className="card-body">
+              <h5>Use Saved Address</h5>
+              <div className="row g-3">
+                {savedAddresses.map((addr) => (
+                  <div key={addr.key} className="col-md-6">
+                    <div
+                      className={`p-3 border rounded cursor-pointer ${selectedAddress?.key === addr.key ? 'border-primary bg-light' : ''}`}
+                      onClick={() => setSelectedAddress(addr)}
+                    >
+                      <strong>{addr.name}</strong><br />
+                      <small>{addr.shippingAddress.city}, {addr.shippingAddress.state}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Form continues as before... */}
+        {/* ... your existing form fields ... */}
+        <button onClick={handleSubmit} className="btn btn-success">Place Order</button>
+      </div>
+    );
+  };
   const openRazorpayCheckout = (razorpayOrder, orderId) => {
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -843,11 +1402,54 @@ const Checkout = () => {
 
           const verifyData = await verifyResponse.json();
           console.log('Payment verified:', verifyData);
-          navigate('/success', { state: { orderId } });
+          navigate('/success', {
+            state: {
+              orderId,
+              orderData: {
+                customerName: formData.customerName,
+                customerEmail: formData.customerEmail,
+                customerPhone: formData.customerPhone,
+                shippingAddress: formData.shippingAddress,
+                billingAddress: formData.useSameAddress
+                  ? formData.shippingAddress
+                  : formData.billingAddress,
+                cartItems: cart.map((item) => ({
+                  name: item.name,
+                  price: item.price,
+                  quantity: item.quantity,
+                })),
+                totalAmount: cart.reduce((sum, i) => sum + i.price * i.quantity, 0),
+                notes: formData.notes,
+              },
+            },
+          });
+
         } catch (error) {
           console.error('Error verifying payment:', error);
           setError(error.message);
-          navigate('/cancel');
+          navigate('/success', {
+            state: {
+              orderId,
+              orderData: {
+                customerName: formData.customerName,
+                customerEmail: formData.customerEmail,
+                customerPhone: formData.customerPhone,
+                shippingAddress: formData.shippingAddress,
+                billingAddress: formData.useSameAddress
+                  ? formData.shippingAddress
+                  : formData.billingAddress,
+                cartItems: cart.map((item) => ({
+                  name: item.name,
+                  price: item.price,
+                  quantity: item.quantity,
+                })),
+                totalAmount: cart.reduce((sum, i) => sum + i.price * i.quantity, 0),
+                notes: formData.notes,
+              },
+            },
+          });
+
+
         }
       },
       prefill: {
@@ -1252,36 +1854,93 @@ const BlogDetails = () => {
   }
 
   return (
-    <div className="container mt-4">
-      <button className="btn btn-secondary mb-3" onClick={() => navigate('/blogs')}>
-        Back to Blogs
-      </button>
-      <div className="card">
+    <div className="container py-5">
+      {/* Navigation */}
+      <nav aria-label="breadcrumb" className="mb-4">
+        <button
+          className="btn btn-outline-primary d-flex justify-content-between align-items-center "
+          onClick={() => navigate('/blogs')}
+        >
+          <ArrowLeft size={20} className='me-2' />
+          Back to Blogs
+        </button>
+      </nav>
+
+      {/* Main Blog Card */}
+      <article className="card shadow-sm border-0 mb-4">
         {blog.image && (
-          <img
-            src={blog.image} // Use Cloudinary URL directly
-            alt={blog.title}
-            className="card-img-top"
-            style={{ height: '300px', objectFit: 'cover' }}
-          />
-        )}
-        <div className="card-body">
-          <h1 className="card-title">{blog.title}</h1>
-          <div className="d-flex justify-content-between mb-3">
-            <span className="text-muted">{blog.author || 'Anonymous'}</span>
-            <span className="text-muted">{new Date(blog.createdAt).toLocaleDateString()}</span>
-          </div>
-          <p className="card-text">{blog.content}</p>
-          {blog.tags && blog.tags.length > 0 && (
-            <div className="mt-3">
-              {blog.tags.map((tag, idx) => (
-                <span key={idx} className="badge bg-primary me-1">{tag}</span>
-              ))}
+          <div className="position-relative" style={{ height: '400px', overflow: 'hidden' }}>
+            <img
+              src={blog.image}
+              alt={blog.title}
+              className="card-img-top w-100 h-100"
+              style={{ objectFit: 'cover' }}
+            />
+            <div className="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-50 text-white p-3">
+              {blog.tags && blog.tags.length > 0 && (
+                <div className="d-flex flex-wrap gap-2">
+                  {blog.tags.map((tag, idx) => (
+                    <span key={idx} className="badge bg-primary rounded-pill px-3 py-2">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
+        )}
+
+        <div className="card-body p-4 p-md-5">
+          {/* Title */}
+          <h1 className="display-5 fw-bold mb-4">{blog.title}</h1>
+
+          {/* Meta Information */}
+          <div className="d-flex flex-wrap align-items-center gap-3 mb-4 pb-4 border-bottom">
+            <div className="d-flex align-items-center">
+              <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                style={{ width: '40px', height: '40px' }}>
+                <i className="bi bi-person-fill"></i>
+              </div>
+              <div>
+                <small className="text-muted d-block">Written by</small>
+                <strong>{blog.author || 'Anonymous'}</strong>
+              </div>
+            </div>
+
+            <div className="vr d-none d-md-block"></div>
+
+            <div className="d-flex align-items-center">
+              <i className="bi bi-calendar3 text-primary me-2"></i>
+              <div>
+                <small className="text-muted d-block">Published on</small>
+                <strong>{new Date(blog.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="blog-content">
+            <p className="lead fs-5 lh-lg text-dark" style={{ whiteSpace: 'pre-wrap' }}>
+              {blog.content}
+            </p>
+          </div>
+        </div>
+      </article>
+
+      {/* Comments Section */}
+      <div className="card shadow-sm border-0">
+        <div className="card-body p-4">
+          <h3 className="mb-4">
+            <i className="bi bi-chat-left-text me-2"></i>
+            Comments
+          </h3>
+          <Comments blogId={id} />
         </div>
       </div>
-      <Comments blogId={id} />
     </div>
   );
 };
@@ -1399,6 +2058,7 @@ const Blog = () => {
     navigate(`/blogs/${blog._id}`);
   };
 
+  // console.log(blogs.tags, typeof blogs.tags);
   return (
     <div className="container mt-4" data-aos="fade-up">
       <h2 className="section-title text-center my-3">Blog</h2>
@@ -1430,13 +2090,29 @@ const Blog = () => {
                   <span className="text-muted">{blog.author || 'Anonymous'}</span>
                   <span className="text-muted">{new Date(blog.createdAt).toLocaleDateString()}</span>
                 </div>
-                {blog.tags && blog.tags.length > 0 && (
+                {blog.tags && (
                   <div className="mt-2">
-                    {blog.tags.map((tag, idx) => (
-                      <span key={idx} className="badge bg-primary me-1">{tag}</span>
-                    ))}
+                    {(() => {
+                      let tags = [];
+                      try {
+                        // Try to parse if it's a JSON string (e.g. '["tag1","tag2"]')
+                        tags = typeof blog.tags === "string" ? JSON.parse(blog.tags) : blog.tags;
+                      } catch {
+                        // Fallback: if it's a simple string like "tag1,tag2"
+                        tags = blog.tags.split(",").map(t => t.trim());
+                      }
+
+                      return Array.isArray(tags) && tags.length > 0 ? (
+                        tags.map((tag, idx) => (
+                          <span key={idx} className="badge bg-primary me-1">
+                            {tag}
+                          </span>
+                        ))
+                      ) : null;
+                    })()}
                   </div>
                 )}
+
               </div>
             </div>
           </div>
@@ -1506,6 +2182,10 @@ function App() {
               </>
             }
           />
+          <Route path="/orders" element={<><Navbars /><MyOrders /><Footers /></>} />
+          <Route path="/order/:id" element={<><Navbars />
+            {/* <OrderDetails /> */}
+            <Footers /></>} />
           <Route
             path="/checkout"
             element={

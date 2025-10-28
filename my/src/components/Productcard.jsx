@@ -4,17 +4,19 @@ import white from "../img/white.jpeg";
 import black from "../img/black.jpeg";
 import Eachprod from "./pages/Eachprod";
 
+
 const Productcard = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hoveredCard, setHoveredCard] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:3000/products');
+        const response = await fetch({'${import.meta.env.VITE_API_URL}/products'});
         if (!response.ok) {
           throw new Error(`Failed to fetch products: ${response.statusText}`);
         }
@@ -32,8 +34,7 @@ const Productcard = () => {
   }, []);
 
   const openPage = (product) => {
-    setSelectedProduct(product); // Set the clicked product for modal
-    // Navigate to checkout with productId
+    setSelectedProduct(product);
     navigate('/', { state: { productId: product._id } });
   };
 
@@ -42,49 +43,104 @@ const Productcard = () => {
     black,
   };
 
-  return (
-    <>
-      <div className="container mt-4" data-aos="fade-up">
-        <h2 className="section-title text-center my-3">Products</h2>
-        {loading && <p>Loading products...</p>}
-        {error && <p>Error: {error}</p>}
-        {!loading && !error && products.length === 0 && <p>No products available</p>}
-        <div className="row">
-          {products.map((ele, index) => (
-            <div
-              className="col-lg-3 col-md-4 col-sm-4 mb-4"
-              data-aos="fade-up"
-              data-aos-duration="2000"
-              key={ele._id || index}
-            >
-              <div className="product-card">
-                <div className="product-image">
-                  <img
-                    src={imageMap[ele.img_url] || black}
-                    alt={ele.name}
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="product-content">
-                  <h3 className="product-title">{ele.name || "Unnamed Product"}</h3>
-                  <p className="product-description">₹ {ele.price || 0}</p>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#productModal"
-                    onClick={() => openPage(ele)}
-                  >
-                    Order Now
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+  if (loading) {
+    return (
+      <div className="products-loading-container">
+        <div className="products-loading-content">
+          <div className="products-spinner"></div>
+          <p className="products-loading-text">Loading products...</p>
         </div>
       </div>
+    );
+  }
 
-      <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} />
-    </>
+  if (error) {
+    return (
+      <div className="products-error-container">
+        <div className="products-error-card">
+          <div className="products-error-icon">⚠</div>
+          <h3 className="products-error-title">Error Loading Products</h3>
+          <p className="products-error-message">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="products-wrapper">
+      <div className="products-container">
+        {/* Header Section */}
+        <div className="products-header">
+          <h2 className="products-main-title">Our Products</h2>
+          <p className="products-subtitle">
+            Discover our curated collection of premium products designed for you
+          </p>
+          <div className="products-divider"></div>
+        </div>
+
+        {products.length === 0 ? (
+          <div className="products-empty">
+            <div className="products-empty-icon">📦</div>
+            <p className="products-empty-text">No products available at the moment</p>
+          </div>
+        ) : (
+          <div className="products-grid">
+            {products.map((product, index) => (
+              <div
+                key={product._id || index}
+                className={`product-card-modern ${hoveredCard === index ? 'hovered' : ''}`}
+                onMouseEnter={() => setHoveredCard(index)}
+                onMouseLeave={() => setHoveredCard(null)}
+              >
+                <div className="product-card-inner">
+                  {/* Image Container */}
+                  <div className="product-image-container">
+                    <img
+                      src={imageMap[product.img_url] || black}
+                      alt={product.name}
+                      className="product-image-modern"
+                    />
+                    <div className="product-overlay"></div>
+                    
+                    {/* Quick action badge */}
+                    <div className="product-favorite-badge">
+                      <span>❤️</span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="product-content-modern">
+                    <h3 className="product-title-modern">
+                      {product.name || "Unnamed Product"}
+                    </h3>
+                    
+                    <div className="product-price-container">
+                      <span className="product-price-modern">
+                        ₹{product.price || 0}
+                      </span>
+                    </div>
+
+                    {/* Action Button */}
+                    <button
+                      onClick={() => openPage(product)}
+                      className="product-order-button"
+                    >
+                      Order Now
+                    </button>
+                  </div>
+
+                  {/* Decorative element */}
+                  <div className="product-glow"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Your modal component */}
+      {/* <Eachprod selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} /> */}
+    </div>
   );
 };
 

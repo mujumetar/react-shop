@@ -12,9 +12,12 @@
   "dependencies": {
     "@lottiefiles/dotlottie-react": "^0.15.2",
     "@tailwindcss/vite": "^4.1.16",
-    "axios": "^1.11.0",
+    "axios": "^1.13.0",
     "cors": "^2.8.5",
     "firebase": "^12.4.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.546.0",
     "razorpay": "^2.9.6",
     "react": "^19.1.1",
