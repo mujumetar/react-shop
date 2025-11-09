@@ -828,7 +828,7 @@ const Productcard = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
       .product-card-hover:hover .hover-overlay,
       .product-card-hover:hover .quick-view-btn {
         opacity: 1 !important;
@@ -1907,20 +1907,20 @@ const Checkout = () => {
       const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
       const trackingUrl = `${window.location.origin}/track-order?order=${orderId}`;
 
-      const sendSMS = async () => {
-        await fetch(`${import.meta.env.VITE_API_URL}/sms/fast2sms`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phone: formData.customerPhone,
-            orderId,
-            total,
-            trackingUrl
-          })
-        });
-      };
-      // console.log(data)
-      sendSMS(); // Auto SMS after order created
+      // const sendSMS = async () => {
+      //   await fetch(`${import.meta.env.VITE_API_URL}/sms/fast2sms`, {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({
+      //       phone: formData.customerPhone,
+      //       orderId,
+      //       total,
+      //       trackingUrl
+      //     })
+      //   });
+      // };
+      // // console.log(data)
+      // sendSMS(); // Auto SMS after order created
 
       // Razorpay
       const razorpayResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
