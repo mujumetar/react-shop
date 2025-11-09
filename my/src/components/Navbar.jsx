@@ -110,7 +110,7 @@ const Navbars = () => {
           border-bottom: 1px solid transparent;
           position: sticky;
           top: 0;
-          z-index: 1000;
+          z-index: 10000000;
           animation: slideDown 0.6s ease-out;
         }
         .modern-navbar.scrolled {

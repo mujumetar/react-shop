@@ -902,7 +902,7 @@ const ProductDetail = ({ product, onClose }) => {
                   <img
                     src={selectedImage || 'https://via.placeholder.com/600'}
                     alt={product.name}
-                    className="img-fluid rounded shadow-sm"
+                    className="img-fluid rounded shadow-sm "
                     style={{ height: '500px', width: '100%', objectFit: 'cover' }}
                   />
                 </div>
@@ -2845,8 +2845,8 @@ const navigate = useNavigate()
 function App() {
   return (
     <CartProvider>
-      <GlobalLoader/>
       <Router>
+      <GlobalLoader/>
         <Routes>
           <Route
             path="/"
