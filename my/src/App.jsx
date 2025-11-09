@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import contains from "./img/contains.png"
 import Eachprod from './components/pages/Eachprod';
+import GlobalLoader from './GlobalLoader';
 // Cart Context
 const CartContext = createContext();
 
@@ -2844,6 +2845,7 @@ const navigate = useNavigate()
 function App() {
   return (
     <CartProvider>
+      <GlobalLoader/>
       <Router>
         <Routes>
           <Route
