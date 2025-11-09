@@ -1377,12 +1377,12 @@ const Cart = () => {
                   placeholder="Coupon code"
                   aria-label="Coupon code"
                 />
+
                 <button className="btn btn-outline-primary" type="button">
                   Apply
                 </button>
               </div>
 
-              {/* Checkout Button */}
               <button
                 onClick={handleCheckout}
                 className="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center shadow-sm"
