@@ -660,7 +660,7 @@ const Productcard = () => {
             <div className="row g-4">
               {products.map((ele, index) => (
                 <div
-                  className="col-lg-3 col-md-4 col-sm-6"
+                  className="col-lg-4 col-md-6 col-sm-6"
                   data-aos="fade-up"
                   data-aos-duration="800"
                   data-aos-delay={index * 50}
@@ -1479,15 +1479,15 @@ const Contact = () => {
 
   return (
     <>
-      <link 
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" 
+      <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
         rel="stylesheet"
       />
-      <link 
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+      <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         rel="stylesheet"
       />
-      
+
       <style>{`
         body {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1934,9 +1934,6 @@ const Checkout = () => {
       setLoading(false);
     }
   };
-
-
-
 
   const Checkout = () => {
     const { cart, placeOrder, savedAddresses } = useCart();
@@ -2664,17 +2661,18 @@ const OrderFailed = ({ errorMessage = "We couldn't process your payment. Please 
   );
 };
 
-// Blog Component
+
+
 const Blog = () => {
-  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+const navigate = useNavigate()
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        // console.log('Fetching blogs from:', `${import.meta.env.VITE_API_URL}/blogs`);
+        // Replace with your actual API URL
+        // const apiUrl = 'https://api.example.com';
         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs`);
         if (!response.ok) {
           const text = await response.text();
@@ -2694,72 +2692,153 @@ const Blog = () => {
   }, []);
 
   const handleViewDetails = (blog) => {
-    navigate(`/blogs/${blog._id}`);
+    // Replace with your navigation logic
+    console.log('Navigate to:', `/blogs/${blog._id}`);
+    // navigate(`/blogs/${blog._id}`);
   };
 
-  // console.log(blogs.tags, typeof blogs.tags);
   return (
-    <div className="container mt-4" data-aos="fade-up">
-      <h2 className="section-title text-center my-3">Blog</h2>
-      {loading && <p>Loading blogs...</p>}
-      {error && <p className="text-danger">Error: {error}</p>}
-      {!loading && !error && blogs.length === 0 && <p>No blogs available</p>}
-      <div className="row">
-        {blogs.map((blog, index) => (
-          <div
-            className="col-lg-4 col-md-6 mb-4"
-            data-aos="fade-up"
-            data-aos-duration="2000"
-            key={blog._id || index}
-            onClick={() => handleViewDetails(blog)}
-          >
-            <div className="card h-100">
-              <div className="card-img-top">
-                <img
-                  src={blog.image || 'https://via.placeholder.com/400x200'} // Use Cloudinary URL or placeholder
-                  alt={blog.title}
-                  className="img-fluid"
-                  style={{ height: '200px', objectFit: 'cover' }}
-                />
+    <>
+
+
+      <div className="bg-light min-vh-100 py-5">
+        <div className="container">
+          {/* Header */}
+          <div className="text-center mb-5">
+            <h2 className="display-4 fw-bold text-primary mb-3">Our Blogs</h2>
+            <p className="lead text-secondary">Discover insights, stories, and updates from our team</p>
+          </div>
+
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
+                <span className="visually-hidden">Loading...</span>
               </div>
-              <div className="card-body">
-                <h3 className="card-title">{blog.title || 'Untitled Blog'}</h3>
-                <p className="card-text">{blog.content?.substring(0, 100)}...</p>
-                <div className="d-flex justify-content-between">
-                  <span className="text-muted">{blog.author || 'Anonymous'}</span>
-                  <span className="text-muted">{new Date(blog.createdAt).toLocaleDateString()}</span>
-                </div>
-                {blog.tags && (
-                  <div className="mt-2">
-                    {(() => {
-                      let tags = [];
-                      try {
-                        // Try to parse if it's a JSON string (e.g. '["tag1","tag2"]')
-                        tags = typeof blog.tags === "string" ? JSON.parse(blog.tags) : blog.tags;
-                      } catch {
-                        // Fallback: if it's a simple string like "tag1,tag2"
-                        tags = blog.tags.split(",").map(t => t.trim());
-                      }
+              <p className="mt-3 fs-5 text-primary fw-semibold">Loading amazing content...</p>
+            </div>
+          )}
 
-                      return Array.isArray(tags) && tags.length > 0 ? (
-                        tags.map((tag, idx) => (
-                          <span key={idx} className="badge bg-primary me-1">
-                            {tag}
-                          </span>
-                        ))
-                      ) : null;
-                    })()}
-                  </div>
-                )}
-
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-5">
+              <i className="fas fa-exclamation-circle text-danger mb-3" style={{ fontSize: '4rem' }}></i>
+              <div className="alert alert-danger d-inline-block" role="alert">
+                <strong>Error:</strong> {error}
               </div>
             </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && blogs.length === 0 && (
+            <div className="text-center py-5">
+              <i className="fas fa-inbox text-muted mb-3" style={{ fontSize: '5rem' }}></i>
+              <p className="fs-4 text-muted fw-semibold">No blogs available</p>
+            </div>
+          )}
+
+          {/* Blog Grid */}
+          <div className="row g-4">
+            {blogs.map((blog, index) => (
+              <div
+                className="col-lg-4 col-md-6 rounded-4"
+                key={blog._id || index}
+              >
+                <div
+                  className="card shadow-sm border-0 rounded-4 overflow-hidden"
+                  onClick={() => handleViewDetails(blog)}
+                  style={{ cursor: 'pointer', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-8px)';
+                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
+                  }}
+                >
+                  {/* Image */}
+                  <div className="position-relative overflow-hidden" style={{ height: '250px' }}>
+                    <img
+                      src={blog.image || 'https://via.placeholder.com/400x250'}
+                      alt={blog.title}
+                      className="card-img-top w-100 h-100"
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="card-body p-4">
+                    <h5 className="card-title fw-bold text-dark mb-3" style={{
+                      fontSize: '1.3rem',
+                      display: '-webkit-box',
+                      WebkitLineClamp: '2',
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
+                      {blog.title || 'Untitled Blog'}
+                    </h5>
+
+                    <p className="card-text text-muted mb-4" style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: '3',
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
+                      {blog.content?.substring(0, 100)}...
+                    </p>
+
+                    {/* Meta Info */}
+                    <div className="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
+                      <div className="d-flex align-items-center text-primary">
+                        <i className="fas fa-user-circle me-2"></i>
+                        <small className="fw-semibold">{blog.author || 'Anonymous'}</small>
+                      </div>
+                      <div className="d-flex align-items-center text-muted">
+                        <i className="fas fa-calendar-alt me-2"></i>
+                        <small>{new Date(blog.createdAt).toLocaleDateString()}</small>
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    {blog.tags && (
+                      <div className="d-flex flex-wrap gap-2">
+                        {(() => {
+                          let tags = [];
+                          try {
+                            tags = typeof blog.tags === "string" ? JSON.parse(blog.tags) : blog.tags;
+                          } catch {
+                            tags = blog.tags.split(",").map(t => t.trim());
+                          }
+
+                          return Array.isArray(tags) && tags.length > 0 ? (
+                            tags.map((tag, idx) => (
+                              <span key={idx} className="badge bg-primary rounded-pill px-3 py-2">
+                                {tag}
+                              </span>
+                            ))
+                          ) : null;
+                        })()}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Footer */}
+                  <div className="card-footer bg-white border-0 px-4 pb-4 pt-0">
+                    <button className="btn btn-outline-primary w-100 rounded-4 fw-semibold">
+                      Read More <ArrowRight size={15} onClick={() => navigate(`/blogs/${blog._id}`)}/>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
+
 
 // Main App Component
 function App() {

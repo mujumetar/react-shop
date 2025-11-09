@@ -37,8 +37,6 @@ const Slider = () => {
                                     We are committed to delivering fresh and authentic grocery products at
                                     affordable prices with excellent service.
                                 </p>
-
-
                             </div>
                         </div>
                     </div>

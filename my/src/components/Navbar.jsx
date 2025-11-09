@@ -329,8 +329,10 @@ const Navbars = () => {
             <ul className="nav-menu-desktop">
               <li className="nav-item-modern"><a href="/" className={`nav-link-modern ${activeLink === 'home' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/'); }}>Home</a></li>
               <li className="nav-item-modern"><a href="/Products" className={`nav-link-modern ${activeLink === 'products' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/Products'); }}>Products</a></li>
+              <li className="nav-item-modern"><a href="/blogs" className={`nav-link-modern ${activeLink === 'blogs' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/blogs'); }}>Blogs</a></li>
               <li className="nav-item-modern"><a href="/about" className={`nav-link-modern ${activeLink === 'about' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/about'); }}>About</a></li>
               <li className="nav-item-modern"><a href="/contact" className={`nav-link-modern ${activeLink === 'contact' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/contact'); }}>Contact</a></li>
+
               <li className="nav-item-modern"><a href="/track-order" className="track-order-btn" onClick={(e) => { e.preventDefault(); handleNav('/track-order'); }}><Truck className='bounce '/> Track Order</a></li>
             </ul>
 
@@ -356,6 +358,7 @@ const Navbars = () => {
           <ul className="mobile-nav-list">
             <li><a href="/" className={`mobile-nav-link ${activeLink === 'home' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/'); }}>Home</a></li>
             <li><a href="/Products" className={`mobile-nav-link ${activeLink === 'products' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/Products'); }}>Products</a></li>
+            <li><a href="/blogs" className={`mobile-nav-link ${activeLink === 'blogs' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/blogs'); }}>Blogs</a></li>
             <li><a href="/about" className={`mobile-nav-link ${activeLink === 'about' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/about'); }}>About</a></li>
             <li><a href="/contact" className={`mobile-nav-link ${activeLink === 'contact' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); handleNav('/contact'); }}>Contact</a></li>
             <li><a href="/track-order" className="track-order-btn" style={{ padding: '18px 32px', fontSize: '1.1rem' }} onClick={(e) => { e.preventDefault(); handleNav('/track-order'); }}><Truck/>Track Order</a></li>
