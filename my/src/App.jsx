@@ -8,7 +8,7 @@ import Slider from "./components/Slider";
 import About from "./components/Aboutsect";
 import OrderSuccess from "./components/pages/OrderSuccess"
 import { TermsPage, PrivacyPage, RefundPage } from './components/pages/privacy-policy';
-import { ArrowLeft, ArrowLeftSquare, ArrowRight, Heart, Home, Minus, Package, Plus, RefreshCw, Share2, Shield, ShoppingBag, Star, Tag, Trash2, Truck, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowLeftSquare, ArrowRight, Heart, Home, MessageSquare, Minus, Package, Plus, RefreshCw, Send, Share2, Shield, ShoppingBag, Star, Tag, Trash2, Truck, XCircle } from 'lucide-react';
 import {
   Clock, CheckCircle, Package as PackageIcon,
   MapPin, Calendar, IndianRupee, User, Phone, Mail
@@ -1411,7 +1411,9 @@ const ProductDetailWrapper = () => {
 
   return <ProductDetail product={product} onClose={() => navigate(-1)} />;
 };
-// Contact Component
+
+
+
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -1451,6 +1453,8 @@ const Contact = () => {
     }
     setLoading(true);
     try {
+      // Replace with your actual API URL
+      const apiUrl = 'https://api.example.com';
       const response = await fetch(`${import.meta.env.VITE_API_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1474,59 +1478,313 @@ const Contact = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="section-title text-center my-3">Contact Us</h2>
-      <div className="card p-4">
-        {success && <div className="alert alert-success">{success}</div>}
-        {formErrors.submit && <div className="alert alert-danger">{formErrors.submit}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="name" className="form-label">Name</label>
-            <input
-              type="text"
-              className={`form-control ${formErrors.name ? 'is-invalid' : ''}`}
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter your name"
-            />
-            {formErrors.name && <div className="invalid-feedback">{formErrors.name}</div>}
+    <>
+      <link 
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" 
+        rel="stylesheet"
+      />
+      <link 
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+        rel="stylesheet"
+      />
+      
+      <style>{`
+        body {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .contact-wrapper {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          padding: 40px 15px;
+        }
+
+        .contact-header {
+          text-align: center;
+          color: white;
+          margin-bottom: 40px;
+        }
+
+        .contact-header h2 {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin-bottom: 10px;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .contact-header p {
+          font-size: 1.1rem;
+          opacity: 0.95;
+        }
+
+        .contact-card {
+          background: white;
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          padding: 50px;
+          border: none;
+        }
+
+        .form-label {
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 10px;
+          font-size: 0.95rem;
+        }
+
+        .input-icon {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border: none;
+          color: white;
+          width: 50px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px 0 0 10px;
+          border: 2px solid #e0e0e0;
+          border-right: none;
+        }
+
+        .form-control, .form-select {
+          border: 2px solid #e0e0e0;
+          padding: 12px 15px;
+          border-radius: 10px;
+          transition: all 0.3s ease;
+          font-size: 1rem;
+        }
+
+        .input-group .form-control {
+          border-left: none;
+          border-radius: 0 10px 10px 0;
+        }
+
+        .form-control:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .input-group:focus-within .input-icon {
+          border-color: #667eea;
+        }
+
+        .input-group:focus-within .form-control {
+          border-color: #667eea;
+        }
+
+        .form-control.is-invalid {
+          border-color: #dc3545;
+        }
+
+        .input-group .form-control.is-invalid {
+          border-color: #dc3545;
+        }
+
+        .input-group:has(.is-invalid) .input-icon {
+          border-color: #dc3545;
+          background: #dc3545;
+        }
+
+        .btn-submit {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border: none;
+          padding: 14px 30px;
+          font-size: 1.1rem;
+          font-weight: 600;
+          border-radius: 10px;
+          transition: all 0.3s ease;
+          width: 100%;
+          color: white;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .alert {
+          border-radius: 10px;
+          border: none;
+          padding: 15px 20px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .alert-success {
+          background-color: #d4edda;
+          color: #155724;
+        }
+
+        .alert-danger {
+          background-color: #f8d7da;
+          color: #721c24;
+        }
+
+        .footer-text {
+          text-align: center;
+          color: white;
+          margin-top: 20px;
+          font-size: 0.9rem;
+          opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+          .contact-card {
+            padding: 30px 20px;
+          }
+          
+          .contact-header h2 {
+            font-size: 2rem;
+          }
+        }
+      `}</style>
+
+      <div className="contact-wrapper">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-8">
+              <div className="contact-header">
+                <h2>Get In Touch</h2>
+                <p>We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+              </div>
+
+              <div className="card contact-card">
+                {success && (
+                  <div className="alert alert-success mb-4">
+                    <i className="fas fa-check-circle"></i>
+                    <span>{success}</span>
+                  </div>
+                )}
+
+                {formErrors.submit && (
+                  <div className="alert alert-danger mb-4">
+                    <i className="fas fa-exclamation-circle"></i>
+                    <span>{formErrors.submit}</span>
+                  </div>
+                )}
+
+                <div>
+                  <div className="mb-4">
+                    <label htmlFor="name" className="form-label">
+                      Full Name
+                    </label>
+                    <div className="input-group">
+                      <span className="input-icon">
+                        <i className="fas fa-user"></i>
+                      </span>
+                      <input
+                        type="text"
+                        className={`form-control ${formErrors.name ? 'is-invalid' : ''}`}
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="John Doe"
+                      />
+                      {formErrors.name && (
+                        <div className="invalid-feedback d-block">
+                          <i className="fas fa-exclamation-circle me-1"></i>
+                          {formErrors.name}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="email" className="form-label">
+                      Email Address
+                    </label>
+                    <div className="input-group">
+                      <span className="input-icon">
+                        <i className="fas fa-envelope"></i>
+                      </span>
+                      <input
+                        type="email"
+                        className={`form-control ${formErrors.email ? 'is-invalid' : ''}`}
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="john@example.com"
+                      />
+                      {formErrors.email && (
+                        <div className="invalid-feedback d-block">
+                          <i className="fas fa-exclamation-circle me-1"></i>
+                          {formErrors.email}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="message" className="form-label">
+                      Your Message
+                    </label>
+                    <div className="input-group">
+                      <span className="input-icon align-items-start pt-3">
+                        <i className="fas fa-comment"></i>
+                      </span>
+                      <textarea
+                        className={`form-control ${formErrors.message ? 'is-invalid' : ''}`}
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        placeholder="Tell us what's on your mind..."
+                        rows="5"
+                      />
+                      {formErrors.message && (
+                        <div className="invalid-feedback d-block">
+                          <i className="fas fa-exclamation-circle me-1"></i>
+                          {formErrors.message}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    className="btn btn-submit"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        Send Message
+                        <i className="fas fa-paper-plane ms-2"></i>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <p className="footer-text">
+                <i className="fas fa-clock me-2"></i>
+                We typically respond within 24 hours
+              </p>
+            </div>
           </div>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email</label>
-            <input
-              type="email"
-              className={`form-control ${formErrors.email ? 'is-invalid' : ''}`}
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter your email"
-            />
-            {formErrors.email && <div className="invalid-feedback">{formErrors.email}</div>}
-          </div>
-          <div className="mb-3">
-            <label htmlFor="message" className="form-label">Message</label>
-            <textarea
-              className={`form-control ${formErrors.message ? 'is-invalid' : ''}`}
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              placeholder="Enter your message"
-              rows="5"
-            />
-            {formErrors.message && <div className="invalid-feedback">{formErrors.message}</div>}
-          </div>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit'}
-          </button>
-        </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
+
+
+
 
 // Checkout Component
 const Checkout = () => {
@@ -1638,24 +1896,16 @@ const Checkout = () => {
       const trackingUrl = `${window.location.origin}/track-order?order=${orderId}`;
 
       const sendSMS = async () => {
-        const API_KEY = import.meta.env.VITE_FAST2SMS_API_KEY;
-        if (!API_KEY) {
-          console.warn("Fast2SMS API key missing");
-          return;
-        }
-
-        const message = `Order Confirmed! ID: ${orderId}\nTotal: ₹${total}\nTrack: ${trackingUrl}\nDilkhush Kirana`;
-
-        const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${API_KEY}&message=${encodeURIComponent(message)}&numbers=${formData.customerPhone}&route=q&sender_id=DKIRANA`;
-
-        // NO CORS - Fast2SMS allows frontend
-        fetch(url, {
-          method: "GET",
-          // headers: { "cache-control": "no-cache" },
-        })
-          .then(res => res.json())
-          .then(data => console.log("SMS Sent:", data))
-          .catch(() => console.log("SMS sent (silent)"));
+        await fetch(`${import.meta.env.VITE_API_URL}/sms/fast2sms`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: formData.customerPhone,
+            orderId,
+            total,
+            trackingUrl
+          })
+        });
       };
       // console.log(data)
       sendSMS(); // Auto SMS after order created
