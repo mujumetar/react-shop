@@ -368,6 +368,201 @@ const OrderDetails = () => {
     </div>
   );
 };
+
+
+// ──────────────────────────────────────────────────────────────
+// ORDER TRACKING PAGE - Enter Order ID → See Live Status
+// ──────────────────────────────────────────────────────────────
+
+const TrackOrder = () => {
+  const location = useLocation();
+  const [orderId, setOrderId] = useState("");
+  const [order, setOrder] = useState(null);
+  const [error, setError] = useState("");
+  const [searching, setSearching] = useState(false);
+
+  // AUTO READ FROM URL ?order=XXX
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlOrderId = params.get("order");
+    if (urlOrderId) {
+      setOrderId(urlOrderId);
+      handleTrack(urlOrderId);
+    }
+  }, [location]);
+
+  const handleTrack = async (id = orderId) => {
+    if (!id.trim()) {
+      setError("Please enter Order ID");
+      return;
+    }
+
+    setSearching(true);
+    setError("");
+    setOrder(null);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/${id}`);
+      if (!res.ok) throw new Error("Order not found");
+
+      const data = await res.json();
+      setOrder(data);
+    } catch (err) {
+      setError("Order not found. Please check your Order ID.");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const statusFlow = [
+    { status: "ordered", label: "Order Placed", icon: Clock, color: "text-warning" },
+    { status: "confirmed", label: "Confirmed", icon: PackageIcon, color: "text-info" },
+    { status: "shipped", label: "Shipped", icon: Truck, color: "text-primary" },
+    { status: "delivered", label: "Delivered", icon: CheckCircle, color: "text-success" },
+  ];
+
+  const currentStatus = order?.status || "ordered";
+  const currentIdx = statusFlow.findIndex((s) => s.status === currentStatus);
+
+  return (
+    <div className="container py-5">
+      <div className="row justify-content-center">
+        <div className="col-lg-8">
+          {/* Search Box */}
+          <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div className="card-header bg-gradient-primary text-white text-center py-4">
+              <Truck size={40} className="mb-3" />
+              <h2 className="mb-0 fw-bold">Track Your Order</h2>
+              <p className="mb-0 opacity-90">Enter your Order ID to see live status</p>
+            </div>
+            <div className="card-body p-5">
+              <div className="input-group input-group-lg mb-3">
+                <input
+                  type="text"
+                  className="form-control border-primary shadow-sm"
+                  placeholder="e.g. ORD-2025-001 or 69104af8db77bdca89b0a6ba"
+                  value={orderId}
+                  onChange={(e) => setOrderId(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleTrack()}
+                />
+                <button
+                  className="btn btn-primary px-5"
+                  onClick={() => handleTrack()}
+                  disabled={searching}
+                >
+                  {searching ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      Searching...
+                    </>
+                  ) : (
+                    "Track"
+                  )}
+                </button>
+              </div>
+              {error && (
+                <div className="alert alert-danger d-flex align-items-center">
+                  <XCircle size={20} className="me-2" />
+                  {error}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Order Found */}
+          {order && (
+            <div className="mt-5">
+              <div className="text-center mb-5">
+                <h1 className="display-6 fw-bold text-success">
+                  Order Found!
+                </h1>
+                <p className="lead text-muted">
+                  Order ID: <strong>{order.orderId || order._id}</strong>
+                </p>
+              </div>
+
+              {/* Tracking Timeline */}
+              <div className="card shadow-sm border-0 mb-4">
+                <div className="card-body">
+                  <h4 className="mb-4 text-primary">
+                    <PackageIcon className="me-2" />
+                    Order Status
+                  </h4>
+                  <div className="timeline position-relative">
+                    {statusFlow.map((step, idx) => {
+                      const isActive = idx <= currentIdx;
+                      const isCurrent = idx === currentIdx;
+                      const Icon = step.icon;
+
+                      return (
+                        <div key={step.status} className="d-flex align-items-center mb-4 position-relative">
+                          <div
+                            className={`rounded-circle d-flex align-items-center justify-content-center flex-shrink-0
+                              ${isActive ? "bg-primary text-white" : "bg-light text-muted"}
+                              ${isCurrent ? "shadow-lg border border-4 border-white" : ""}
+                            `}
+                            style={{ width: 56, height: 56, zIndex: 1 }}
+                          >
+                            <Icon size={26} />
+                          </div>
+
+                          <div className="ms-4 flex-grow-1">
+                            <h6 className={`mb-1 ${isActive ? "fw-bold text-dark" : "text-muted"}`}>
+                              {step.label}
+                            </h6>
+                            <small className={isActive ? step.color : "text-muted"}>
+                              {isCurrent && "In Progress"}
+                              {idx < currentIdx && "Completed"}
+                            </small>
+                          </div>
+
+                          {idx < statusFlow.length - 1 && (
+                            <div
+                              className="position-absolute top-0 start-0 translate-middle-x ms-3"
+                              style={{
+                                width: "4px",
+                                height: "60px",
+                                backgroundColor: idx < currentIdx ? "#0d6efd" : "#e9ecef",
+                                left: "28px",
+                                top: "56px",
+                              }}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-4">
+                <p className="text-muted small">
+                  Ordered on: <strong>{new Date(order.createdAt).toLocaleString()}</strong>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <style jsx>{`
+        .bg-gradient-primary {
+          background: linear-gradient(135deg, #0d6efd, #6610f2) !important;
+        }
+        .timeline::before {
+          content: '';
+          position: absolute;
+          left: 28px;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: #e9ecef;
+          z-index: 0;
+        }
+      `}</style>
+    </div>
+  );
+};
+
 // Productcard Component
 const Productcard = () => {
   const navigate = useNavigate();
@@ -606,12 +801,12 @@ const Productcard = () => {
                     </div>
 
                     {/* Card Footer (Optional - for additional info) */}
-                    <div className="card-footer bg-transparent border-0 pt-0 pb-3 px-4">
+                    {/* <div className="card-footer bg-transparent border-0 pt-0 pb-3 px-4">
                       <div className="d-flex justify-content-between align-items-center text-muted small">
                         <span><i className="bi bi-truck me-1"></i> 5 ⭐⭐⭐⭐⭐</span>
                         <span><i className="bi bi-shield-check me-1"></i>200+ orders</span>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               ))}
@@ -1405,7 +1600,7 @@ const Checkout = () => {
 
   const placeOrder = async () => {
     if (!cart || cart.length === 0) {
-      setError('Your cart is empty. Please add products.');
+      setError('Your cart is empty.');
       return;
     }
 
@@ -1429,55 +1624,61 @@ const Checkout = () => {
     };
 
     try {
-      // console.log('Placing order with data:', orderData);
       const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
       });
 
-      if (!orderResponse.ok) {
-        const text = await orderResponse.text();
-        console.error('Order creation failed:', text);
-        throw new Error(`Failed to create order: ${orderResponse.status} ${orderResponse.statusText}`);
-      }
-
+      if (!orderResponse.ok) throw new Error('Order failed');
       const { orderId } = await orderResponse.json();
 
+      const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+      const trackingUrl = `${window.location.origin}/track-order?order=${orderId}`;
+
+      const sendSMS = async () => {
+        const API_KEY = import.meta.env.VITE_FAST2SMS_API_KEY;
+        if (!API_KEY) {
+          console.warn("Fast2SMS API key missing");
+          return;
+        }
+
+        const message = `Order Confirmed! ID: ${orderId}\nTotal: ₹${total}\nTrack: ${trackingUrl}\nDilkhush Kirana`;
+
+        const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${API_KEY}&message=${encodeURIComponent(message)}&numbers=${formData.customerPhone}&route=q&sender_id=DKIRANA`;
+
+        // NO CORS - Fast2SMS allows frontend
+        fetch(url, {
+          method: "GET",
+          // headers: { "cache-control": "no-cache" },
+        })
+          .then(res => res.json())
+          .then(data => console.log("SMS Sent:", data))
+          .catch(() => console.log("SMS sent (silent)"));
+      };
+      // console.log(data)
+      sendSMS(); // Auto SMS after order created
+
+      // Razorpay
       const razorpayResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!razorpayResponse.ok) {
-        const text = await razorpayResponse.text();
-        console.error('Razorpay order creation failed:', text);
-        throw new Error(`Failed to create payment order: ${razorpayResponse.status} ${orderResponse.statusText}`);
-      }
-
+      if (!razorpayResponse.ok) throw new Error('Payment failed');
       const razorpayOrder = await razorpayResponse.json();
-      // console.log('Razorpay order created:', razorpayOrder);
 
-      // Ensure Razorpay script is loaded only once
       if (!window.Razorpay) {
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         script.async = true;
-        script.onload = () => {
-          // console.log('Razorpay script loaded');
-          openRazorpayCheckout(razorpayOrder, orderId);
-        };
-        script.onerror = () => {
-          console.error('Failed to load Razorpay script');
-          setError('Failed to load payment gateway');
-          setLoading(false);
-        };
+        script.onload = () => openRazorpayCheckout(razorpayOrder, orderId);
         document.body.appendChild(script);
       } else {
         openRazorpayCheckout(razorpayOrder, orderId);
       }
+
     } catch (error) {
-      console.error('Error placing order:', error);
       setError(error.message);
       setLoading(false);
     }
@@ -1528,18 +1729,24 @@ const Checkout = () => {
 
         {/* Saved Addresses */}
         {savedAddresses.length > 0 && (
-          <div className="card mb-4">
+          <div className="card mb-4 border-primary">
             <div className="card-body">
-              <h5>Use Saved Address</h5>
+              <h5 className="text-primary mb-3">
+                <Shield className="me-2" /> Use Saved Address
+              </h5>
               <div className="row g-3">
                 {savedAddresses.map((addr) => (
                   <div key={addr.key} className="col-md-6">
                     <div
-                      className={`p-3 border rounded cursor-pointer ${selectedAddress?.key === addr.key ? 'border-primary bg-light' : ''}`}
+                      className={`p-3 border rounded cursor-pointer hover-shadow ${selectedAddress?.key === addr.key ? 'border-primary bg-primary text-white' : 'bg-light'}`}
                       onClick={() => setSelectedAddress(addr)}
                     >
-                      <strong>{addr.name}</strong><br />
-                      <small>{addr.shippingAddress.city}, {addr.shippingAddress.state}</small>
+                      <strong>{addr.name}</strong>
+                      <br />
+                      <small>
+                        {addr.shippingAddress.city}, {addr.shippingAddress.state}
+                        {selectedAddress?.key === addr.key && " (Selected)"}
+                      </small>
                     </div>
                   </div>
                 ))}
@@ -2460,6 +2667,7 @@ function App() {
               </>
             }
           />
+          <Route path="/track-order" element={<><Navbars /><TrackOrder /><Footers /></>} />
           <Route
             path="/cancel"
             element={
