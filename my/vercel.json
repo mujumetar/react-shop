@@ -1,14 +1,5 @@
 {
   "rewrites": [
-    {
-      "source": "/(product|products|about|cart|checkout|contact|blogs|offers|order|track-order|success|cancel)/:path*",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/index.html"
-    }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }

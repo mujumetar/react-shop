@@ -6,10 +6,9 @@ export default defineConfig({
   base: '/', // This is critical
   build: {
     outDir: 'dist',
-    rollupOptions: {
-      output: {
-        manualChunks: undefined
-      }
-    }
+  },
+  server: {
+    historyApiFallback: true,
+
   }
 })
