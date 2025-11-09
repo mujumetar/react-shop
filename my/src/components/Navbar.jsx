@@ -119,7 +119,7 @@ const Navbars = () => {
           backdrop-filter: blur(10px);
           background: rgba(255, 255, 255, 0.95);
         }
-        .navbar-container { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; }
+        .navbar-container { display: flex; align-items: center; justify-content: space-between; }
 
         .navbar-brand-modern {
           display: flex; align-items: center; text-decoration: none; gap: 12px;
