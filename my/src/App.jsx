@@ -596,10 +596,11 @@ const Productcard = () => {
         }
         const data = await response.json();
         // console.log('Fetched products:', data);
-        setProducts(data);
+        setProducts(data || []);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching products:', err);
+        setProducts([]);
         setError(err.message);
         setLoading(false);
       }
