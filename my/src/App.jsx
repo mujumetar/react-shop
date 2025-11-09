@@ -7,6 +7,7 @@ import Footers from "./components/Footer";
 import Slider from "./components/Slider";
 import About from "./components/Aboutsect";
 import OrderSuccess from "./components/pages/OrderSuccess"
+import { TermsPage, PrivacyPage, RefundPage } from './components/pages/privacy-policy';
 import { ArrowLeft, ArrowLeftSquare, ArrowRight, Heart, Home, Minus, Package, Plus, RefreshCw, Share2, Shield, ShoppingBag, Star, Tag, Trash2, Truck, XCircle } from 'lucide-react';
 import {
   Clock, CheckCircle, Package as PackageIcon,
@@ -2681,6 +2682,9 @@ function App() {
               </>
             }
           />
+          <Route path="/terms-conditions" element={<TermsPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPage />} />
+          <Route path="/refund-policy" element={<RefundPage />} />
         </Routes>
       </Router>
     </CartProvider>

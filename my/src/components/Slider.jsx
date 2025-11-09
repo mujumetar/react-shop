@@ -5,7 +5,7 @@ import black from "../img/black.jpeg"
 const Slider = () => {
     return (
         <>
-            <div id="heroCarousel"  className="carousel slide carousel-fade" data-bs-ride="carousel">
+            <div id="heroCarousel" className="carousel slide carousel-fade" data-bs-ride="carousel">
                 <div className="carousel-indicators">
                     <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" className="active" aria-current="true"
                         aria-label="Slide 1"></button>
@@ -18,9 +18,13 @@ const Slider = () => {
                             className="d-block w-100 carousel-image" alt="Fresh produce" />
                         <div className="carousel-caption">
                             <div className="hero-content">
-                                <h1>A different kind of grocery store</h1>
-                                <p>Order any goods from our store online and we'll deliver within 24 hours.</p>
-                               
+                                <h1 className="text-3xl font-bold mb-4">Dilkhush Kirana Store</h1>
+                                <p className="mb-2">
+                                    Welcome to <strong>Dilkhush Kirana Store</strong>, your trusted shop in{" "}
+                                    <strong>Dhasa, Gujarat</strong> for daily essentials, saani, and spices.
+                                </p>
+
+
                             </div>
                         </div>
                     </div>
@@ -29,14 +33,16 @@ const Slider = () => {
                             className="d-block w-100 carousel-image" alt="Organic vegetables" />
                         <div className="carousel-caption">
                             <div className="hero-content">
-                                <h1>Fresh Organic Produce</h1>
-                                <p>Locally sourced organic vegetables and fruits delivered daily to your doorstep.</p>
-                            
+                                <p className="mb-4">
+                                    We are committed to delivering fresh and authentic grocery products at
+                                    affordable prices with excellent service.
+                                </p>
+
 
                             </div>
                         </div>
                     </div>
-               
+
                 </div>
                 <button className="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
                     <span className="carousel-control-prev-icon" aria-hidden="true"></span>

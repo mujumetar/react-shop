@@ -11,14 +11,23 @@ const Aboutsect = () => {
                         <div className="col-md-6">
                             <div className="restaurant-image">
                                 <img src={shopimg}
-                                    alt="Restaurant interior" className="img-fluid rounded shadow"/>
+                                    alt="Restaurant interior" className="img-fluid rounded shadow" />
                             </div>
                         </div>
                         <div className="col-md-6">
                             <div className="restaurant-text">
-                                <h2>We go through and buy operation, have built it.</h2>
-                                <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Obcaecati animi officia cum nostrum soluta necessitatibus iste dolore maiores nam inventore?</p>
-                                <a href="#" className="btn">View Menu</a>
+                                <div className="p-6 font-sans text-gray-800">
+                                    <h1 className="text-3xl font-bold mb-4">About Us</h1>
+                                    <p>
+                                        Welcome to <strong>Dilkhush Kirana Store</strong>, your local grocery
+                                        partner in <strong>Dhasa, Gujarat</strong>. We specialize in high-quality{" "}
+                                        <strong>saani and spices</strong> along with all your daily essentials.
+                                    </p>
+                                    <p className="mt-2">
+                                        Our mission is to provide fresh, authentic, and affordable grocery items
+                                        while building long-term trust with our customers.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

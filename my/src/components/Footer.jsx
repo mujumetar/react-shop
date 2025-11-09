@@ -1,7 +1,24 @@
-import React from 'react'
-import { ShoppingBasket, MapPin, Phone, Mail, ArrowRight, Instagram, Facebook, Twitter } from 'lucide-react'
+import React from 'react';
+import { ShoppingBasket, MapPin, Phone, Mail, ArrowRight, InstagramIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Footer = () => {
+    const navigate = useNavigate();
+
+    const handleQuickLink = (path) => {
+        navigate(path);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const quickLinks = [
+        { name: 'Home', path: '/' },
+        { name: 'Shop', path: '/Products' },
+        { name: 'About Us', path: '/about' },
+        { name: 'Contact', path: '/contact' },
+        { name: 'Privacy Policy', path: '/privacy-policy' },
+        { name: 'Terms & Conditions', path: '/terms-conditions' },
+    ];
+
     return (
         <>
             <style>{`
@@ -25,7 +42,7 @@ const Footer = () => {
                 }
                 
                 .footer-modern::after {
-                    content: '';
+                    content:href;
                     position: absolute;
                     bottom: 0;
                     right: 0;
@@ -93,26 +110,14 @@ const Footer = () => {
                     color: #ffffff;
                 }
                 
-                .social-icon.facebook:hover {
-                    background: #2563eb;
-                    border-color: #2563eb;
-                    color: #ffffff;
+                .section-titlefoo {
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    color: #1f2937;
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 1.5rem;
                 }
-                
-                .social-icon.twitter:hover {
-                    background: #60a5fa;
-                    border-color: #60a5fa;
-                    color: #ffffff;
-                }
-                
-                // .section-title {
-                //     font-size: 1.25rem;
-                //     font-weight: 700;
-                //     color: #1f2937;
-                //     display: flex;
-                //     align-items: center;
-                //     margin-bottom: 1.5rem;
-                // }
                 
                 .title-accent {
                     width: 4px;
@@ -130,6 +135,7 @@ const Footer = () => {
                     padding: 8px 0;
                     transition: all 0.2s ease;
                     position: relative;
+                    cursor: pointer;
                 }
                 
                 .quick-link:hover {
@@ -198,6 +204,8 @@ const Footer = () => {
                     color: #6b7280;
                     font-weight: 500;
                     margin: 0;
+                    display:flex;
+                    
                 }
                 
                 .contact-value {
@@ -239,6 +247,7 @@ const Footer = () => {
                     color: #6b7280;
                     text-decoration: none;
                     transition: color 0.2s ease;
+                    cursor: pointer;
                 }
                 
                 .footer-bottom-links a:hover {
@@ -249,150 +258,17 @@ const Footer = () => {
                     color: #d1d5db;
                 }
                 
-               @media (max-width: 991px) {
-                    .footer-modern::before,
-                    .footer-modern::after {
-                        width: 300px;
-                        height: 300px;
-                    }
-                    
-                    .brand-title {
-                        font-size: 1.5rem;
-                    }
-                    
-                    .section-title {
-                        font-size: 1.125rem;
-                    }
-                }
-                
                 @media (max-width: 767px) {
-                    .footer-modern::before,
-                    .footer-modern::after {
-                        width: 200px;
-                        height: 200px;
-                    }
-                    
-                    .brand-logo {
-                        width: 40px;
-                        height: 40px;
-                    }
-                    
-                    .brand-title {
-                        font-size: 1.375rem;
-                    }
-                    
-                    .footer-description {
-                        font-size: 0.9375rem;
-                    }
-                    
-                    .social-icon {
-                        width: 42px;
-                        height: 42px;
-                    }
-                    
-                    .section-title {
-                        font-size: 1.125rem;
-                        margin-bottom: 1.25rem;
-                    }
-                    
-                    .contact-icon {
-                        width: 40px;
-                        height: 40px;
-                    }
-                    
-                    .contact-item {
-                        margin-bottom: 1.25rem;
-                    }
-                    
-                    .footer-bottom {
-                        padding-top: 1.5rem;
-                        margin-top: 1.5rem;
-                    }
-                    
-                    .footer-bottom-text {
-                        font-size: 0.8125rem;
-                    }
-                    
                     .footer-bottom-links {
                         flex-wrap: wrap;
                         justify-content: center;
-                        gap: 1rem;
-                        font-size: 0.8125rem;
-                    }
-                }
-                
-                @media (max-width: 575px) {
-                    .footer-content {
-                        padding: 2rem 0 !important;
-                    }
-                    
-                    .brand-logo {
-                        width: 38px;
-                        height: 38px;
-                    }
-                    
-                    .brand-title {
-                        font-size: 1.25rem;
-                    }
-                    
-                    .footer-description {
-                        font-size: 0.875rem;
-                        line-height: 1.6;
-                    }
-                    
-                    .social-icon {
-                        width: 40px;
-                        height: 40px;
-                    }
-                    
-                    .section-title {
-                        font-size: 1rem;
-                        margin-bottom: 1rem;
-                    }
-                    
-                    .title-accent {
-                        width: 3px;
-                        height: 20px;
-                        margin-right: 10px;
-                    }
-                    
-                    .quick-link {
-                        font-size: 0.9375rem;
-                        padding: 6px 0;
-                    }
-                    
-                    .contact-icon {
-                        width: 38px;
-                        height: 38px;
-                    }
-                    
-                    .contact-label {
-                        font-size: 0.8125rem;
-                    }
-                    
-                    .contact-value {
-                        font-size: 0.9375rem;
-                    }
-                    
-                    .footer-bottom {
-                        padding-top: 1.25rem;
-                        margin-top: 1.25rem;
-                    }
-                    
-                    .footer-bottom-links {
-                        gap: 0.75rem;
-                        margin-top: 0.75rem;
-                    }
-                    
-                    .footer-bottom-links .divider {
-                        display: none;
                     }
                 }
             `}</style>
-
-            <footer className='footer-modern my-4'>
+            
+            <footer className='footer-modern'>
                 <div className="container footer-content py-5">
-                    <div className="row mb-4">
+                    <div className="row mb-4 px-3">
                         {/* About Section */}
                         <div className="col-md-4 mb-4">
                             <div className="d-flex align-items-center mb-3">
@@ -401,39 +277,40 @@ const Footer = () => {
                                 </div>
                                 <h3 className="brand-title ms-2">Dilkhush</h3>
                             </div>
-                            <p className="footer-description mb-4">
+                            <p className="footer-description mb-4 text-start">
                                 Your trusted modern grocery store offering premium quality products with seamless online ordering and lightning-fast delivery to your doorstep.
                             </p>
                             <div className="d-flex gap-2">
-                                <a
-                                    href="https://www.instagram.com/dilkhush_kirana"
-                                    target="_blank"
+                                <a 
+                                    href="https://www.instagram.com/dilkhush_kirana" 
+                                    target="_blank" 
                                     rel="noopener noreferrer"
                                     className="social-icon instagram"
                                 >
-                                    <Instagram size={20} />
-                                </a>
-                                <a href="#" className="social-icon facebook">
-                                    <Facebook size={20} />
-                                </a>
-                                <a href="#" className="social-icon twitter">
-                                    <Twitter size={20} />
+                                    <InstagramIcon size={20} />
                                 </a>
                             </div>
                         </div>
 
-                        {/* Quick Links */}
+                        {/* Quick Links - NOW WITH REAL ROUTING */}
                         <div className="col-md-4 mb-4">
-                            <h3 className="section-title">
+                            <h3 className="section-titlefoo">
                                 <span className="title-accent"></span>
                                 Quick Links
                             </h3>
                             <ul className="list-unstyled">
-                                {['Home', 'Shop', 'About Us', 'Contact', 'Privacy Policy', 'Terms & Conditions'].map((link, index) => (
+                                {quickLinks.map((link, index) => (
                                     <li key={index}>
-                                        <a href="#" className="quick-link">
+                                        <a
+                                            href={link.path}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleQuickLink(link.path);
+                                            }}
+                                            className="quick-link"
+                                        >
                                             <ArrowRight size={18} className="arrow-icon" />
-                                            {link}
+                                            {link.name}
                                         </a>
                                     </li>
                                 ))}
@@ -442,11 +319,11 @@ const Footer = () => {
 
                         {/* Contact Info */}
                         <div className="col-md-4 mb-4">
-                            <h3 className="section-title">
+                            <h3 className="section-titlefoo">
                                 <span className="title-accent"></span>
                                 Get In Touch
                             </h3>
-
+                            
                             <div className="contact-item">
                                 <div className="contact-icon location">
                                     <MapPin size={18} />
@@ -486,21 +363,21 @@ const Footer = () => {
                         </div>
                     </div>
 
-                    {/* Bottom Bar */}
+                    {/* Bottom Bar - Also Fixed */}
                     <div className="footer-bottom">
                         <div className="row align-items-center">
                             <div className="col-md-6 text-center text-md-start mb-3 mb-md-0">
                                 <p className="footer-bottom-text">
-                                    &copy; 2025 Dilkhush. All rights reserved. Made with <span style={{ color: '#ef4444' }}>♥</span>
+                                    © 2025 Dilkhush. All rights reserved. Made with <span style={{color: '#ef4444'}}>♥</span>
                                 </p>
                             </div>
                             <div className="col-md-6 text-center text-md-end">
                                 <div className="footer-bottom-links justify-content-center justify-content-md-end">
-                                    <a href="#">Privacy Policy</a>
+                                    <a href="/privacy-policy" onClick={(e) => { e.preventDefault(); handleQuickLink('/privacy-policy'); }}>Privacy Policy</a>
                                     <span className="divider">|</span>
-                                    <a href="#">Terms of Service</a>
+                                    <a href="/terms-conditions" onClick={(e) => { e.preventDefault(); handleQuickLink('/terms-conditions'); }}>Terms of Service</a>
                                     <span className="divider">|</span>
-                                    <a href="#">Sitemap</a>
+                                    <a href="/refund-policy" onClick={(e) => { e.preventDefault(); handleQuickLink('/refund-policy'); }}>Refund Policy</a>
                                 </div>
                             </div>
                         </div>
@@ -508,7 +385,7 @@ const Footer = () => {
                 </div>
             </footer>
         </>
-    )
-}
+    );
+};
 
-export default Footer
+export default Footer;
