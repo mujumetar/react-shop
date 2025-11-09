@@ -1426,6 +1426,7 @@ const ProductDetailWrapper = () => {
 };
 
 
+console.log("API URL:", import.meta.env.VITE_API_URL);
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -1467,7 +1468,7 @@ const Contact = () => {
     setLoading(true);
     try {
       // Replace with your actual API URL
-      const apiUrl = 'https://api.example.com';
+      // const apiUrl = 'https://api.example.com';
       const response = await fetch(`${import.meta.env.VITE_API_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

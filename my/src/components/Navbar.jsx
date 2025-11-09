@@ -72,6 +72,7 @@ const Navbars = () => {
     currentPath === '/' || currentPath === '/home' ? 'home' :
     currentPath.includes('products') ? 'products' :
     currentPath.includes('about') ? 'about' :
+    currentPath.includes('blogs') ? 'blogs' :
     currentPath.includes('contact') ? 'contact' :
     currentPath.includes('track-order') ? 'track' : 'home';
 
