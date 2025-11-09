@@ -1076,7 +1076,7 @@ const ProductDetail = ({ product, onClose }) => {
                       <div className="card-body">
                         <h2 className="card-title text-primary mb-3">
                           {/* <span className="badge bg-primary me-2">Latest</span> */}
-                          {product.name} Kachariyu/Saani
+                          {product.name} 
                         </h2>
 
                         {/* Key Features */}
@@ -2869,6 +2869,9 @@ function App() {
                 <Navbars />
                 <Slider />
                 <Productcard />
+                <marquee behavior="" direction="">
+                 <strong>🏆 25 years of trust</strong> | We believe in quality, not in quantity
+                </marquee>
                 <Blog />
                 <div className="">
                   <Footers />
