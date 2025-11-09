@@ -372,6 +372,17 @@ const OrderDetails = () => {
 };
 
 
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 // ──────────────────────────────────────────────────────────────
 // ORDER TRACKING PAGE - Enter Order ID → See Live Status
 // ──────────────────────────────────────────────────────────────
@@ -2847,6 +2858,7 @@ function App() {
     <CartProvider>
       <Router>
       <GlobalLoader/>
+      <ScrollToTop/>
         <Routes>
           <Route
             path="/"
