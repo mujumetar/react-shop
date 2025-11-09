@@ -101,7 +101,7 @@ const Navbars = () => {
         @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        @keyframes shimmer { 0% { background-position: -100px 0; } 100% { background-position: 300px 0; } }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
         .modern-navbar {
@@ -319,6 +319,7 @@ const Navbars = () => {
             {/* Brand */}
             <a href="/" className="navbar-brand-modern" onClick={(e) => { e.preventDefault(); handleNav('/'); }}>
               {/* <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop" alt="Dilkhush Logo" className="brand-logo-img" /> */}
+              {/* <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop" alt="Dilkhush Logo" className="" /> */}
               <div className="brand-text">
                 <h1 className="brand-name">Dilkhush</h1>
                 <p className="brand-tagline">Fresh & Quality</p>
