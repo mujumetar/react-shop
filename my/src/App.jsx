@@ -2452,6 +2452,193 @@ const Comments = ({ blogId }) => {
   );
 };
 
+// custom orders--------------------------------------------------------------------
+
+
+
+const CustomBuilder = () => {
+  const [ingredients, setIngredients] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', email: '' });
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('https://dilkhush-api.vercel.app/custom/ingredients')
+      .then(r => r.json())
+      .then(data => setIngredients(Array.isArray(data) ? data : []))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const addIngredient = (ing, variant) => {
+    if (selected.some(s => s.ingredientId === ing._id && s.variant === variant.quality)) {
+      alert('Already added!');
+      return;
+    }
+    setSelected([...selected, {
+      ingredientId: ing._id,
+      name: ing.name,
+      variant: variant.quality,
+      quantity: variant.unit === 'g' ? 100 : 0.25,
+      unit: variant.unit,
+      minQty: variant.minQuantity,
+      pricePerKg: variant.pricePerKg,
+      price: variant.pricePerKg * (variant.unit === 'g' ? variant.minQuantity / 1000 : variant.minQuantity)
+    }]);
+  };
+
+  const updateQuantity = (i, qty) => {
+    if (qty < selected[i].minQty) qty = selected[i].minQty;
+    setSelected(prev => {
+      const updated = [...prev];
+      const item = updated[i];
+      const qtyInKg = item.unit === 'g' ? qty / 1000 : qty;
+      item.quantity = qty;
+      item.price = Math.round(item.pricePerKg * qtyInKg * 100) / 100;
+      return updated;
+    });
+  };
+
+  const removeItem = (i) => setSelected(selected.filter((_, idx) => idx !== i));
+
+  const totalPrice = selected.reduce((s, i) => s + i.price, 0).toFixed(2);
+  const totalWeight = selected.reduce((s, i) => s + (i.unit === 'g' ? i.quantity : i.quantity * 1000), 0);
+  const totalWeightStr = totalWeight >= 1000 
+    ? `${(totalWeight / 1000).toFixed(2)} kg` 
+    : `${totalWeight.toFixed(0)} g`;
+
+  const loadRazorpay = () => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => initiatePayment();
+    document.body.appendChild(script);
+  };
+
+  const initiatePayment = async () => {
+    if (!customerInfo.name || !customerInfo.phone) {
+      alert('Name & Phone required!');
+      return;
+    }
+
+    const res = await fetch('https://dilkhush-api.vercel.app/custom/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: customerInfo.name,
+        customerPhone: customerInfo.phone,
+        customerEmail: customerInfo.email,
+        selectedIngredients: selected.map(s => ({
+          ingredientId: s.ingredientId,
+          variant: s.variant,
+          quantity: s.quantity,
+          unit: s.unit
+        })),
+        totalPrice: parseFloat(totalPrice),
+        totalWeight
+      })
+    });
+    const order = await res.json();
+
+    const options = {
+      key: 'rzp_test_YourKeyHere', // CHANGE TO YOUR KEY
+      amount: totalPrice * 100,
+      currency: 'INR',
+      name: 'Dilkhush Kirana',
+      description: 'Custom Mix Order',
+      order_id: order.razorpayOrderId,
+      handler: async (response) => {
+        await fetch('https://dilkhush-api.vercel.app/custom/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            orderId: order.orderId
+          })
+        });
+        alert(`₹${totalPrice} Paid! Order ID: ${order.orderId}`);
+        navigate('/success');
+      },
+      prefill: { name: customerInfo.name, contact: customerInfo.phone, email: customerInfo.email },
+      theme: { color: '#f59e0b' }
+    };
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
+  if (loading) return <div className="text-center py-20">Loading ingredients...</div>;
+
+  return (
+    <div className="container py-5">
+      <h1 className="text-center text-4xl font-bold mb-8">Build Your Mix</h1>
+      <div className="row">
+        <div className="col-lg-8">
+          <div className="row">
+            {ingredients.map(ing => (
+              <div key={ing._id} className="col-md-6 mb-4">
+                <div className="card h-100 shadow">
+                  {ing.image && <img src={ing.image} className="card-img-top" style={{height: '200px', objectFit: 'cover'}} />}
+                  <div className="card-body">
+                    <h5>{ing.name} ({ing.category})</h5>
+                    {ing.variants.map(v => (
+                      <button key={v.quality} onClick={() => addIngredient(ing, v)} className="btn btn-success btn-sm m-1">
+                        {v.quality}<br />
+                        <small>₹{v.pricePerKg}/kg • Min {v.minQuantity}{v.unit}</small>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="col-lg-4">
+          <div className="card sticky-top" style={{top: '20px'}}>
+            <div className="card-header bg-success text-white">
+              <h4>Your Mix • ₹{totalPrice}</h4>
+              <p className="mb-0">Total Weight: <strong>{totalWeightStr}</strong></p>
+            </div>
+            <div className="card-body">
+              {selected.map((item, i) => (
+                <div key={i} className="border-bottom pb-2 mb-2">
+                  <div className="d-flex justify-content-between">
+                    <div>
+                      <strong>{item.name}</strong> ({item.variant})
+                      <br />
+                      <input
+                        type="number"
+                        min={item.minQty}
+                        step={item.unit === 'g' ? 50 : 0.25}
+                        value={item.quantity}
+                        onChange={e => updateQuantity(i, parseFloat(e.target.value))}
+                        style={{width: '80px'}}
+                      /> {item.unit} = ₹{item.price}
+                    </div>
+                    <button onClick={() => removeItem(i)} className="btn btn-sm btn-danger">×</button>
+                  </div>
+                </div>
+              ))}
+
+              <hr />
+              <h4>Total: ₹{totalPrice} • {totalWeightStr}</h4>
+
+              <input placeholder="Name *" className="form-control mb-2" value={customerInfo.name} onChange={e => setCustomerInfo({...customerInfo, name: e.target.value})} />
+              <input placeholder="Phone *" className="form-control mb-2" value={customerInfo.phone} onChange={e => setCustomerInfo({...customerInfo, phone: e.target.value})} />
+              <input placeholder="Email" className="form-control mb-3" value={customerInfo.email} onChange={e => setCustomerInfo({...customerInfo, email: e.target.value})} />
+
+              <button onClick={loadRazorpay} disabled={selected.length === 0} className="btn btn-warning btn-lg w-100">
+                PAY ₹{totalPrice} & PLACE ORDER
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Blog Details Component
 const BlogDetails = () => {
   const navigate = useNavigate();
@@ -3023,6 +3210,19 @@ function App() {
               <>
                 <Navbars />
                 <OrderFailed />
+                <div className="">
+                  <Footers />
+                </div>
+
+              </>
+            }
+          />
+          <Route
+            path="/custom"
+            element={
+              <>
+                <Navbars />
+                <CustomBuilder />
                 <div className="">
                   <Footers />
                 </div>
