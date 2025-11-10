@@ -1871,83 +1871,59 @@ const Checkout = () => {
 
 
 
-  const placeOrder = async () => {
-    if (!cart || cart.length === 0) {
-      setError('Your cart is empty.');
-      return;
-    }
+const placeOrder = async () => {
+  if (!cart || cart.length === 0) {
+    setError('Your cart is empty.');
+    return;
+  }
 
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
+  const errors = validateForm();
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    return;
+  }
 
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    const orderData = {
-      customerName: formData.customerName,
-      customerEmail: formData.customerEmail,
-      customerPhone: formData.customerPhone,
-      shippingAddress: formData.shippingAddress,
-      billingAddress: formData.useSameAddress ? formData.shippingAddress : formData.billingAddress,
-      products: cart.map((item) => ({ productId: item.productId, quantity: item.quantity })),
-      notes: formData.notes,
-    };
-
-    try {
-      const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!orderResponse.ok) throw new Error('Order failed');
-      const { orderId } = await orderResponse.json();
-
-      const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-      const trackingUrl = `${window.location.origin}/track-order?order=${orderId}`;
-
-      // const sendSMS = async () => {
-      //   await fetch(`${import.meta.env.VITE_API_URL}/sms/fast2sms`, {
-      //     method: 'POST',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify({
-      //       phone: formData.customerPhone,
-      //       orderId,
-      //       total,
-      //       trackingUrl
-      //     })
-      //   });
-      // };
-      // // console.log(data)
-      // sendSMS(); // Auto SMS after order created
-
-      // Razorpay
-      const razorpayResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!razorpayResponse.ok) throw new Error('Payment failed');
-      const razorpayOrder = await razorpayResponse.json();
-
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.async = true;
-        script.onload = () => openRazorpayCheckout(razorpayOrder, orderId);
-        document.body.appendChild(script);
-      } else {
-        openRazorpayCheckout(razorpayOrder, orderId);
-      }
-
-    } catch (error) {
-      setError(error.message);
-      setLoading(false);
-    }
+  const orderData = {
+    customerName: formData.customerName,
+    customerEmail: formData.customerEmail,
+    customerPhone: formData.customerPhone,
+    shippingAddress: formData.shippingAddress,
+    billingAddress: formData.useSameAddress ? formData.shippingAddress : formData.billingAddress,
+    products: cart.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+    notes: formData.notes,
   };
+
+  try {
+    // CREATE ORDER
+    const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData),
+    });
+
+    if (!orderRes.ok) throw new Error('Order creation failed');
+    const { orderId } = await orderRes.json();
+
+    // CREATE RAZORPAY ORDER
+    const razorpayRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!razorpayRes.ok) throw new Error('Payment setup failed');
+    const razorpayOrder = await razorpayRes.json();
+
+    // OPEN RAZORPAY
+    openRazorpayCheckout(razorpayOrder, orderId);
+
+  } catch (error) {
+    setError(error.message || 'Something went wrong');
+    setLoading(false);
+  }
+};
 const getRazorpayKey = () => {
   const host = window.location.hostname;
   
@@ -2034,13 +2010,13 @@ const getRazorpayKey = () => {
     );
   };
 const openRazorpayCheckout = (razorpayOrder, orderId) => {
-  // KILL ALL OLD RAZORPAY INSTANCES + CACHE
+  // KILL ALL OLD RAZORPAY
   if (window.Razorpay) delete window.Razorpay;
   document.querySelectorAll('script[src*="razorpay"], script[src*="checkout"]').forEach(s => s.remove());
 
-  const RAZORPAY_KEY = import.meta.env.VITE__; // YOUR .env KEY
+  const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
   if (!RAZORPAY_KEY) {
-    alert('Payment key missing! Contact admin.');
+    alert('Payment gateway not ready. Please refresh.');
     return;
   }
 
@@ -2050,7 +2026,7 @@ const openRazorpayCheckout = (razorpayOrder, orderId) => {
 
   script.onload = () => {
     const options = {
-      key: RAZORPAY_KEY, // EXACT SAME KEY
+      key: RAZORPAY_KEY,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
       name: "Dilkhush Kirana",
@@ -2069,17 +2045,13 @@ const openRazorpayCheckout = (razorpayOrder, orderId) => {
             }),
           });
 
-          if (!verifyRes.ok) throw new Error('Verification failed');
-          
+          if (!verifyRes.ok) throw new Error('Payment failed');
+
           navigate('/success', {
-            state: {
-              orderId,
-              orderData: { ...formData, cartItems: cart, totalAmount: total }
-            }
+            state: { orderId, orderData: { ...formData, cartItems: cart, totalAmount: total }}
           });
         } catch (err) {
-          console.error(err);
-          navigate('/success'); // Still redirect (standard practice)
+          navigate('/success'); // Standard practice
         }
       },
       prefill: {
@@ -2090,28 +2062,27 @@ const openRazorpayCheckout = (razorpayOrder, orderId) => {
       theme: { color: '#f59e0b' },
       modal: {
         ondismiss: () => setLoading(false),
-        onhidden: () => window.location.reload() // KILLS BAD SESSION
+        onhidden: () => window.location.reload()
       },
-      // FORCE v2 ENDPOINT + SESSION MATCH
       config: {
         display: {
           preferences: { show_pricing: true }
         }
       },
-      // CRITICAL: THIS MAKES RAZORPAY USE YOUR ENV KEY IN URL TOO
-      key_id: RAZORPAY_KEY
+      // THIS FIXES 400 ERROR
+      retry: { enabled: false },
+      timeout: 300
     };
 
     const rzp = new window.Razorpay(options);
-    rzp.on('payment.failed', (res) => {
-      alert('Payment Failed: ' + (res.error.description || 'Try again'));
-      setLoading(false);
+    rzp.on('payment.failed', () => {
+      navigate('/cancel', { state: { errorMessage: 'Payment failed. Please try again.' } });
     });
     rzp.open();
   };
 
   script.onerror = () => {
-    alert('Gateway blocked. Retrying...');
+    alert('Payment gateway blocked. Retrying...');
     setTimeout(() => document.body.appendChild(script), 1000);
   };
 
