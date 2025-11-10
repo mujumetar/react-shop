@@ -1801,6 +1801,7 @@ const Contact = () => {
 
 
 // Checkout Component
+
 const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -1808,8 +1809,8 @@ const Checkout = () => {
     customerName: '',
     customerEmail: '',
     customerPhone: '',
-    shippingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-    billingAddress: { street: '', city: '', state: '', zip: '', country: '' },
+    shippingAddress: { street: '', city: '', state: '', zip: '', country: 'India' },
+    billingAddress: { street: '', city: '', state: '', zip: '', country: 'India' },
     useSameAddress: true,
     notes: '',
   });
@@ -1817,6 +1818,15 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const { cart } = state || {};
+
+  // AUTO SWITCH RAZORPAY KEY: Test on Vercel/local, Live on dilkhush.shop
+  const getRazorpayKey = () => {
+    const host = window.location.hostname;
+    if (host.includes('vercel.app') || host === 'localhost') {
+      return 'rzp_test_9rK8vX2mN1pQ7w'; // Replace with your TEST KEY
+    }
+    return import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_Re1i7zytUrHedP';
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -1839,7 +1849,7 @@ const Checkout = () => {
     setFormData((prev) => ({
       ...prev,
       useSameAddress: checked,
-      billingAddress: checked ? prev.shippingAddress : { street: '', city: '', state: '', zip: '', country: '' },
+      billingAddress: checked ? prev.shippingAddress : { street: '', city: '', state: '', zip: '', country: 'India' },
     }));
   };
 
@@ -1852,24 +1862,102 @@ const Checkout = () => {
       errors.customerEmail = 'Invalid email format';
     }
     if (!formData.customerPhone.trim()) errors.customerPhone = 'Phone is required';
+    if (formData.customerPhone.length !== 10) errors.customerPhone = 'Phone must be 10 digits';
+
     const addr = formData.shippingAddress;
     if (!addr.street.trim()) errors['shippingAddress.street'] = 'Street is required';
     if (!addr.city.trim()) errors['shippingAddress.city'] = 'City is required';
     if (!addr.state.trim()) errors['shippingAddress.state'] = 'State is required';
     if (!addr.zip.trim()) errors['shippingAddress.zip'] = 'Pin code is required';
-    if (!addr.country.trim()) errors['shippingAddress.country'] = 'Country is required';
+    if (addr.zip.length !== 6) errors['shippingAddress.zip'] = 'Pin code must be 6 digits';
+
     if (!formData.useSameAddress) {
       const billAddr = formData.billingAddress;
       if (!billAddr.street.trim()) errors['billingAddress.street'] = 'Street is required';
       if (!billAddr.city.trim()) errors['billingAddress.city'] = 'City is required';
       if (!billAddr.state.trim()) errors['billingAddress.state'] = 'State is required';
-      if (!billAddr.zip.trim()) errors['billingAddress.zip'] = 'Zip code is required';
-      if (!billAddr.country.trim()) errors['billingAddress.country'] = 'Country is required';
+      if (!billAddr.zip.trim()) errors['billingAddress.zip'] = 'Pin code is required';
     }
     return errors;
   };
 
+  const openRazorpayCheckout = (razorpayOrder, orderId) => {
+    const options = {
+      key: getRazorpayKey(),
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency || "INR",
+      name: 'Dilkhush Kirana',
+      description: 'Premium Winter Mix - Thank You!',
+      image: 'https://dilkhush.shop/logo.png',
+      order_id: razorpayOrder.id,
+      handler: async (response) => {
+        try {
+          const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
 
+          if (!verifyResponse.ok) throw new Error('Verification failed');
+
+          navigate('/success', {
+            state: {
+              orderId,
+              orderData: {
+                customerName: formData.customerName,
+                customerEmail: formData.customerEmail,
+                customerPhone: formData.customerPhone,
+                shippingAddress: formData.shippingAddress,
+                billingAddress: formData.useSameAddress ? formData.shippingAddress : formData.billingAddress,
+                cartItems: cart,
+                totalAmount: cart.reduce((sum, i) => sum + i.price * i.quantity, 0),
+                notes: formData.notes,
+              },
+            },
+          });
+        } catch (err) {
+          console.error(err);
+          navigate('/cancel');
+        } finally {
+          setLoading(false);
+        }
+      },
+      prefill: {
+        name: formData.customerName,
+        email: formData.customerEmail,
+        contact: formData.customerPhone,
+      },
+      theme: { color: '#f97316' },
+      modal: {
+        ondismiss: () => {
+          setLoading(false);
+          alert('Payment cancelled. You can try again.');
+        },
+      },
+    };
+
+    // Load Razorpay script safely
+    if (!window.Razorpay) {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      };
+      script.onerror = () => {
+        setError('Failed to load payment gateway');
+        setLoading(false);
+      };
+      document.body.appendChild(script);
+    } else {
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    }
+  };
 
   const placeOrder = async () => {
     if (!cart || cart.length === 0) {
@@ -1897,377 +1985,125 @@ const Checkout = () => {
     };
 
     try {
+      // Create Order
       const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
       });
 
-      if (!orderResponse.ok) throw new Error('Order failed');
+      if (!orderResponse.ok) throw new Error('Failed to create order');
       const { orderId } = await orderResponse.json();
 
-      const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-      const trackingUrl = `${window.location.origin}/track-order?order=${orderId}`;
-
-      // const sendSMS = async () => {
-      //   await fetch(`${import.meta.env.VITE_API_URL}/sms/fast2sms`, {
-      //     method: 'POST',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify({
-      //       phone: formData.customerPhone,
-      //       orderId,
-      //       total,
-      //       trackingUrl
-      //     })
-      //   });
-      // };
-      // // console.log(data)
-      // sendSMS(); // Auto SMS after order created
-
-      // Razorpay
+      // Create Razorpay Order
       const razorpayResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!razorpayResponse.ok) throw new Error('Payment failed');
+      if (!razorpayResponse.ok) throw new Error('Payment setup failed');
       const razorpayOrder = await razorpayResponse.json();
 
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.async = true;
-        script.onload = () => openRazorpayCheckout(razorpayOrder, orderId);
-        document.body.appendChild(script);
-      } else {
-        openRazorpayCheckout(razorpayOrder, orderId);
-      }
+      // Open Razorpay
+      openRazorpayCheckout(razorpayOrder, orderId);
 
-    } catch (error) {
-      setError(error.message);
-      setLoading(false);
-    }
-  };
-
-  const Checkout = () => {
-    const { cart, placeOrder, savedAddresses } = useCart();
-    const navigate = useNavigate();
-    const [selectedAddress, setSelectedAddress] = useState(null);
-
-    const [formData, setFormData] = useState({
-      customerName: '', customerEmail: '', customerPhone: '',
-      shippingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-      billingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-      useSameAddress: true,
-    });
-
-    // Auto-fill from saved address
-    useEffect(() => {
-      if (selectedAddress) {
-        setFormData(prev => ({
-          ...prev,
-          customerName: selectedAddress.name,
-          customerEmail: selectedAddress.email,
-          shippingAddress: selectedAddress.shippingAddress,
-          billingAddress: selectedAddress.billingAddress,
-          useSameAddress: selectedAddress.shippingAddress.street === selectedAddress.billingAddress.street,
-        }));
-      }
-    }, [selectedAddress]);
-
-    const handleSubmit = () => {
-      const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-      placeOrder({
-        ...formData,
-        items: cart,
-        total,
-      });
-      navigate('/success');
-    };
-
-    return (
-      <div className="container py-4">
-        <h2>Checkout</h2>
-
-        {/* Saved Addresses */}
-        {savedAddresses.length > 0 && (
-          <div className="card mb-4 border-primary">
-            <div className="card-body">
-              <h5 className="text-primary mb-3">
-                <Shield className="me-2" /> Use Saved Address
-              </h5>
-              <div className="row g-3">
-                {savedAddresses.map((addr) => (
-                  <div key={addr.key} className="col-md-6">
-                    <div
-                      className={`p-3 border rounded cursor-pointer hover-shadow ${selectedAddress?.key === addr.key ? 'border-primary bg-primary text-white' : 'bg-light'}`}
-                      onClick={() => setSelectedAddress(addr)}
-                    >
-                      <strong>{addr.name}</strong>
-                      <br />
-                      <small>
-                        {addr.shippingAddress.city}, {addr.shippingAddress.state}
-                        {selectedAddress?.key === addr.key && " (Selected)"}
-                      </small>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Form continues as before... */}
-        {/* ... your existing form fields ... */}
-        <button onClick={handleSubmit} className="btn btn-success">Place Order</button>
-      </div>
-    );
-  };
-  const openRazorpayCheckout = (razorpayOrder, orderId) => {
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: razorpayOrder.amount,
-      currency: razorpayOrder.currency,
-      name: 'Dilkhush Kirana',
-      description: 'Order Payment',
-      order_id: razorpayOrder.id,
-      handler: async (paymentResponse) => {
-        try {
-          // console.log('Payment response:', paymentResponse);
-          const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: paymentResponse.razorpay_order_id,
-              razorpay_payment_id: paymentResponse.razorpay_payment_id,
-              razorpay_signature: paymentResponse.razorpay_signature,
-            }),
-          });
-
-          if (!verifyResponse.ok) {
-            const text = await verifyResponse.text();
-            console.error('Payment verification failed:', text);
-            throw new Error(`Payment verification failed: ${verifyResponse.status} ${verifyResponse.statusText}`);
-          }
-
-          const verifyData = await verifyResponse.json();
-          // console.log('Payment verified:', verifyData);
-          navigate('/success', {
-            state: {
-              orderId,
-              orderData: {
-                customerName: formData.customerName,
-                customerEmail: formData.customerEmail,
-                customerPhone: formData.customerPhone,
-                shippingAddress: formData.shippingAddress,
-                billingAddress: formData.useSameAddress
-                  ? formData.shippingAddress
-                  : formData.billingAddress,
-                cartItems: cart.map((item) => ({
-                  name: item.name,
-                  price: item.price,
-                  quantity: item.quantity,
-                })),
-                totalAmount: cart.reduce((sum, i) => sum + i.price * i.quantity, 0),
-                notes: formData.notes,
-              },
-            },
-          });
-
-        } catch (error) {
-          console.error('Error verifying payment:', error);
-          setError(error.message);
-          navigate('/success', {
-            state: {
-              orderId,
-              orderData: {
-                customerName: formData.customerName,
-                customerEmail: formData.customerEmail,
-                customerPhone: formData.customerPhone,
-                shippingAddress: formData.shippingAddress,
-                billingAddress: formData.useSameAddress
-                  ? formData.shippingAddress
-                  : formData.billingAddress,
-                cartItems: cart.map((item) => ({
-                  name: item.name,
-                  price: item.price,
-                  quantity: item.quantity,
-                })),
-                totalAmount: cart.reduce((sum, i) => sum + i.price * i.quantity, 0),
-                notes: formData.notes,
-              },
-            },
-          });
-
-
-        }
-      },
-      prefill: {
-        name: formData.customerName,
-        email: formData.customerEmail,
-        contact: formData.customerPhone,
-      },
-      theme: { color: '#3399cc' },
-      modal: {
-        ondismiss: () => {
-          // console.log('Razorpay modal dismissed');
-          setLoading(false);
-        },
-      },
-    };
-
-    try {
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', (response) => {
-        console.error('Payment failed:', response.error);
-        setError(`Payment failed: ${response.error.description}`);
-        setLoading(false);
-        navigate('/cancel');
-      });
-      rzp.open();
-    } catch (error) {
-      console.error('Error opening Razorpay checkout:', error);
-      setError('Failed to open payment gateway');
+    } catch (err) {
+      setError(err.message || 'Something went wrong');
       setLoading(false);
     }
   };
 
   return (
     <div className="container mt-4">
-      <h2 className="section-title text-center my-3">Checkout</h2>
+      <h2 className="section-title text-center my-4 fw-bold text-primary">Checkout - Dilkhush Kirana</h2>
 
       {error && <div className="alert alert-danger">{error}</div>}
 
       {!cart || cart.length === 0 ? (
-        <p>Your cart is empty.</p>
+        <div className="text-center">
+          <p className="display-6">Your cart is empty</p>
+          <a href="/" className="btn btn-success">Continue Shopping</a>
+        </div>
       ) : (
         <>
-          <h4>Order Summary</h4>
-          {cart.map((item) => (
-            <div key={item.productId} className="mb-2">
-              <p>{item.name} - ₹{item.price} x {item.quantity}</p>
-            </div>
-          ))}
-          <h5>Total: ₹{cart.reduce((total, item) => total + item.price * item.quantity, 0)}</h5>
+          <div className="row">
+            <div className="col-md-8">
+              <div className="card shadow-sm p-4">
+                <h4>Customer Details</h4>
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <input type="text" name="customerName" value={formData.customerName} onChange={handleInputChange} placeholder="Full Name *" className={`form-control ${formErrors.customerName ? 'is-invalid' : ''}`} />
+                    {formErrors.customerName && <div className="text-danger small">{formErrors.customerName}</div>}
+                  </div>
+                  <div className="col-md-6">
+                    <input type="email" name="customerEmail" value={formData.customerEmail} onChange={handleInputChange} placeholder="Email *" className={`form-control ${formErrors.customerEmail ? 'is-invalid' : ''}`} />
+                    {formErrors.customerEmail && <div className="text-danger small">{formErrors.customerEmail}</div>}
+                  </div>
+                  <div className="col-12">
+                    <input type="tel" name="customerPhone" value={formData.customerPhone} onChange={handleInputChange} placeholder="Phone (10 digits) *" className={`form-control ${formErrors.customerPhone ? 'is-invalid' : ''}`} />
+                    {formErrors.customerPhone && <div className="text-danger small">{formErrors.customerPhone}</div>}
+                  </div>
+                </div>
 
-          <h4 className="mt-4">Customer Details</h4>
-          <div className="card p-4 mb-4">
-            <div className="mb-3">
-              <label htmlFor="customerName" className="form-label">Full Name</label>
-              <input
-                type="text"
-                className={`form-control ${formErrors.customerName ? 'is-invalid' : ''}`}
-                id="customerName"
-                name="customerName"
-                value={formData.customerName}
-                onChange={handleInputChange}
-                placeholder="Enter your full name"
-              />
-              {formErrors.customerName && <div className="invalid-feedback">{formErrors.customerName}</div>}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="customerEmail" className="form-label">Email</label>
-              <input
-                type="email"
-                className={`form-control ${formErrors.customerEmail ? 'is-invalid' : ''}`}
-                id="customerEmail"
-                name="customerEmail"
-                value={formData.customerEmail}
-                onChange={handleInputChange}
-                placeholder="Enter your email"
-              />
-              {formErrors.customerEmail && <div className="invalid-feedback">{formErrors.customerEmail}</div>}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="customerPhone" className="form-label">Phone</label>
-              <input
-                type="tel"
-                className={`form-control ${formErrors.customerPhone ? 'is-invalid' : ''}`}
-                id="customerPhone"
-                name="customerPhone"
-                value={formData.customerPhone}
-                onChange={handleInputChange}
-                placeholder="Enter your phone number"
-              />
-              {formErrors.customerPhone && <div className="invalid-feedback">{formErrors.customerPhone}</div>}
-            </div>
-            <h5>Shipping Address</h5>
-            {['street', 'city', 'state', 'zip', 'country'].map((field) => (
-              <div className="mb-3" key={field}>
-                <label htmlFor={`shippingAddress.${field}`} className="form-label">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </label>
-                <input
-                  type="text"
-                  className={`form-control ${formErrors[`shippingAddress.${field}`] ? 'is-invalid' : ''}`}
-                  id={`shippingAddress.${field}`}
-                  name={`shippingAddress.${field}`}
-                  value={formData.shippingAddress[field]}
-                  onChange={handleInputChange}
-                  placeholder={`Enter ${field}`}
-                />
-                {formErrors[`shippingAddress.${field}`] && (
-                  <div className="invalid-feedback">{formErrors[`shippingAddress.${field}`]}</div>
-                )}
-              </div>
-            ))}
-            <div className="mb-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="useSameAddress"
-                checked={formData.useSameAddress}
-                onChange={handleCheckboxChange}
-              />
-              <label className="form-check-label" htmlFor="useSameAddress">
-                Use same address for billing
-              </label>
-            </div>
-            {!formData.useSameAddress && (
-              <>
-                <h5>Billing Address</h5>
-                {['street', 'city', 'state', 'Pin Code', 'country'].map((field) => (
+                <h5 className="mt-4">Shipping Address</h5>
+                {['street', 'city', 'state', 'zip'].map(field => (
                   <div className="mb-3" key={field}>
-                    <label htmlFor={`billingAddress.${field}`} className="form-label">
-                      {field.charAt(0).toUpperCase() + field.slice(1)}
-                    </label>
                     <input
                       type="text"
-                      className={`form-control ${formErrors[`billingAddress.${field}`] ? 'is-invalid' : ''}`}
-                      id={`billingAddress.${field}`}
-                      name={`billingAddress.${field}`}
-                      value={formData.billingAddress[field]}
+                      name={`shippingAddress.${field}`}
+                      value={formData.shippingAddress[field]}
                       onChange={handleInputChange}
-                      placeholder={`Enter ${field}`}
+                      placeholder={field === 'zip' ? 'Pin Code *' : `${field.charAt(0).toUpperCase() + field.slice(1)} *`}
+                      className={`form-control ${formErrors[`shippingAddress.${field}`] ? 'is-invalid' : ''}`}
                     />
-                    {formErrors[`billingAddress.${field}`] && (
-                      <div className="invalid-feedback">{formErrors[`billingAddress.${field}`]}</div>
-                    )}
+                    {formErrors[`shippingAddress.${field}`] && <div className="text-danger small">{formErrors[`shippingAddress.${field}`]}</div>}
                   </div>
                 ))}
-              </>
-            )}
-            <div className="mb-3">
-              <label htmlFor="notes" className="form-label">Order Notes (Optional)</label>
-              <textarea
-                className={`form-control ${formErrors.notes ? 'is-invalid' : ''}`}
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                placeholder="Any special instructions?"
-                rows="3"
-              />
-              {formErrors.notes && <div className="invalid-feedback">{formErrors.notes}</div>}
+
+                <div className="form-check mb-3">
+                  <input type="checkbox" className="form-check-input" id="useSameAddress" checked={formData.useSameAddress} onChange={handleCheckboxChange} />
+                  <label className="form-check-label" htmlFor="useSameAddress">Same as shipping address</label>
+                </div>
+
+                {!formData.useSameAddress && (
+                  <>
+                    <h5>Billing Address</h5>
+                    {['street', 'city', 'state', 'zip'].map(field => (
+                      <div className="mb-3" key={field}>
+                        <input type="text" name={`billingAddress.${field}`} value={formData.billingAddress[field]} onChange={handleInputChange} placeholder={`${field.charAt(0).toUpperCase() + field.slice(1)} *`} className="form-control" />
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                <textarea name="notes" value={formData.notes} onChange={handleInputChange} placeholder="Order notes (optional)" className="form-control mb-3" rows="2"></textarea>
+              </div>
+            </div>
+
+            <div className="col-md-4">
+              <div className="card shadow-sm p-4">
+                <h4>Order Summary</h4>
+                {cart.map(item => (
+                  <div key={item.productId} className="d-flex justify-content-between mb-2">
+                    <span>{item.name} × {item.quantity}</span>
+                    <strong>₹{item.price * item.quantity}</strong>
+                  </div>
+                ))}
+                <hr />
+                <div className="d-flex justify-content-between">
+                  <h5>Total</h5>
+                  <h5>₹{cart.reduce((s, i) => s + i.price * i.quantity, 0)}</h5>
+                </div>
+                <button
+                  onClick={placeOrder}
+                  disabled={loading}
+                  className="btn btn-success btn-lg w-100 mt-3"
+                >
+                  {loading ? 'Processing Payment...' : 'PAY NOW →'}
+                </button>
+              </div>
             </div>
           </div>
-          <button
-            onClick={placeOrder}
-            disabled={loading || !cart || cart.length === 0}
-            className="btn btn-primary"
-          >
-            {loading ? 'Processing...' : 'Place Order'}
-          </button>
         </>
       )}
     </div>
