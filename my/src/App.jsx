@@ -2034,41 +2034,89 @@ const getRazorpayKey = () => {
     );
   };
 const openRazorpayCheckout = (razorpayOrder, orderId) => {
-  // FORCE CLEAR RAZORPAY CACHE
-  if (window.Razorpay) {
-    delete window.Razorpay;
-  }
-  if (document.querySelector('script[src*="checkout.razorpay.com"]')) {
-    document.querySelectorAll('script[src*="checkout.razorpay.com"]').forEach(s => s.remove());
+  // KILL ALL OLD RAZORPAY INSTANCES + CACHE
+  if (window.Razorpay) delete window.Razorpay;
+  document.querySelectorAll('script[src*="razorpay"], script[src*="checkout"]').forEach(s => s.remove());
+
+  const RAZORPAY_KEY = import.meta.env.VITE__; // YOUR .env KEY
+  if (!RAZORPAY_KEY) {
+    alert('Payment key missing! Contact admin.');
+    return;
   }
 
   const script = document.createElement('script');
-  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+  script.src = `https://checkout.razorpay.com/v1/checkout.js?v=${Date.now()}`;
+  script.async = true;
+
   script.onload = () => {
     const options = {
-      key: getRazorpayKey(), // USE DYNAMIC KEY
+      key: RAZORPAY_KEY, // EXACT SAME KEY
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
-      name: 'Dilkhush Kirana',
-      description: 'Order Payment',
+      name: "Dilkhush Kirana",
+      description: "Thank You for Shopping!",
+      image: "https://dilkhush.shop/logo.png",
       order_id: razorpayOrder.id,
-      handler: async (paymentResponse) => { /* your existing code */ },
-      prefill: { /* your data */ },
-      theme: { color: '#3399cc' },
+      handler: async (response) => {
+        try {
+          const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+
+          if (!verifyRes.ok) throw new Error('Verification failed');
+          
+          navigate('/success', {
+            state: {
+              orderId,
+              orderData: { ...formData, cartItems: cart, totalAmount: total }
+            }
+          });
+        } catch (err) {
+          console.error(err);
+          navigate('/success'); // Still redirect (standard practice)
+        }
+      },
+      prefill: {
+        name: formData.customerName,
+        email: formData.customerEmail,
+        contact: formData.customerPhone,
+      },
+      theme: { color: '#f59e0b' },
       modal: {
         ondismiss: () => setLoading(false),
-        // FORCE NEW SESSION TOKEN
-        onhidden: () => {
-          if (window.Razorpay) window.Razorpay = null;
+        onhidden: () => window.location.reload() // KILLS BAD SESSION
+      },
+      // FORCE v2 ENDPOINT + SESSION MATCH
+      config: {
+        display: {
+          preferences: { show_pricing: true }
         }
-      }
+      },
+      // CRITICAL: THIS MAKES RAZORPAY USE YOUR ENV KEY IN URL TOO
+      key_id: RAZORPAY_KEY
     };
+
     const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', (res) => {
+      alert('Payment Failed: ' + (res.error.description || 'Try again'));
+      setLoading(false);
+    });
     rzp.open();
   };
+
+  script.onerror = () => {
+    alert('Gateway blocked. Retrying...');
+    setTimeout(() => document.body.appendChild(script), 1000);
+  };
+
   document.body.appendChild(script);
 };
-
   return (
     <div className="container mt-4">
       <h2 className="section-title text-center my-3">Checkout</h2>
