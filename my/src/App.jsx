@@ -1205,7 +1205,7 @@ const Cart = () => {
   const navigate = useNavigate();
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 1000 ? 0 : 50;
+  const shipping = subtotal > 1000 ? 0 : 1;
   const discount = 0; // You can add coupon logic later
   const total = subtotal + shipping - discount;
 
@@ -1249,7 +1249,7 @@ const Cart = () => {
         <Truck className="me-3" size={24} />
         <div>
           <strong>
-            {subtotal >= 1000 ? (
+            {subtotal >= 1 ? (
               <>Free Shipping Unlocked!</>
             ) : (
               <>Add <span className="text-danger">₹{(1000 - subtotal).toLocaleString()}</span> more for FREE shipping</>
@@ -1798,9 +1798,6 @@ const Contact = () => {
   );
 };
 
-
-
-
 // Checkout Component
 const Checkout = () => {
   const [loading, setLoading] = useState(false);
@@ -1822,7 +1819,7 @@ const Checkout = () => {
   const [locationError, setLocationError] = useState('');
 
   const subtotal = cart?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
-  const shipping = subtotal >= 1000 ? 0 : 50;
+  const shipping = subtotal >= 1000 ? 0 : 1;
   const totalAmount = subtotal + shipping;
 
   const handleInputChange = (e) => {
@@ -1992,46 +1989,86 @@ const Checkout = () => {
     }
   };
 
-  const openRazorpayCheckout = (razorpayOrder, orderId) => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => {
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_9rK8vX2mN1pQ7w',
-        amount: razorpayOrder.amount,
-        currency: 'INR',
-        name: 'Dilkhush Kirana',
-        description: `Order #${orderId}`,
-        order_id: razorpayOrder.id,
-        handler: (response) => verifyPayment(response, orderId),
-        prefill: {
-          name: formData.customerName,
-          email: formData.customerEmail,
-          contact: formData.customerPhone,
-        },
-        theme: { color: '#f59e0b' },
-      };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+const openRazorpayCheckout = (razorpayOrder, orderId) => {
+  const script = document.createElement('script');
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+  script.onload = () => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY,
+      amount: razorpayOrder.amount,
+      currency: 'INR',
+      name: 'Dilkhush Kirana',
+      description: `Order #${orderId}`,
+      order_id: razorpayOrder.id,
+      image: 'https://res.cloudinary.com/dyngkb9yx/image/upload/v1762702784/dilkhush_kirana/products/mv2easf2jbr0zq44a8gl.jpg', // YE ADD KARO – 404 FIX!
+      handler: (response) => {
+        const paymentData = {
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+        };
+        // console.log(paymentData)
+        verifyPayment(paymentData, orderId);
+      },
+      prefill: {
+        name: formData.customerName,
+        email: formData.customerEmail,
+        contact: formData.customerPhone,
+      },
+      theme: {
+        color: '#f59e0b'
+      },
+      modal: {
+        ondismiss: () => {
+          setLoading(false);
+          navigate('/cancel', { state: { errorMessage: 'Payment cancelled by user.' } });
+        }
+      }
     };
-    document.body.appendChild(script);
+    
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', (response) => {
+      navigate('/cancel', { state: { errorMessage: response.error.description } });
+    });
+    rzp.open();
   };
+  script.onerror = () => {
+    setError('Failed to load Razorpay SDK');
+    setLoading(false);
+  };
+  document.body.appendChild(script);
+};
 
-  const verifyPayment = async (response, orderId) => {
-    try {
-      const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(response),
+const verifyPayment = async (paymentData, orderId) => {
+  try {
+    const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(paymentData),
+    });
+
+    const result = await verifyRes.json();
+
+    if (verifyRes.ok && result.success) {
+      navigate('/success', { 
+        state: { 
+          orderId, 
+          totalAmount,
+          paymentId: paymentData.razorpay_payment_id 
+        } 
       });
-      if (!verifyRes.ok) throw new Error('Payment verification failed');
-      navigate('/success', { state: { orderId, totalAmount } });
-    } catch (err) {
-      navigate('/cancel', { state: { errorMessage: 'Payment failed.' } });
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error(result.error || 'Payment verification failed');
     }
-  };
+  } catch (err) {
+    console.error('Verification error:', err);
+    navigate('/cancel', { 
+      state: { errorMessage: err.message || 'Payment failed. Contact support.' } 
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   return (
