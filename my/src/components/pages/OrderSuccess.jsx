@@ -269,9 +269,11 @@ const generatePDF = () => {
         Thank you for your purchase. Your order <strong>#{orderId}</strong> has been confirmed and will be delivered soon.
       </p>
 
-      <button className="btn btn-success mt-4" onClick={generatePDF}>
-        Download Invoice (PDF)
-      </button>
+ //     <button className="btn 
+ // btn-success mt-4"
+ //onClick={generatePDF}>
+     //   Download Invoice (PDF)
+    //  </button>
 
       <button className="btn btn-outline-primary ms-3 mt-4" onClick={() => navigate("/")}>
         Back to Home
