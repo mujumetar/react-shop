@@ -23,7 +23,8 @@ const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [savedAddresses, setSavedAddresses] = useState([]);
-
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState('');
   // Load from localStorage
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
@@ -1076,7 +1077,7 @@ const ProductDetail = ({ product, onClose }) => {
                       <div className="card-body">
                         <h2 className="card-title text-primary mb-3">
                           {/* <span className="badge bg-primary me-2">Latest</span> */}
-                          {product.name} 
+                          {product.name}
                         </h2>
 
                         {/* Key Features */}
@@ -1426,7 +1427,7 @@ const ProductDetailWrapper = () => {
 };
 
 
-console.log("API URL:", import.meta.env.VITE_API_URL);
+// console.log("API URL:", import.meta.env.VITE_API_URL);
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -1817,6 +1818,12 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const { cart } = state || {};
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState('');
+
+  const subtotal = cart?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
+  const shipping = subtotal >= 1000 ? 0 : 50;
+  const totalAmount = subtotal + shipping;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -1869,225 +1876,164 @@ const Checkout = () => {
     return errors;
   };
 
-
-
-const placeOrder = async () => {
-  if (!cart || cart.length === 0) {
-    setError('Your cart is empty.');
-    return;
-  }
-
-  const errors = validateForm();
-  if (Object.keys(errors).length > 0) {
-    setFormErrors(errors);
-    return;
-  }
-
-  setLoading(true);
-  setError(null);
-
-  const orderData = {
-    customerName: formData.customerName,
-    customerEmail: formData.customerEmail,
-    customerPhone: formData.customerPhone,
-    shippingAddress: formData.shippingAddress,
-    billingAddress: formData.useSameAddress ? formData.shippingAddress : formData.billingAddress,
-    products: cart.map((item) => ({ productId: item.productId, quantity: item.quantity })),
-    notes: formData.notes,
-  };
-
-  try {
-    // CREATE ORDER
-    const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData),
-    });
-
-    if (!orderRes.ok) throw new Error('Order creation failed');
-    const { orderId } = await orderRes.json();
-
-    // CREATE RAZORPAY ORDER
-    const razorpayRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!razorpayRes.ok) throw new Error('Payment setup failed');
-    const razorpayOrder = await razorpayRes.json();
-
-    // OPEN RAZORPAY
-    openRazorpayCheckout(razorpayOrder, orderId);
-
-  } catch (error) {
-    setError(error.message || 'Something went wrong');
-    setLoading(false);
-  }
-};
-const getRazorpayKey = () => {
-  const host = window.location.hostname;
-  
-  // LIVE ON dilkhush.shop (WHITELIST NOW ACTIVE)
-  if (host === 'dilkhush.shop' || host === 'www.dilkhush.shop') {
-    return 'rzp_live_Re1i7zytUrHedP';
-  }
-  
-  // TEST EVERYWHERE ELSE
-  return 'rzp_test_9rK8vX2mN1pQ7w';
-};
-  const Checkout = () => {
-    const { cart, placeOrder, savedAddresses } = useCart();
-    const navigate = useNavigate();
-    const [selectedAddress, setSelectedAddress] = useState(null);
-
-    const [formData, setFormData] = useState({
-      customerName: '', customerEmail: '', customerPhone: '',
-      shippingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-      billingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-      useSameAddress: true,
-    });
-
-    // Auto-fill from saved address
-    useEffect(() => {
-      if (selectedAddress) {
-        setFormData(prev => ({
-          ...prev,
-          customerName: selectedAddress.name,
-          customerEmail: selectedAddress.email,
-          shippingAddress: selectedAddress.shippingAddress,
-          billingAddress: selectedAddress.billingAddress,
-          useSameAddress: selectedAddress.shippingAddress.street === selectedAddress.billingAddress.street,
-        }));
-      }
-    }, [selectedAddress]);
-
-    const handleSubmit = () => {
-      const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-      placeOrder({
-        ...formData,
-        items: cart,
-        total,
-      });
-      navigate('/success');
-    };
-
-    return (
-      <div className="container py-4">
-        <h2>Checkout</h2>
-
-        {/* Saved Addresses */}
-        {savedAddresses.length > 0 && (
-          <div className="card mb-4 border-primary">
-            <div className="card-body">
-              <h5 className="text-primary mb-3">
-                <Shield className="me-2" /> Use Saved Address
-              </h5>
-              <div className="row g-3">
-                {savedAddresses.map((addr) => (
-                  <div key={addr.key} className="col-md-6">
-                    <div
-                      className={`p-3 border rounded cursor-pointer hover-shadow ${selectedAddress?.key === addr.key ? 'border-primary bg-primary text-white' : 'bg-light'}`}
-                      onClick={() => setSelectedAddress(addr)}
-                    >
-                      <strong>{addr.name}</strong>
-                      <br />
-                      <small>
-                        {addr.shippingAddress.city}, {addr.shippingAddress.state}
-                        {selectedAddress?.key === addr.key && " (Selected)"}
-                      </small>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Form continues as before... */}
-        {/* ... your existing form fields ... */}
-        <button onClick={handleSubmit} className="btn btn-success">Place Order</button>
-      </div>
+  const handleAutoFillLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation not supported.');
+      return;
+    }
+    setLocating(true);
+    setLocationError('');
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const indiaRes = await fetch(
+            `https://api.postalpincode.in/pincode/by-lat-lng?lat=${latitude}&lng=${longitude}`
+          );
+          const indiaData = await indiaRes.json();
+          if (indiaData[0]?.Status === 'Success' && indiaData[0]?.PostOffice?.[0]) {
+            const po = indiaData[0].PostOffice[0];
+            const address = {
+              street: `${po.Name}, ${po.Block || ''}`.trim(),
+              city: po.District,
+              state: po.State,
+              zip: po.Pincode,
+              country: 'India',
+            };
+            fillAddress(address);
+            setLocating(false);
+            return;
+          }
+          const osmRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
+          );
+          const osmData = await osmRes.json();
+          if (osmData?.address) {
+            const addr = osmData.address;
+            const address = {
+              street: `${addr.road || addr.suburb || ''}, ${addr.hamlet || ''}`.trim(),
+              city: addr.city || addr.town || addr.village,
+              state: addr.state || addr.region,
+              zip: addr.postcode || '',
+              country: addr.country || 'India',
+            };
+            fillAddress(address);
+          }
+          setLocating(false);
+        } catch (err) {
+          setLocationError('Address not found. Enter manually.');
+          setLocating(false);
+        }
+      },
+      (error) => {
+        setLocationError('Location access denied or failed.');
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 20000 }
     );
   };
-const openRazorpayCheckout = (razorpayOrder, orderId) => {
-  // KILL ALL OLD RAZORPAY
-  if (window.Razorpay) delete window.Razorpay;
-  document.querySelectorAll('script[src*="razorpay"], script[src*="checkout"]').forEach(s => s.remove());
 
-  const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
-  if (!RAZORPAY_KEY) {
-    alert('Payment gateway not ready. Please refresh.');
-    return;
-  }
+  const fillAddress = (address) => {
+    setFormData(prev => ({
+      ...prev,
+      shippingAddress: { ...prev.shippingAddress, ...address },
+      billingAddress: prev.useSameAddress ? { ...prev.billingAddress, ...address } : prev.billingAddress,
+    }));
+    alert('Location filled successfully!');
+  };
 
-  const script = document.createElement('script');
-  script.src = `https://checkout.razorpay.com/v1/checkout.js?v=${Date.now()}`;
-  script.async = true;
+  const placeOrder = async () => {
+    if (!cart || cart.length === 0) {
+      setError('Cart is empty.');
+      return;
+    }
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setLoading(true);
+    setError(null);
 
-  script.onload = () => {
-    const options = {
-      key: RAZORPAY_KEY,
-      amount: razorpayOrder.amount,
-      currency: razorpayOrder.currency,
-      name: "Dilkhush Kirana",
-      description: "Thank You for Shopping!",
-      image: "https://dilkhush.shop/logo.png",
-      order_id: razorpayOrder.id,
-      handler: async (response) => {
-        try {
-          const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
-
-          if (!verifyRes.ok) throw new Error('Payment failed');
-
-          navigate('/success', {
-            state: { orderId, orderData: { ...formData, cartItems: cart, totalAmount: total }}
-          });
-        } catch (err) {
-          navigate('/success'); // Standard practice
-        }
-      },
-      prefill: {
-        name: formData.customerName,
-        email: formData.customerEmail,
-        contact: formData.customerPhone,
-      },
-      theme: { color: '#f59e0b' },
-      modal: {
-        ondismiss: () => setLoading(false),
-        onhidden: () => window.location.reload()
-      },
-      config: {
-        display: {
-          preferences: { show_pricing: true }
-        }
-      },
-      // THIS FIXES 400 ERROR
-      retry: { enabled: false },
-      timeout: 300
+    const orderData = {
+      customerName: formData.customerName,
+      customerEmail: formData.customerEmail,
+      customerPhone: formData.customerPhone,
+      shippingAddress: formData.shippingAddress,
+      billingAddress: formData.useSameAddress ? formData.shippingAddress : formData.billingAddress,
+      products: cart.map((item) => ({ productId: item.productId, quantity: item.quantity, price: item.price })),
+      notes: formData.notes,
+      subtotal,
+      shipping,
+      total: totalAmount,
     };
 
-    const rzp = new window.Razorpay(options);
-    rzp.on('payment.failed', () => {
-      navigate('/cancel', { state: { errorMessage: 'Payment failed. Please try again.' } });
-    });
-    rzp.open();
+    try {
+      const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+      if (!orderRes.ok) throw new Error('Order creation failed');
+      const { orderId } = await orderRes.json();
+
+      const razorpayRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: totalAmount }),
+      });
+      if (!razorpayRes.ok) throw new Error('Payment setup failed');
+      const razorpayOrder = await razorpayRes.json();
+
+      openRazorpayCheckout(razorpayOrder, orderId);
+    } catch (err) {
+      setError(err.message || 'Something went wrong');
+      setLoading(false);
+    }
   };
 
-  script.onerror = () => {
-    alert('Payment gateway blocked. Retrying...');
-    setTimeout(() => document.body.appendChild(script), 1000);
+  const openRazorpayCheckout = (razorpayOrder, orderId) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => {
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_9rK8vX2mN1pQ7w',
+        amount: razorpayOrder.amount,
+        currency: 'INR',
+        name: 'Dilkhush Kirana',
+        description: `Order #${orderId}`,
+        order_id: razorpayOrder.id,
+        handler: (response) => verifyPayment(response, orderId),
+        prefill: {
+          name: formData.customerName,
+          email: formData.customerEmail,
+          contact: formData.customerPhone,
+        },
+        theme: { color: '#f59e0b' },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    };
+    document.body.appendChild(script);
   };
 
-  document.body.appendChild(script);
-};
+  const verifyPayment = async (response, orderId) => {
+    try {
+      const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(response),
+      });
+      if (!verifyRes.ok) throw new Error('Payment verification failed');
+      navigate('/success', { state: { orderId, totalAmount } });
+    } catch (err) {
+      navigate('/cancel', { state: { errorMessage: 'Payment failed.' } });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <div className="container mt-4">
       <h2 className="section-title text-center my-3">Checkout</h2>
@@ -2147,11 +2093,43 @@ const openRazorpayCheckout = (razorpayOrder, orderId) => {
               />
               {formErrors.customerPhone && <div className="invalid-feedback">{formErrors.customerPhone}</div>}
             </div>
-            <h5>Shipping Address</h5>
+            {/* SHIPPING ADDRESS WITH AUTO LOCATION */}
+            <h5 className="mt-4">
+              <MapPin className="me-2" size={20} />
+              Shipping Address
+            </h5>
+
+            {/* AUTO LOCATION BUTTON */}
+            <div className="mb-3">
+              <button
+                type="button"
+                onClick={handleAutoFillLocation}
+                className="btn btn-outline-success btn-sm d-flex align-items-center gap-2"
+                disabled={locating}
+              >
+                {locating ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm" />
+                    Detecting location...
+                  </>
+                ) : (
+                  <>
+                    <MapPin size={18} />
+                    Use My Current Location
+                  </>
+                )}
+              </button>
+              {locationError && (
+                <small className="text-danger d-block mt-1">
+                  {locationError}
+                </small>
+              )}
+            </div>
+
             {['street', 'city', 'state', 'zip', 'country'].map((field) => (
               <div className="mb-3" key={field}>
                 <label htmlFor={`shippingAddress.${field}`} className="form-label">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
+                  {field.charAt(0).toUpperCase() + field.slice(1)} {field === 'zip' && '(PIN Code)'}
                 </label>
                 <input
                   type="text"
@@ -2160,7 +2138,8 @@ const openRazorpayCheckout = (razorpayOrder, orderId) => {
                   name={`shippingAddress.${field}`}
                   value={formData.shippingAddress[field]}
                   onChange={handleInputChange}
-                  placeholder={`Enter ${field}`}
+                  placeholder={`Enter ${field === 'zip' ? 'PIN code' : field}`}
+                  readOnly={field === 'country' && formData.shippingAddress.country === 'India'} // Optional: lock country
                 />
                 {formErrors[`shippingAddress.${field}`] && (
                   <div className="invalid-feedback">{formErrors[`shippingAddress.${field}`]}</div>
@@ -2459,8 +2438,8 @@ const CustomBuilder = () => {
 
   const totalPrice = selected.reduce((s, i) => s + i.price, 0).toFixed(2);
   const totalWeight = selected.reduce((s, i) => s + (i.unit === 'g' ? i.quantity : i.quantity * 1000), 0);
-  const totalWeightStr = totalWeight >= 1000 
-    ? `${(totalWeight / 1000).toFixed(2)} kg` 
+  const totalWeightStr = totalWeight >= 1000
+    ? `${(totalWeight / 1000).toFixed(2)} kg`
     : `${totalWeight.toFixed(0)} g`;
 
   const loadRazorpay = () => {
@@ -2534,7 +2513,7 @@ const CustomBuilder = () => {
             {ingredients.map(ing => (
               <div key={ing._id} className="col-md-6 mb-4">
                 <div className="card h-100 shadow">
-                  {ing.image && <img src={ing.image} className="card-img-top" style={{height: '200px', objectFit: 'cover'}} />}
+                  {ing.image && <img src={ing.image} className="card-img-top" style={{ height: '200px', objectFit: 'cover' }} />}
                   <div className="card-body">
                     <h5>{ing.name} ({ing.category})</h5>
                     {ing.variants.map(v => (
@@ -2551,7 +2530,7 @@ const CustomBuilder = () => {
         </div>
 
         <div className="col-lg-4">
-          <div className="card sticky-top" style={{top: '20px'}}>
+          <div className="card sticky-top" style={{ top: '20px' }}>
             <div className="card-header bg-success text-white">
               <h4>Your Mix • ₹{totalPrice}</h4>
               <p className="mb-0">Total Weight: <strong>{totalWeightStr}</strong></p>
@@ -2569,7 +2548,7 @@ const CustomBuilder = () => {
                         step={item.unit === 'g' ? 50 : 0.25}
                         value={item.quantity}
                         onChange={e => updateQuantity(i, parseFloat(e.target.value))}
-                        style={{width: '80px'}}
+                        style={{ width: '80px' }}
                       /> {item.unit} = ₹{item.price}
                     </div>
                     <button onClick={() => removeItem(i)} className="btn btn-sm btn-danger">×</button>
@@ -2580,9 +2559,9 @@ const CustomBuilder = () => {
               <hr />
               <h4>Total: ₹{totalPrice} • {totalWeightStr}</h4>
 
-              <input placeholder="Name *" className="form-control mb-2" value={customerInfo.name} onChange={e => setCustomerInfo({...customerInfo, name: e.target.value})} />
-              <input placeholder="Phone *" className="form-control mb-2" value={customerInfo.phone} onChange={e => setCustomerInfo({...customerInfo, phone: e.target.value})} />
-              <input placeholder="Email" className="form-control mb-3" value={customerInfo.email} onChange={e => setCustomerInfo({...customerInfo, email: e.target.value})} />
+              <input placeholder="Name *" className="form-control mb-2" value={customerInfo.name} onChange={e => setCustomerInfo({ ...customerInfo, name: e.target.value })} />
+              <input placeholder="Phone *" className="form-control mb-2" value={customerInfo.phone} onChange={e => setCustomerInfo({ ...customerInfo, phone: e.target.value })} />
+              <input placeholder="Email" className="form-control mb-3" value={customerInfo.email} onChange={e => setCustomerInfo({ ...customerInfo, email: e.target.value })} />
 
               <button onClick={loadRazorpay} disabled={selected.length === 0} className="btn btn-warning btn-lg w-100">
                 PAY ₹{totalPrice} & PLACE ORDER
@@ -2753,20 +2732,20 @@ const OrderFailed = ({ errorMessage = "We couldn't process your payment. Please 
             <XCircle size={48} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold">Order Failed</h1>
-          <p className="text-red-100 mt-2 text-sm">Something went wrong with your payment</p>
+          {/* <p className="text-red-100 mt-2 text-sm">Something went wrong with your payment</p> */}
         </div>
 
         {/* Body */}
         <div className="p-6 space-y-5">
           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
             <p className="text-red-800 text-sm leading-relaxed">
-              <strong>Error:</strong> {errorMessage}
+              {/* <strong>Error:</strong> {errorMessage} */}
             </p>
           </div>
 
           <div className="text-center text-gray-600 text-sm">
-            <p>Don't worry — no money was charged.</p>
-            <p className="mt-1">You can try again or contact support.</p>
+            {/* <p>Don't worry — no money was charged.</p> */}
+            <p className="mt-1">You can try again or contact support. 7874536227</p>
           </div>
 
           {/* Action Buttons */}
@@ -2824,7 +2803,7 @@ const Blog = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const navigate = useNavigate()
+  const navigate = useNavigate()
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
@@ -2983,7 +2962,7 @@ const navigate = useNavigate()
                   {/* Card Footer */}
                   <div className="card-footer bg-white border-0 px-4 pb-4 pt-0">
                     <button className="btn btn-outline-primary w-100 rounded-4 fw-semibold">
-                      Read More <ArrowRight size={15} onClick={() => navigate(`/blogs/${blog._id}`)}/>
+                      Read More <ArrowRight size={15} onClick={() => navigate(`/blogs/${blog._id}`)} />
                     </button>
                   </div>
                 </div>
@@ -3002,8 +2981,8 @@ function App() {
   return (
     <CartProvider>
       <Router>
-      <GlobalLoader/>
-      <ScrollToTop/>
+        <GlobalLoader />
+        <ScrollToTop />
         <Routes>
           <Route
             path="/"
@@ -3013,7 +2992,7 @@ function App() {
                 <Slider />
                 <Productcard />
                 <marquee behavior="" direction="">
-                 <strong>🏆 25 years of trust</strong> | We believe in quality, not in quantity
+                  <strong>🏆 25 years of trust</strong> | We believe in quality, not in quantity
                 </marquee>
                 <Blog />
                 <div className="">
