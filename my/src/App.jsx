@@ -1286,7 +1286,7 @@ const Cart = () => {
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <div>
                         <h6 className="mb-1 fw-bold">{item.name}</h6>
-                        <p className="text-muted small mb-0">₹{item.price.toLocaleString()} each</p>
+                        <p className="text-muted small mb-0">₹{item.price.toLocaleString()} / kg</p>
                       </div>
                       <button
                         onClick={() => removeFromCart(item.productId)}
@@ -2776,7 +2776,7 @@ const OrderFailed = ({ errorMessage = "We couldn't process your payment. Please 
         <div className="p-6 space-y-5">
           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
             <p className="text-red-800 text-sm leading-relaxed">
-              {/* <strong>Error:</strong> {errorMessage} */}
+              <strong>Error:</strong> {errorMessage}
             </p>
           </div>
 
@@ -3121,7 +3121,7 @@ const CounterDashboard = () => {
             animation: 'float 6s ease-in-out infinite'
           }}
         >
-          Sparkles
+          💫
         </div>
         <div
           style={{
@@ -3133,7 +3133,7 @@ const CounterDashboard = () => {
             animation: 'float 8s ease-in-out infinite'
           }}
         >
-          Sparkles
+✨
         </div>
 
         <div className="container py-5">
@@ -3297,7 +3297,8 @@ const CounterDashboard = () => {
                 fontWeight: '500'
               }}
             >
-              Last updated: {new Date().toLocaleTimeString()}
+              Last updated: <strong>Today </strong>
+               {/* {new Date().toLocaleTimeString()} */}
             </div>
           </div>
         </div>
@@ -3358,6 +3359,19 @@ function App() {
               <>
                 <Navbars />
                 <Productcard />
+                <div className="">
+                  <Footers />
+                </div>
+
+              </>
+            }
+          />
+          <Route
+            path="/my"
+            element={
+              <>
+                <Navbars />
+             <MyOrders/>
                 <div className="">
                   <Footers />
                 </div>
@@ -3525,3 +3539,7 @@ function App() {
 }
 
 export default App;
+
+
+
+// 69183e308b10b0b65f58ae0e
