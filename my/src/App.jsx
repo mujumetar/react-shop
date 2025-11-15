@@ -1989,86 +1989,86 @@ const Checkout = () => {
     }
   };
 
-const openRazorpayCheckout = (razorpayOrder, orderId) => {
-  const script = document.createElement('script');
-  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-  script.onload = () => {
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY,
-      amount: razorpayOrder.amount,
-      currency: 'INR',
-      name: 'Dilkhush Kirana',
-      description: `Order #${orderId}`,
-      order_id: razorpayOrder.id,
-      image: 'https://res.cloudinary.com/dyngkb9yx/image/upload/v1762702784/dilkhush_kirana/products/mv2easf2jbr0zq44a8gl.jpg', // YE ADD KARO – 404 FIX!
-      handler: (response) => {
-        const paymentData = {
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_signature: response.razorpay_signature,
-        };
-        // console.log(paymentData)
-        verifyPayment(paymentData, orderId);
-      },
-      prefill: {
-        name: formData.customerName,
-        email: formData.customerEmail,
-        contact: formData.customerPhone,
-      },
-      theme: {
-        color: '#f59e0b'
-      },
-      modal: {
-        ondismiss: () => {
-          setLoading(false);
-          navigate('/cancel', { state: { errorMessage: 'Payment cancelled by user.' } });
+  const openRazorpayCheckout = (razorpayOrder, orderId) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => {
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY,
+        amount: razorpayOrder.amount,
+        currency: 'INR',
+        name: 'Dilkhush Kirana',
+        description: `Order #${orderId}`,
+        order_id: razorpayOrder.id,
+        image: 'https://res.cloudinary.com/dyngkb9yx/image/upload/v1762702784/dilkhush_kirana/products/mv2easf2jbr0zq44a8gl.jpg', // YE ADD KARO – 404 FIX!
+        handler: (response) => {
+          const paymentData = {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          };
+          // console.log(paymentData)
+          verifyPayment(paymentData, orderId);
+        },
+        prefill: {
+          name: formData.customerName,
+          email: formData.customerEmail,
+          contact: formData.customerPhone,
+        },
+        theme: {
+          color: '#f59e0b'
+        },
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+            navigate('/cancel', { state: { errorMessage: 'Payment cancelled by user.' } });
+          }
         }
-      }
-    };
-    
-    const rzp = new window.Razorpay(options);
-    rzp.on('payment.failed', (response) => {
-      navigate('/cancel', { state: { errorMessage: response.error.description } });
-    });
-    rzp.open();
-  };
-  script.onerror = () => {
-    setError('Failed to load Razorpay SDK');
-    setLoading(false);
-  };
-  document.body.appendChild(script);
-};
+      };
 
-const verifyPayment = async (paymentData, orderId) => {
-  try {
-    const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(paymentData),
-    });
-
-    const result = await verifyRes.json();
-
-    if (verifyRes.ok && result.success) {
-      navigate('/success', { 
-        state: { 
-          orderId, 
-          totalAmount,
-          paymentId: paymentData.razorpay_payment_id 
-        } 
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (response) => {
+        navigate('/cancel', { state: { errorMessage: response.error.description } });
       });
-    } else {
-      throw new Error(result.error || 'Payment verification failed');
+      rzp.open();
+    };
+    script.onerror = () => {
+      setError('Failed to load Razorpay SDK');
+      setLoading(false);
+    };
+    document.body.appendChild(script);
+  };
+
+  const verifyPayment = async (paymentData, orderId) => {
+    try {
+      const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentData),
+      });
+
+      const result = await verifyRes.json();
+
+      if (verifyRes.ok && result.success) {
+        navigate('/success', {
+          state: {
+            orderId,
+            totalAmount,
+            paymentId: paymentData.razorpay_payment_id
+          }
+        });
+      } else {
+        throw new Error(result.error || 'Payment verification failed');
+      }
+    } catch (err) {
+      console.error('Verification error:', err);
+      navigate('/cancel', {
+        state: { errorMessage: err.message || 'Payment failed. Contact support.' }
+      });
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Verification error:', err);
-    navigate('/cancel', { 
-      state: { errorMessage: err.message || 'Payment failed. Contact support.' } 
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   return (
@@ -3013,6 +3013,318 @@ const Blog = () => {
 };
 
 
+const CounterDashboard = () => {
+  const [counts, setCounts] = useState({
+    offline: 800,
+    dailySales: 20000,
+    totalCustomers: 17000,
+    experience: 25
+  });
+
+  const [hovered, setHovered] = useState(null);
+
+  const targets = {
+    offline: 234,
+    dailySales: 15420,
+    totalCustomers: 8567,
+    experience: 15
+  };
+
+  useEffect(() => {
+    const duration = 2000;
+    const steps = 60;
+    const interval = duration / steps;
+
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      const progress = step / steps;
+
+      setCounts({
+        offline: Math.floor(targets.offline * progress),
+        dailySales: Math.floor(targets.dailySales * progress),
+        totalCustomers: Math.floor(targets.totalCustomers * progress),
+        experience: Math.floor(targets.experience * progress)
+      });
+
+      if (step >= steps) {
+        clearInterval(timer);
+        setCounts(targets);
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const cards = [
+    {
+      title: 'Offline Customers',
+      value: counts.offline,
+      icon: '🛍️',
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      glow: '0 20px 60px rgba(102, 126, 234, 0.4)',
+      pattern: '🛍️',
+      subtitle: 'Currently Shopping'
+    },
+    {
+      title: 'Per Day Sales',
+      value: `$${counts.dailySales.toLocaleString()}`,
+      icon: '💸',
+      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      glow: '0 20px 60px rgba(240, 147, 251, 0.4)',
+      pattern: '💸',
+      subtitle: 'Revenue Today'
+    },
+    {
+      title: 'Total Customers',
+      value: counts.totalCustomers.toLocaleString(),
+      icon: '👥',
+      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      glow: '0 20px 60px rgba(79, 172, 254, 0.4)',
+      pattern: '👥',
+      subtitle: 'Happy Clients'
+    },
+    {
+      title: 'Experience',
+      value: `${counts.experience}+`,
+      icon: '🚀',
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      glow: '0 20px 60px rgba(250, 112, 154, 0.4)',
+      pattern: '🚀',
+      subtitle: 'Years of Excellence'
+    }
+  ];
+
+  return (
+    <>
+      <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
+        rel="stylesheet"
+      />
+
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)',
+          minHeight: '100vh',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Animated Background Elements */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '10%',
+            left: '5%',
+            fontSize: '100px',
+            opacity: '0.1',
+            animation: 'float 6s ease-in-out infinite'
+          }}
+        >
+          Sparkles
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '15%',
+            right: '8%',
+            fontSize: '80px',
+            opacity: '0.1',
+            animation: 'float 8s ease-in-out infinite'
+          }}
+        >
+          Sparkles
+        </div>
+
+        <div className="container py-5">
+          <div className="text-center text-white mb-5 pt-4">
+            <div
+              style={{
+                display: 'inline-block',
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                padding: '10px 30px',
+                borderRadius: '50px',
+                marginBottom: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              <span style={{ fontSize: '14px', letterSpacing: '3px' }}>DASHBOARD</span>
+            </div>
+            <h1
+              className="display-2 fw-bold mb-3"
+              style={{
+                textShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                letterSpacing: '-2px'
+              }}
+            >
+              Business Analytics
+            </h1>
+            <p className="lead" style={{ opacity: '0.9', fontSize: '1.3rem' }}>
+              Real-time performance metrics at a glance
+            </p>
+          </div>
+
+          <div className="row g-4 px-2">
+            {cards.map((card, index) => (
+              <div key={index} className="col-lg-3 col-md-6">
+                <div
+                  onMouseEnter={() => setHovered(index)}
+                  onMouseLeave={() => setHovered(null)}
+                  style={{
+                    background: hovered === index
+                      ? 'rgba(255, 255, 255, 0.95)'
+                      : 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '30px',
+                    padding: '0',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    transform: hovered === index ? 'translateY(-15px) scale(1.02)' : 'translateY(0) scale(1)',
+                    boxShadow: hovered === index ? card.glow : '0 10px 40px rgba(0,0,0,0.15)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}
+                >
+                  {/* Gradient Header */}
+                  <div
+                    style={{
+                      background: card.gradient,
+                      padding: '30px 20px',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {/* Decorative Pattern */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '-10px',
+                        right: '-10px',
+                        fontSize: '60px',
+                        opacity: '0.2',
+                        transform: hovered === index ? 'rotate(20deg) scale(1.2)' : 'rotate(0deg) scale(1)',
+                        transition: 'all 0.4s ease'
+                      }}
+                    >
+                      {card.pattern}
+                    </div>
+
+                    <div className="text-center">
+                      <div
+                        style={{
+                          fontSize: '50px',
+                          marginBottom: '10px',
+                          filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.2))',
+                          transform: hovered === index ? 'scale(1.1) rotate(5deg)' : 'scale(1)',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        {card.icon}
+                      </div>
+                      <div
+                        style={{
+                          color: 'white',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          letterSpacing: '2px',
+                          textTransform: 'uppercase',
+                          opacity: '0.9'
+                        }}
+                      >
+                        {card.title}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="text-center p-4">
+                    <div
+                      style={{
+                        fontSize: '48px',
+                        fontWeight: '800',
+                        background: card.gradient,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        marginBottom: '10px',
+                        letterSpacing: '-1px'
+                      }}
+                    >
+                      {card.value}
+                    </div>
+                    <div
+                      style={{
+                        color: '#64748b',
+                        fontSize: '13px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      {card.subtitle}
+                    </div>
+                  </div>
+
+                  {/* Pulse Indicator */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '20px',
+                      right: '20px',
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      boxShadow: '0 0 0 0 rgba(255, 255, 255, 0.7)',
+                      animation: 'pulse 2s infinite'
+                    }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-5 pt-4">
+            <div
+              style={{
+                display: 'inline-block',
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                padding: '15px 40px',
+                borderRadius: '50px',
+                color: 'white',
+                fontSize: '14px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                fontWeight: '500'
+              }}
+            >
+              Last updated: {new Date().toLocaleTimeString()}
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+          
+          @keyframes pulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+            }
+            70% {
+              box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+            100% {
+              box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+          }
+        `}</style>
+      </div>
+    </>
+  );
+}
+
 // Main App Component
 function App() {
   return (
@@ -3031,6 +3343,7 @@ function App() {
                 <marquee behavior="" direction="">
                   <strong>🏆 25 years of trust</strong> | We believe in quality, not in quantity
                 </marquee>
+                <CounterDashboard/>
                 <Blog />
                 <div className="">
                   <Footers />
