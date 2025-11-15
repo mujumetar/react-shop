@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate, useParams, useLocation } from 'react-router-dom';
 import white from './img/white.jpeg';
-import black from './img/black.jpeg';
+import black from '/black.jpeg';
 import Navbars from "./components/Navbar";
 import Footers from "./components/Footer";
 import Slider from "./components/Slider";
@@ -2867,7 +2867,8 @@ const Blog = () => {
   const handleViewDetails = (blog) => {
     // Replace with your navigation logic
     console.log('Navigate to:', `/blogs/${blog._id}`);
-    // navigate(`/blogs/${blog._id}`);
+    navigate(`/blogs/${blog._id}`);
+
   };
 
   return (
@@ -3024,10 +3025,10 @@ const CounterDashboard = () => {
   const [hovered, setHovered] = useState(null);
 
   const targets = {
-    offline: 234,
-    dailySales: 15420,
-    totalCustomers: 8567,
-    experience: 15
+    offline: 28000,
+    dailySales: 20000,
+    totalCustomers: 17000,
+    experience: 25
   };
 
   useEffect(() => {
@@ -3068,7 +3069,7 @@ const CounterDashboard = () => {
     },
     {
       title: 'Per Day Sales',
-      value: `$${counts.dailySales.toLocaleString()}`,
+      value: `${counts.dailySales.toLocaleString()}`,
       icon: '💸',
       gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
       glow: '0 20px 60px rgba(240, 147, 251, 0.4)',
@@ -3086,7 +3087,7 @@ const CounterDashboard = () => {
     },
     {
       title: 'Experience',
-      value: `${counts.experience}+`,
+      value: `${counts.experience}`,
       icon: '🚀',
       gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
       glow: '0 20px 60px rgba(250, 112, 154, 0.4)',
@@ -3251,7 +3252,7 @@ const CounterDashboard = () => {
                         letterSpacing: '-1px'
                       }}
                     >
-                      {card.value}
+                      {card.value} +
                     </div>
                     <div
                       style={{

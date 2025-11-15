@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import white from "../../img/white.jpeg";
 import contains from "../../img/contains.png"
-import black from "../../img/black.jpeg";
+import black from "/black.jpeg";
 import { useNavigate } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 

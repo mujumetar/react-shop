@@ -1,6 +1,6 @@
 import React from 'react'
 import white from "../img/white.jpg"
-import black from "../img/black.jpeg"
+import black from "/black.jpeg"
 
 const Slider = () => {
     return (
@@ -17,7 +17,7 @@ const Slider = () => {
                         <img src={white}
                             className="d-block w-100 carousel-image" alt="Fresh produce" />
                         <div className="carousel-caption">
-                            <div className="hero-content">
+                            {/* <div className="hero-content">
                                 <h1 className="text-3xl font-bold mb-4">Dilkhush Kirana Store</h1>
                                 <p className="mb-2">
                                     Welcome to <strong>Dilkhush Kirana Store</strong>, your trusted shop in{" "}
@@ -25,7 +25,7 @@ const Slider = () => {
                                 </p>
 
 
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     <div className="carousel-item">
@@ -33,10 +33,10 @@ const Slider = () => {
                             className="d-block w-100 carousel-image" alt="Organic vegetables" />
                         <div className="carousel-caption">
                             <div className="hero-content">
-                                <p className="mb-4">
+                                {/* <p className="mb-4">
                                     We are committed to delivering fresh and authentic grocery products at
                                     affordable prices with excellent service.
-                                </p>
+                                </p> */}
                             </div>
                         </div>
                     </div>
