@@ -8,7 +8,7 @@ import Slider from "./components/Slider";
 import About from "./components/Aboutsect";
 import OrderSuccess from "./components/pages/OrderSuccess"
 import { TermsPage, PrivacyPage, RefundPage } from './components/pages/privacy-policy';
-import { ArrowLeft, ArrowLeftSquare, ArrowRight, Heart, Home, MessageSquare, Minus, Package, Plus, RefreshCw, Send, Share2, Shield, ShoppingBag, Star, Tag, Trash2, Truck, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowLeftSquare, ArrowRight, ExternalLink, Heart, Home, Loader2, MessageSquare, Minus, Package, Plus, RefreshCw, Send, Share2, Shield, ShoppingBag, Star, Tag, ToggleLeft, ToggleRight, Trash2, Truck, XCircle } from 'lucide-react';
 import {
   Clock, CheckCircle, Package as PackageIcon,
   MapPin, Calendar, IndianRupee, User, Phone, Mail
@@ -1936,7 +1936,7 @@ const Checkout = () => {
       shippingAddress: { ...prev.shippingAddress, ...address },
       billingAddress: prev.useSameAddress ? { ...prev.billingAddress, ...address } : prev.billingAddress,
     }));
-    alert('Location filled successfully!');
+    // alert('Location filled successfully!');
   };
 
   const placeOrder = async () => {
@@ -2245,6 +2245,160 @@ const Checkout = () => {
     </div>
   );
 };
+
+
+const API = import.meta.env.VITE_API_URL; // e.g. https://api.dilkhush.shop
+
+
+const DistributorsSection = () => {
+  const [distributors, setDistributors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDistributors = async () => {
+      try {
+        const res = await fetch(`${API}/api/distributors`);
+        if (!res.ok) throw new Error('Failed to load distributors');
+        const data = await res.json();
+        setDistributors(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDistributors();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-5" style={{background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)'}}>
+        <div className="container">
+          <div className="text-center">
+            <div className="spinner-border text-info" role="status" style={{width: '3rem', height: '3rem'}}>
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-3 text-muted">Loading distributors...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-5 bg-danger bg-opacity-10">
+        <div className="container">
+          <div className="alert alert-danger text-center" role="alert">
+            <strong>Error:</strong> {error}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (distributors.length === 0) {
+    return (
+      <section className="py-5" style={{background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)'}}>
+        <div className="container">
+          <div className="text-center">
+            <h2 className="display-5 fw-bold mb-3">Our Distributors</h2>
+            <p className="text-muted">No active distributors at the moment.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-5" style={{background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)'}}>
+      <div className="container">
+        <div className="text-center mb-5">
+          <h2 className="display-4 fw-bold text-dark mb-3">Find a Distributor Near You</h2>
+          <p className="lead text-muted">We deliver fresh products through trusted local partners</p>
+        </div>
+
+        <div className="row g-4">
+          {distributors.map((dist) => (
+            <div key={dist._id} className="col-12 col-md-6 col-lg-4">
+              <div className="card h-100 shadow-sm border-0 rounded-3 hover-lift" 
+                   style={{transition: 'all 0.3s ease'}}>
+                <div className="card-body p-4">
+                  {/* Header */}
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <h3 className="h5 fw-bold mb-0">{dist.name}</h3>
+                    <span className="badge bg-success rounded-pill d-flex align-items-center gap-1 px-3 py-2">
+                      <Package size={14} />
+                      <small>In Stock</small>
+                    </span>
+                  </div>
+
+                  {/* City */}
+                  <div className="d-flex align-items-center gap-2 mb-3">
+                    <MapPin size={20} className="text-info" />
+                    <span className="fw-semibold text-dark">{dist.city}</span>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="d-flex align-items-center gap-2 mb-3">
+                    <Phone size={20} className="text-info" />
+                    <a href={`tel:${dist.phone}`} 
+                       className="text-decoration-none text-muted hover-text-info"
+                       style={{transition: 'color 0.2s'}}>
+                      {dist.phone}
+                    </a>
+                  </div>
+
+                  {/* Stock */}
+                  <div className="d-flex justify-content-between align-items-center mb-4 py-2 px-3 bg-light rounded">
+                    <span className="small text-muted">Available Stock:</span>
+                    <span className="fw-bold text-info">{dist.stock} units</span>
+                  </div>
+
+                  {/* Map Link */}
+                  <a
+                    href={dist.locationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-info text-white w-100 d-flex align-items-center justify-content-center gap-2 py-2"
+                    style={{background: 'linear-gradient(90deg, #0d9488 0%, #0891b2 100%)', border: 'none'}}
+                  >
+                    <MapPin size={16} />
+                    View on Google Maps
+                    <ExternalLink size={16} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center mt-5">
+          <p className="text-muted mb-0">
+            Can't find a distributor in your city?{' '}
+            <a href="/contact" className="text-info text-decoration-none fw-semibold">
+              Contact us
+            </a>{' '}
+            to become one!
+          </p>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .hover-lift:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+        .hover-text-info:hover {
+          color: #0891b2 !important;
+        }
+      `}</style>
+    </section>
+  );
+};
+
 
 // Comments Component
 const Comments = ({ blogId }) => {
@@ -3346,6 +3500,7 @@ function App() {
                   <strong>🏆 25 years of trust</strong> | We believe in quality, not in quantity
                 </marquee>
                 <CounterDashboard/>
+                <DistributorsSection/>
                 <Blog />
                 <div className="">
                   <Footers />
