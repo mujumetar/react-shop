@@ -898,9 +898,9 @@ const UltraSmoothHero = () => {
                   <button className="px-4 py-3 border border-white/40 text-white font-medium rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm">
                     View Collection
                   </button> */}
-                </motion.div>
               {/* )} */} 
             {/* </motion.div> */}
+                </motion.div>
 
             {/* Ultra-smooth dots */}
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3">
