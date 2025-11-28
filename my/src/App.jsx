@@ -3704,7 +3704,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate, useParams, useLocation } from 'react-router-dom';
 import white from './img/white.jpeg';
-import black from '/black.jpeg';
+import black from './img/black.jpeg';
 import Navbars from "./components/Navbar";
 import Footers from "./components/Footer";
 import Slider from "./components/Slider";
