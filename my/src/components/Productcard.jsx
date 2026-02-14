@@ -55,7 +55,7 @@ const ProductCard = () => {
       <div className="py-20 text-center">
         <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
         <h3 className="text-xl font-semibold text-gray-700">No products yet</h3>
-        <p className="text-gray-500 mt-2">New winter specials coming soon!</p>
+        <p className="text-gray-500 mt-2">New Summer specials coming soon!</p>
       </div>
     );
   }
@@ -70,10 +70,10 @@ const ProductCard = () => {
             Handmade with Love • Since 1999
           </p>
           <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-            Our Winter Specials
+            Our Summer Specials
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Pure saani & kachariyu made fresh in Dhasa — just like grandmother used to make
+            Pure Spices made fresh in Dhasa — just like grandmother used to make
           </p>
           <div className="mt-6 flex justify-center">
             <div className="w-32 h-1 bg-gradient-to-r from-emerald-600 to-amber-600 rounded-full"></div>

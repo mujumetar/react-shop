@@ -4276,10 +4276,10 @@ const ProductCard = () => {
             Handmade with Love • Since 2005`
           </p>
           <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-            Our Winter Specials
+            Our Summmer Specials
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Pure saani & kachariyu made fresh in Dhasa — just like grandmother used to make
+            Pure Spices made in Dhasa
           </p>
           <div className="mt-6 flex justify-center">
             <div className="w-32 h-1 bg-gradient-to-r from-emerald-600 to-amber-600 rounded-full"></div>
@@ -4596,7 +4596,7 @@ function ProductDetail({ product, onClose }) {
             <div className="space-y-8 max-w-4xl">
               {[
                 { title: "Instant + Long-lasting Energy", desc: "Jaggery provides quick energy while sesame seeds offer sustained fuel from healthy fats and protein." },
-                { title: "Traditional Winter Superfood", desc: "Consumed for generations in Gujarat to stay warm, strong, and healthy during cold months." },
+                { title: "Traditional ", desc: "Consumed for generations in Gujarat to stay warm, strong, and healthy during cold months." },
                 { title: "Family Recipe Since 1999", desc: "Made exactly like our grandmothers did — pure, authentic, and full of love." }
               ].map((point, i) => (
                 <div key={i} className="flex gap-6">
@@ -6268,13 +6268,13 @@ const Blog = () => {
         {/* Warm Header */}
         <div className="text-center mb-16 lg:mb-20">
           <p className="text-emerald-700 font-semibold tracking-wider text-sm uppercase mb-4">
-            From Our Family Diary
+            From Our Factory
           </p>
           <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
             Stories of <span className="text-emerald-700">Tradition & Taste</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Every winter has a story. Every saani pack carries memories.
+            Every Summer has a story. Every Spices pack carries memories.
             Here are a few we’d love to share with you.
           </p>
           <div className="mt-8 flex justify-center">
