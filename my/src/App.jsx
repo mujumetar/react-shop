@@ -1,3735 +1,33 @@
-// import React, { useState, useEffect, createContext, useContext } from 'react';
-// import { BrowserRouter as Router, Route, Routes, useNavigate, useParams, useLocation } from 'react-router-dom';
-// import white from './img/white.jpeg';
-// import black from '/black.jpeg';
-// import Navbars from "./components/Navbar";
-// import Footers from "./components/Footer";
-// import Slider from "./components/Slider";
-// import About from "./components/Aboutsect";
-// import OrderSuccess from "./components/pages/OrderSuccess"
-// import { TermsPage, PrivacyPage, RefundPage } from './components/pages/privacy-policy';
-// import { ArrowLeft, ArrowLeftSquare, ArrowRight, ExternalLink, Heart, Home, Loader2, MessageSquare, Minus, Package, Plus, RefreshCw, Send, Share2, Shield, ShoppingBag, Star, Tag, ToggleLeft, ToggleRight, Trash2, Truck, XCircle } from 'lucide-react';
-// import {
-//   Clock, CheckCircle, Package as PackageIcon,
-//   MapPin, Calendar, IndianRupee, User, Phone, Mail
-// } from 'lucide-react';
-// import contains from "./img/contains.png"
-// import Eachprod from './components/pages/Eachprod';
-// import GlobalLoader from './GlobalLoader';
-// // Cart Context
-// const CartContext = createContext();
-
-// const CartProvider = ({ children }) => {
-//   const [cart, setCart] = useState([]);
-//   const [orders, setOrders] = useState([]);
-//   const [savedAddresses, setSavedAddresses] = useState([]);
-//   const [locating, setLocating] = useState(false);
-//   const [locationError, setLocationError] = useState('');
-//   // Load from localStorage
-//   useEffect(() => {
-//     const storedCart = localStorage.getItem('cart');
-//     const storedOrders = localStorage.getItem('orders');
-//     const storedAddresses = localStorage.getItem('savedAddresses');
-//     if (storedCart) setCart(JSON.parse(storedCart));
-//     if (storedOrders) setOrders(JSON.parse(storedOrders));
-//     if (storedAddresses) setSavedAddresses(JSON.parse(storedAddresses));
-//   }, []);
-
-//   // Save to localStorage
-//   useEffect(() => {
-//     localStorage.setItem('cart', JSON.stringify(cart));
-//   }, [cart]);
-
-//   useEffect(() => {
-//     localStorage.setItem('orders', JSON.stringify(orders));
-//   }, [orders]);
-
-//   useEffect(() => {
-//     localStorage.setItem('savedAddresses', JSON.stringify(savedAddresses));
-//   }, [savedAddresses]);
-
-//   const addToCart = (product) => {
-//     setCart((prev) => {
-//       const existing = prev.find((i) => i.productId === product._id);
-//       if (existing) {
-//         return prev.map((i) =>
-//           i.productId === product._id ? { ...i, quantity: i.quantity + 1 } : i
-//         );
-//       }
-//       return [...prev, { productId: product._id, name: product.name, price: product.price, quantity: 1, image: product.img_url }];
-//     });
-//   };
-
-//   const removeFromCart = (id) => {
-//     setCart((prev) => prev.filter((i) => i.productId !== id));
-//   };
-
-//   const updateQuantity = (id, qty) => {
-//     if (qty <= 0) removeFromCart(id);
-//     else setCart((prev) => prev.map((i) => (i.productId === id ? { ...i, quantity: qty } : i)));
-//   };
-
-//   const clearCart = () => setCart([]);
-
-//   const placeOrder = (orderData) => {
-//     const order = {
-//       ...orderData,
-//       _id: Date.now().toString(),
-//       orderId: `ORD-${new Date().getFullYear()}-${String(orders.length + 1).padStart(3, '0')}`,
-//       status: 'ordered',
-//       createdAt: new Date().toISOString(),
-//       tracking: null,
-//     };
-//     setOrders((prev) => [order, ...prev]);
-//     clearCart();
-
-//     // Save address for reuse
-//     const addrKey = `${order.customerEmail}-${order.shippingAddress.street}`;
-//     if (!savedAddresses.find(a => a.key === addrKey)) {
-//       setSavedAddresses((prev) => [...prev, {
-//         key: addrKey,
-//         name: order.customerName,
-//         email: order.customerEmail,
-//         shippingAddress: order.shippingAddress,
-//         billingAddress: order.billingAddress || order.shippingAddress,
-//       }]);
-//     }
-//   };
-
-//   const updateOrderStatus = (orderId, newStatus) => {
-//     setOrders((prev) =>
-//       prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
-//     );
-//   };
-
-//   return (
-//     <CartContext.Provider value={{
-//       cart, addToCart, removeFromCart, updateQuantity, clearCart,
-//       orders, placeOrder, updateOrderStatus,
-//       savedAddresses
-//     }}>
-//       {children}
-//     </CartContext.Provider>
-//   );
-// };
-
-// const useCart = () => useContext(CartContext);
-// export { CartProvider, useCart };
-// const MyOrders = () => {
-//   const { orders, updateOrderStatus } = useCart();
-//   const navigate = useNavigate();
-
-//   const getStatusIcon = (status) => {
-//     const map = {
-//       ordered: { Icon: Clock, color: 'text-warning' },
-//       confirmed: { Icon: PackageIcon, color: 'text-info' },
-//       shipped: { Icon: Truck, color: 'text-primary' },
-//       delivered: { Icon: CheckCircle, color: 'text-success' },
-//     };
-//     const { Icon, color } = map[status] || map.ordered;
-//     return <Icon className={color} size={20} />;
-//   };
-
-//   const getNextStatus = (current) => {
-//     const flow = ['ordered', 'confirmed', 'shipped', 'delivered'];
-//     const idx = flow.indexOf(current);
-//     return idx < flow.length - 1 ? flow[idx + 1] : null;
-//   };
-
-//   if (orders.length === 0) {
-//     return (
-//       <div className="container py-5 text-center">
-//         <PackageIcon size={80} className="text-muted mb-3" />
-//         <h3>No orders yet</h3>
-//         <button onClick={() => navigate('/products')} className="btn btn-primary mt-3">
-//           Start Shopping
-//         </button>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="container py-4">
-//       <h2 className="display-6 fw-bold mb-4">My Orders</h2>
-//       <div className="row g-4">
-//         {orders.map((order) => (
-//           <div key={order._id} className="col-lg-6">
-//             <div className="card shadow-sm h-100">
-//               <div className="card-body">
-//                 <div className="d-flex justify-content-between align-items-start mb-3">
-//                   <div>
-//                     <h5 className="fw-bold">#{order.orderId}</h5>
-//                     <p className="text-muted small">
-//                       <Calendar size={14} className="me-1" />
-//                       {new Date(order.createdAt).toLocaleDateString()}
-//                     </p>
-//                   </div>
-//                   <div className="text-end">
-//                     {getStatusIcon(order.status)}
-//                     <span className="badge bg-light text-dark ms-2 text-capitalize">
-//                       {order.status}
-//                     </span>
-//                   </div>
-//                 </div>
-
-//                 <div className="border-top pt-3 mb-3">
-//                   <p className="mb-1"><strong>Total:</strong> ₹{order.total}</p>
-//                   <p className="mb-1 text-muted small">
-//                     {order.items.length} item{order.items.length > 1 ? 's' : ''}
-//                   </p>
-//                   <p className="mb-0 text-muted small">
-//                     <MapPin size={14} className="me-1" />
-//                     {order.shippingAddress.city}, {order.shippingAddress.state}
-//                   </p>
-//                 </div>
-
-//                 {getNextStatus(order.status) && (
-//                   <button
-//                     onClick={() => updateOrderStatus(order._id, getNextStatus(order.status))}
-//                     className="btn btn-sm btn-outline-success w-100 mb-2"
-//                   >
-//                     Mark as {getNextStatus(order.status)}
-//                   </button>
-//                 )}
-
-//                 <button
-//                   onClick={() => navigate(`/order/${order._id}`)}
-//                   className="btn btn-link w-100 mt-2"
-//                 >
-//                   View Details →
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// const OrderDetails = () => {
-//   const { id } = useParams();
-//   const { orders, updateOrderStatus } = useCart();
-//   const navigate = useNavigate();
-
-//   const order = orders.find(o => o._id === id);
-//   if (!order) {
-//     return (
-//       <div className="container py-5 text-center">
-//         <h3>Order not found</h3>
-//         <button onClick={() => navigate('/orders')} className="btn btn-primary mt-3">
-//           Back to Orders
-//         </button>
-//       </div>
-//     );
-//   }
-
-//   const statusFlow = [
-//     { status: 'ordered', label: 'Order Placed', Icon: Clock },
-//     { status: 'confirmed', label: 'Confirmed', Icon: PackageIcon },
-//     { status: 'shipped', label: 'Shipped', Icon: Truck },
-//     { status: 'delivered', label: 'Delivered', Icon: CheckCircle },
-//   ];
-
-//   const currentIdx = statusFlow.findIndex(s => s.status === order.status);
-//   const nextStatus = currentIdx < statusFlow.length - 1 ? statusFlow[currentIdx + 1].status : null;
-
-//   return (
-//     <div className="container py-4">
-//       {/* Header */}
-//       <div className="d-flex align-items-center mb-4">
-//         <button onClick={() => navigate(-1)} className="btn btn-outline-secondary me-3">
-//           <ArrowLeft size={20} />
-//         </button>
-//         <h2 className="mb-0">Order #{order.orderId}</h2>
-//       </div>
-
-//       <div className="row g-4">
-//         {/* Tracking Timeline */}
-//         <div className="col-lg-8">
-//           <div className="card shadow-sm">
-//             <div className="card-header bg-primary text-white">
-//               <h5 className="mb-0">Tracking</h5>
-//             </div>
-//             <div className="card-body">
-//               <div className="timeline">
-//                 {statusFlow.map((step, idx) => {
-//                   const active = idx <= currentIdx;
-//                   const current = idx === currentIdx;
-//                   return (
-//                     <div key={step.status} className="d-flex align-items-center mb-4">
-//                       <div
-//                         className={`rounded-circle d-flex align-items-center justify-content-center me-3
-//                           ${active ? 'bg-primary text-white' : 'bg-light text-muted'} 
-//                           ${current ? 'border border-primary border-3' : ''}`}
-//                         style={{ width: 48, height: 48 }}
-//                       >
-//                         <step.Icon size={22} />
-//                       </div>
-//                       <div className="flex-grow-1">
-//                         <h6 className={`mb-0 ${active ? 'fw-bold' : 'text-muted'}`}>
-//                           {step.label}
-//                         </h6>
-//                         {idx < statusFlow.length - 1 && (
-//                           <div
-//                             className={`border-start ms-3 ps-3 ${idx < currentIdx ? 'border-primary' : 'border-light'}`}
-//                             style={{ height: 40 }}
-//                           />
-//                         )}
-//                       </div>
-//                     </div>
-//                   );
-//                 })}
-//               </div>
-
-//               {nextStatus && (
-//                 <button
-//                   onClick={() => updateOrderStatus(order._id, nextStatus)}
-//                   className="btn btn-success w-100 mt-4"
-//                 >
-//                   Mark as {statusFlow.find(s => s.status === nextStatus)?.label}
-//                 </button>
-//               )}
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Order Summary */}
-//         <div className="col-lg-4">
-//           <div className="card shadow-sm sticky-top" style={{ top: '1rem' }}>
-//             <div className="card-header bg-light">
-//               <h5 className="mb-0">Order Summary</h5>
-//             </div>
-//             <div className="card-body">
-//               <p><strong>Status:</strong> <span className="text-capitalize">{order.status}</span></p>
-//               <p><strong>Total:</strong> ₹{order.total}</p>
-//               <p><strong>Items:</strong> {order.items.length}</p>
-//               <p><strong>Placed on:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-
-//               <hr />
-
-//               <h6 className="fw-bold">Shipping Address</h6>
-//               <p className="small">
-//                 {order.shippingAddress.street},<br />
-//                 {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.zip}<br />
-//                 {order.shippingAddress.country}
-//               </p>
-
-//               <h6 className="fw-bold mt-3">Customer</h6>
-//               <p className="small">
-//                 <User size={14} className="me-1" /> {order.customerName}<br />
-//                 <Mail size={14} className="me-1" /> {order.customerEmail}<br />
-//                 <Phone size={14} className="me-1" /> {order.customerPhone}
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Items Table */}
-//       <div className="card shadow-sm mt-4">
-//         <div className="card-header">
-//           <h5 className="mb-0">Items</h5>
-//         </div>
-//         <div className="card-body p-0">
-//           <div className="table-responsive">
-//             <table className="table table-hover mb-0">
-//               <thead className="table-light">
-//                 <tr>
-//                   <th>Product</th>
-//                   <th className="text-center">Qty</th>
-//                   <th className="text-end">Price</th>
-//                   <th className="text-end">Total</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 {order.items.map((item) => (
-//                   <tr key={item.productId}>
-//                     <td>
-//                       <div className="d-flex align-items-center">
-//                         <img
-//                           src={item.image || 'https://via.placeholder.com/60'}
-//                           alt={item.name}
-//                           className="me-3 rounded"
-//                           style={{ width: 50, height: 50, objectFit: 'cover' }}
-//                         />
-//                         <div>
-//                           <strong>{item.name}</strong>
-//                         </div>
-//                       </div>
-//                     </td>
-//                     <td className="text-center">{item.quantity}</td>
-//                     <td className="text-end">₹{item.price}</td>
-//                     <td className="text-end">₹{item.price * item.quantity}</td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-//             </table>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-
-
-// const ScrollToTop = () => {
-//   const { pathname } = useLocation();
-
-//   useEffect(() => {
-//     window.scrollTo(0, 0);
-//   }, [pathname]);
-
-//   return null;
-// };
-
-// // ──────────────────────────────────────────────────────────────
-// // ORDER TRACKING PAGE - Enter Order ID → See Live Status
-// // ──────────────────────────────────────────────────────────────
-
-// const TrackOrder = () => {
-//   const location = useLocation();
-//   const [orderId, setOrderId] = useState("");
-//   const [order, setOrder] = useState(null);
-//   const [error, setError] = useState("");
-//   const [searching, setSearching] = useState(false);
-
-//   // AUTO READ FROM URL ?order=XXX
-//   useEffect(() => {
-//     const params = new URLSearchParams(location.search);
-//     const urlOrderId = params.get("order");
-//     if (urlOrderId) {
-//       setOrderId(urlOrderId);
-//       handleTrack(urlOrderId);
-//     }
-//   }, [location]);
-
-//   const handleTrack = async (id = orderId) => {
-//     if (!id.trim()) {
-//       setError("Please enter Order ID");
-//       return;
-//     }
-
-//     setSearching(true);
-//     setError("");
-//     setOrder(null);
-
-//     try {
-//       const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/${id}`);
-//       if (!res.ok) throw new Error("Order not found");
-
-//       const data = await res.json();
-//       setOrder(data);
-//     } catch (err) {
-//       setError("Order not found. Please check your Order ID.");
-//     } finally {
-//       setSearching(false);
-//     }
-//   };
-
-//   const statusFlow = [
-//     { status: "ordered", label: "Order Placed", icon: Clock, color: "text-warning" },
-//     { status: "confirmed", label: "Confirmed", icon: PackageIcon, color: "text-info" },
-//     { status: "shipped", label: "Shipped", icon: Truck, color: "text-primary" },
-//     { status: "delivered", label: "Delivered", icon: CheckCircle, color: "text-success" },
-//   ];
-
-//   const currentStatus = order?.status || "ordered";
-//   const currentIdx = statusFlow.findIndex((s) => s.status === currentStatus);
-
-//   return (
-//     <div className="container py-5">
-//       <div className="row justify-content-center">
-//         <div className="col-lg-8">
-//           {/* Search Box */}
-//           <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
-//             <div className="card-header bg-gradient-primary text-white text-center py-4">
-//               <Truck size={40} className="mb-3" />
-//               <h2 className="mb-0 fw-bold">Track Your Order</h2>
-//               <p className="mb-0 opacity-90">Enter your Order ID to see live status</p>
-//             </div>
-//             <div className="card-body p-5">
-//               <div className="input-group input-group-lg mb-3">
-//                 <input
-//                   type="text"
-//                   className="form-control border-primary shadow-sm"
-//                   placeholder="e.g. ORD-2025-001 or 69104af8db77bdca89b0a6ba"
-//                   value={orderId}
-//                   onChange={(e) => setOrderId(e.target.value)}
-//                   onKeyPress={(e) => e.key === "Enter" && handleTrack()}
-//                 />
-//                 <button
-//                   className="btn btn-primary px-5"
-//                   onClick={() => handleTrack()}
-//                   disabled={searching}
-//                 >
-//                   {searching ? (
-//                     <>
-//                       <span className="spinner-border spinner-border-sm me-2" />
-//                       Searching...
-//                     </>
-//                   ) : (
-//                     "Track"
-//                   )}
-//                 </button>
-//               </div>
-//               {error && (
-//                 <div className="alert alert-danger d-flex align-items-center">
-//                   <XCircle size={20} className="me-2" />
-//                   {error}
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-
-//           {/* Order Found */}
-//           {order && (
-//             <div className="mt-5">
-//               <div className="text-center mb-5">
-//                 <h1 className="display-6 fw-bold text-success">
-//                   Order Found!
-//                 </h1>
-//                 <p className="lead text-muted">
-//                   Order ID: <strong>{order.orderId || order._id}</strong>
-//                 </p>
-//               </div>
-
-//               {/* Tracking Timeline */}
-//               <div className="card shadow-sm border-0 mb-4">
-//                 <div className="card-body">
-//                   <h4 className="mb-4 text-primary">
-//                     <PackageIcon className="me-2" />
-//                     Order Status
-//                   </h4>
-//                   <div className="timeline position-relative">
-//                     {statusFlow.map((step, idx) => {
-//                       const isActive = idx <= currentIdx;
-//                       const isCurrent = idx === currentIdx;
-//                       const Icon = step.icon;
-
-//                       return (
-//                         <div key={step.status} className="d-flex align-items-center mb-4 position-relative">
-//                           <div
-//                             className={`rounded-circle d-flex align-items-center justify-content-center flex-shrink-0
-//                               ${isActive ? "bg-primary text-white" : "bg-light text-muted"}
-//                               ${isCurrent ? "shadow-lg border border-4 border-white" : ""}
-//                             `}
-//                             style={{ width: 56, height: 56, zIndex: 1 }}
-//                           >
-//                             <Icon size={26} />
-//                           </div>
-
-//                           <div className="ms-4 flex-grow-1">
-//                             <h6 className={`mb-1 ${isActive ? "fw-bold text-dark" : "text-muted"}`}>
-//                               {step.label}
-//                             </h6>
-//                             <small className={isActive ? step.color : "text-muted"}>
-//                               {isCurrent && "In Progress"}
-//                               {idx < currentIdx && "Completed"}
-//                             </small>
-//                           </div>
-
-//                           {idx < statusFlow.length - 1 && (
-//                             <div
-//                               className="position-absolute top-0 start-0 translate-middle-x ms-3"
-//                               style={{
-//                                 width: "4px",
-//                                 height: "60px",
-//                                 backgroundColor: idx < currentIdx ? "#0d6efd" : "#e9ecef",
-//                                 left: "28px",
-//                                 top: "56px",
-//                               }}
-//                             />
-//                           )}
-//                         </div>
-//                       );
-//                     })}
-//                   </div>
-//                 </div>
-//               </div>
-//               <div className="text-center mt-4">
-//                 <p className="text-muted small">
-//                   Ordered on: <strong>{new Date(order.createdAt).toLocaleString()}</strong>
-//                 </p>
-//               </div>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-
-//       <style jsx>{`
-//         .bg-gradient-primary {
-//           background: linear-gradient(135deg, #0d6efd, #6610f2) !important;
-//         }
-//         .timeline::before {
-//           content: '';
-//           position: absolute;
-//           left: 28px;
-//           top: 0;
-//           bottom: 0;
-//           width: 4px;
-//           background: #e9ecef;
-//           z-index: 0;
-//         }
-//       `}</style>
-//     </div>
-//   );
-// };
-
-// // Productcard Component
-// const Productcard = () => {
-//   const navigate = useNavigate();
-//   const { addToCart } = useCart();
-//   const [products, setProducts] = useState([]);
-//   const [selectedProduct, setSelectedProduct] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchProducts = async () => {
-//       try {
-//         const response = await fetch(`${import.meta.env.VITE_API_URL}/products`);
-//         if (!response.ok) {
-//           const text = await response.text();
-//           console.error('Non-JSON response:', text);
-//           throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
-//         }
-//         const data = await response.json();
-//         // console.log('Fetched products:', data);
-//         setProducts(data || []);
-//         setLoading(false);
-//       } catch (err) {
-//         console.error('Error fetching products:', err);
-//         setProducts([]);
-//         setError(err.message);
-//         setLoading(false);
-//       }
-//     };
-//     fetchProducts();
-//   }, []);
-
-//   const openPage = (product) => {
-//     setSelectedProduct(product);
-//   };
-
-//   const handleAddToCart = (product) => {
-//     addToCart(product);
-//     navigate('/cart');
-//   };
-
-//   const imageMap = { white, black };
-
-//   return (
-//     <>
-//       <div className="container-fluid py-5 bg-light">
-//         <div className="container">
-//           {/* Header Section */}
-//           <div className="text-center mb-5" data-aos="fade-up">
-//             <h2 className="display-4 fw-bold mb-3">
-//               <span className="text-primary">Our</span> Products
-//             </h2>
-//             <p className="lead text-muted mb-4">
-//               Discover our curated collection of premium products
-//             </p>
-//             <div className="mx-auto" style={{ width: '80px', height: '4px', background: 'linear-gradient(to right, #0d6efd, #6610f2)', borderRadius: '50px' }}></div>
-//           </div>
-
-//           {/* Loading State */}
-//           {loading && (
-//             <div className="text-center py-5" data-aos="fade-up">
-//               <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
-//                 <span className="visually-hidden">Loading...</span>
-//               </div>
-//               <p className="mt-3 text-muted fw-semibold">Loading products...</p>
-//             </div>
-//           )}
-
-//           {/* Error State */}
-//           {error && (
-//             <div className="alert alert-danger shadow-sm border-0 rounded-4" role="alert" data-aos="fade-up">
-//               <div className="d-flex align-items-center">
-//                 <i className="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
-//                 <div>
-//                   <h5 className="alert-heading mb-1">Error Loading Products</h5>
-//                   <p className="mb-0">{error}</p>
-//                 </div>
-//               </div>
-//             </div>
-//           )}
-
-//           {/* Empty State */}
-//           {!loading && !error && products.length === 0 && (
-//             <div className="text-center py-5" data-aos="fade-up">
-//               <div className="mb-4">
-//                 <i className="bi bi-box-seam fs-1 text-muted"></i>
-//               </div>
-//               <h4 className="text-muted">No products available</h4>
-//               <p className="text-muted">Check back soon for new arrivals!</p>
-//             </div>
-//           )}
-
-//           {/* Products Grid */}
-//           {!loading && !error && products.length > 0 && (
-//             <div className="row g-4">
-//               {products.map((ele, index) => (
-//                 <div
-//                   className="col-lg-4 col-md-6 col-sm-6"
-//                   data-aos="fade-up"
-//                   data-aos-duration="800"
-//                   data-aos-delay={index * 50}
-//                   key={ele._id || index}
-//                 >
-//                   <div
-//                     className="card border-0 shadow-sm h-100 product-card-hover"
-//                     onClick={() => navigate(`/product/${ele._id}`)}
-//                     style={{
-//                       cursor: 'pointer',
-//                       transition: 'all 0.3s ease',
-//                       borderRadius: '1rem',
-//                       overflow: 'hidden'
-//                     }}
-//                     onMouseEnter={(e) => {
-//                       e.currentTarget.style.transform = 'translateY(-8px)';
-//                       e.currentTarget.style.boxShadow = '0 1rem 3rem rgba(0,0,0,0.175)';
-//                     }}
-//                     onMouseLeave={(e) => {
-//                       e.currentTarget.style.transform = 'translateY(0)';
-//                       e.currentTarget.style.boxShadow = '0 0.5rem 1rem rgba(0,0,0,0.15)';
-//                     }}
-//                   >
-//                     {/* Image Container */}
-//                     <div
-//                       className="position-relative overflow-hidden bg-light"
-//                       style={{
-//                         height: '280px',
-//                         background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
-//                       }}
-//                     >
-//                       <img
-//                         src={ele.img_url || imageMap.black}
-//                         alt={ele.name}
-//                         className="w-100 h-100 object-fit-cover"
-//                         style={{
-//                           transition: 'transform 0.5s ease'
-//                         }}
-//                         onMouseEnter={(e) => {
-//                           e.currentTarget.style.transform = 'scale(1.1)';
-//                         }}
-//                         onMouseLeave={(e) => {
-//                           e.currentTarget.style.transform = 'scale(1)';
-//                         }}
-//                       />
-
-//                       {/* Overlay Badge */}
-//                       <div
-//                         className="position-absolute top-0 start-0 m-3"
-//                         style={{
-//                           opacity: 0,
-//                           transition: 'opacity 0.3s ease'
-//                         }}
-//                         onMouseEnter={(e) => {
-//                           e.currentTarget.parentElement.querySelector('.hover-overlay').style.opacity = '1';
-//                         }}
-//                       >
-//                         <span className="badge bg-white text-dark shadow-sm">
-//                           <i className="bi bi-heart text-danger"></i>
-//                         </span>
-//                       </div>
-
-//                       {/* Hover Overlay */}
-//                       <div
-//                         className="position-absolute bottom-0 start-0 end-0 hover-overlay"
-//                         style={{
-//                           height: '100%',
-//                           background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
-//                           opacity: 0,
-//                           transition: 'opacity 0.3s ease'
-//                         }}
-//                       ></div>
-
-//                       {/* Quick View Button (appears on hover) */}
-//                       <div
-//                         className="position-absolute top-50 start-50 translate-middle quick-view-btn"
-//                         style={{
-//                           opacity: 0,
-//                           transition: 'opacity 0.3s ease'
-//                         }}
-//                       >
-//                         <button className="btn btn-light btn-sm rounded-pill shadow">
-//                           <i className="bi bi-eye me-2"></i>See more
-//                         </button>
-//                       </div>
-//                     </div>
-
-//                     {/* Card Body */}
-//                     <div className="card-body p-4">
-//                       <h5 className="card-title fw-bold mb-2 text-truncate" style={{ fontSize: '1.1rem' }}>
-//                         {ele.name || 'Unnamed Product'}
-//                       </h5>
-
-//                       {/* Price */}
-//                       <div className="d-flex align-items-center justify-content-between mb-3">
-//                         <h4 className="mb-0 fw-bold" style={{
-//                           background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)',
-//                           WebkitBackgroundClip: 'text',
-//                           WebkitTextFillColor: 'transparent',
-//                           backgroundClip: 'text'
-//                         }}>
-//                           ₹{ele.price || 0}
-//                         </h4>
-//                         <div className="text-muted small">
-//                           <i className="bi bi-star-fill text-warning"></i>
-//                           <i className="bi bi-star-fill text-warning"></i>
-//                           <i className="bi bi-star-fill text-warning"></i>
-//                           <i className="bi bi-star-fill text-warning"></i>
-//                           <i className="bi bi-star-half text-warning"></i>
-//                         </div>
-//                       </div>
-
-//                       {/* Action Buttons */}
-//                       <div className="d-grid gap-2">
-//                         <button
-//                           className="btn btn-primary rounded-pill fw-semibold"
-//                           style={{
-//                             background: 'linear-gradient(135deg, #0d6efd 0%, #6610f2 100%)',
-//                             border: 'none',
-//                             transition: 'all 0.3s ease'
-//                           }}
-//                           onClick={(e) => {
-//                             e.stopPropagation();
-//                             navigate(`/product/${ele._id}`);
-//                           }}
-//                           onMouseEnter={(e) => {
-//                             e.currentTarget.style.transform = 'scale(1.05)';
-//                             e.currentTarget.style.boxShadow = '0 0.5rem 1rem rgba(13,110,253,0.3)';
-//                           }}
-//                           onMouseLeave={(e) => {
-//                             e.currentTarget.style.transform = 'scale(1)';
-//                             e.currentTarget.style.boxShadow = 'none';
-//                           }}
-//                         >
-//                           <i className="bi bi-cart-plus me-2"></i>
-//                           Order Now
-//                         </button>
-//                       </div>
-//                     </div>
-
-//                     {/* Card Footer (Optional - for additional info) */}
-//                     {/* <div className="card-footer bg-transparent border-0 pt-0 pb-3 px-4">
-//                       <div className="d-flex justify-content-between align-items-center text-muted small">
-//                         <span><i className="bi bi-truck me-1"></i> 5 ⭐⭐⭐⭐⭐</span>
-//                         <span><i className="bi bi-shield-check me-1"></i>200+ orders</span>
-//                       </div>
-//                     </div> */}
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </div>
-//       </div>
-
-//       <style>{`
-//       .product-card-hover:hover .hover-overlay,
-//       .product-card-hover:hover .quick-view-btn {
-//         opacity: 1 !important;
-//       }
-
-//       .card {
-//         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-//       }
-
-//       .object-fit-cover {
-//         object-fit: cover;
-//       }
-//     `}</style>
-//     </>
-//   );
-// };
-
-// // Eachprod Component
-// const ProductDetail = ({ product, onClose }) => {
-//   const [quantity, setQuantity] = useState(1);
-//   const [selectedImage, setSelectedImage] = useState(product.img_url);
-//   const [showToast, setShowToast] = useState(false);
-//   const navigate = useNavigate();   // <-- Add this line
-//   const { addToCart } = useCart();
-//   if (!product) return null;
-//   const handleAddToCart = () => {
-//     // Use context instead of event
-//     for (let i = 0; i < quantity; i++) {
-//       addToCart(product);
-//     }
-
-//     setShowToast(true);
-//     setTimeout(() => setShowToast(false), 3000);
-//     navigate('/cart');
-//   };
-
-//   const increment = () => setQuantity(q => q + 1);
-//   const decrement = () => setQuantity(q => Math.max(1, q - 1));
-
-//   const averageRating = 4.5;
-//   const totalReviews = 128;
-
-//   return (
-//     <>
-//       <div className='container'>
-//         {/* Toast */}
-//         {showToast && (
-//           <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
-//             <div className="toast show align-items-center text-white bg-success border-0">
-//               <div className="d-flex">
-//                 <div className="toast-body">
-//                   <ShoppingBag size={18} className="me-2" />
-//                   {quantity} × {product.name} added to cart!
-//                 </div>
-//                 <button
-//                   type="button"
-//                   className="btn-close btn-close-white me-2 m-auto"
-//                   onClick={() => setShowToast(false)}
-//                 />
-//               </div>
-//             </div>
-//           </div>
-//         )}
-
-//         <div className="container-fluid py-4 py-md-5">
-//           {/* Back Button */}
-//           <div className="mb-4">
-//             <button
-//               onClick={onClose}
-//               className="btn text-decoration-none d-flex align-items-center p-2"
-//             >
-//               <ArrowLeft size={20} className="me-2 " />
-//               Back to Products
-//             </button>
-//           </div>
-
-//           <div className="row g-4 g-xl-5">
-//             {/* Image Gallery */}
-//             <div className="col-lg-6">
-//               <div className="sticky-top" style={{ top: '1rem' }}>
-//                 <div className="mb-3">
-//                   <img
-//                     src={selectedImage || 'https://via.placeholder.com/600'}
-//                     alt={product.name}
-//                     className="img-fluid rounded shadow-sm "
-//                     style={{ height: '500px', width: '100%', objectFit: 'cover' }}
-//                   />
-//                 </div>
-//                 {/* <div className="d-flex gap-2 flex-wrap">
-//                   {[product.img_url, 'https://via.placeholder.com/150?text=2', 'https://via.placeholder.com/150?text=3'].map((img, i) => (
-//                     <img
-//                       key={i}
-//                       src={img}
-//                       alt={`Thumbnail ${i + 1}`}
-//                       className={`rounded cursor-pointer ${selectedImage === img ? 'border border-primary border-3' : 'border'}`}
-//                       style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-//                       onClick={() => setSelectedImage(img)}
-//                     />
-//                   ))}
-//                 </div> */}
-//               </div>
-//             </div>
-
-//             {/* Product Info */}
-//             <div className="col-lg-6">
-//               <div className="h-100 d-flex flex-column">
-//                 <div className="mb-4">
-//                   <h1 className="display-5 fw-bold mb-3">{product.name}</h1>
-
-//                   {/* Rating */}
-//                   <div className="d-flex align-items-center mb-3">
-//                     <div className="me-2">
-//                       {[...Array(5)].map((_, i) => (
-//                         <Star
-//                           key={i}
-//                           size={20}
-//                           className={i < Math.floor(averageRating) ? 'text-warning fill-warning' : 'text-muted'}
-//                         />
-//                       ))}
-//                     </div>
-//                     <span className="text-muted small">
-//                       {averageRating} ({totalReviews} reviews)
-//                     </span>
-//                   </div>
-
-//                   <div className="d-flex-align-items-baseline mb-4">
-//                     <h2 className="text-primary me-3">₹{product.price?.toLocaleString()}</h2>
-//                     <del className="text-muted">₹{(product.price * 1.3).toFixed(0)}</del>
-//                     <span className="badge bg-success ms-2">23% OFF</span>
-//                   </div>
-
-//                   <p className="lead text-muted">
-//                     {product.description || 'High-quality product with premium materials. Perfect for daily use.'}
-//                   </p>
-//                 </div>
-
-//                 {/* Quantity */}
-//                 <div className="mb-4">
-
-//                   {/* <div className="d-flex align-items-center mb-3">
-//                     <span className="me-3 fw-semibold">Quantity:</span>
-//                     <div className="input-group" style={{ width: '150px' }}>
-//                       <button className="btn btn-outline-secondary" onClick={decrement}>
-//                         <Minus size={16} />
-//                       </button>
-//                       <input
-//                         type="text"
-//                         className="form-control text-center fw-bold"
-//                         value={quantity}
-//                         readOnly
-//                       />
-//                       <button className="btn btn-outline-secondary" onClick={increment}>
-//                         <Plus size={16} />
-//                       </button>
-//                     </div>
-//                     <span className="ms-3 fw-semibold">In KGs</span>
-//                   </div> */}
-
-//                   <div className="d-grid d-md-flex gap-2">
-//                     <button
-//                       onClick={handleAddToCart}
-//                       className="btn btn-primary btn-lg flex-grow-1 d-flex align-items-center justify-content-center"
-//                     >
-//                       <ShoppingBag className="me-2" size={20} />
-//                       Add to Cart
-//                     </button>
-
-//                     <button
-//                       className="btn btn-outline-secondary btn-lg d-flex align-items-center justify-content-center"
-//                       onClick={async () => {
-//                         const url = window.location.href; // current page URL
-//                         const shareData = {
-//                           title: `🔥 ${product.name} is a must-have! 🔥`,
-//                           text: `✨ Your next favorite purchase is here: ${product.name} ✨\nGrab it now 👉 ${url}`,
-//                           url,
-//                         };
-
-//                         try {
-//                           if (navigator.share) {
-//                             await navigator.share(shareData);
-//                             // console.log('Product shared successfully');
-//                           } else {
-//                             // Fallback: copy link to clipboard
-//                             await navigator.clipboard.writeText(url);
-//                             alert('Link copied to clipboard!');
-//                           }
-//                         } catch (err) {
-//                           console.error('Error sharing:', err);
-//                         }
-//                       }}
-//                     >
-//                       <Share2 size={20} className="me-1" /> Share
-//                     </button>
-//                   </div>
-//                   <div className=" my-5">
-
-//                     {/* <div>
-//                       <marquee className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background" behavior="" direction="">  <b>25 years of trust</b></marquee>
-//                       <marquee behavior="" direction="">   <b>we belive in quality not in quantity</b></marquee>
-//                       <p> <b>Latest Products</b>
-//                         <br />
-//                         {product.name} kachariyu/saani
-
-
-//                         <ul>
-//                           <li> No added flavours.</li>
-//                           <li> No harmful Chemicals.</li>
-//                           <li>Best for winters.</li>
-//                           <li> No additional colours.</li>
-//                           <li>  100% natural and healthy.</li>
-//                           <li> Healthy for everyone ☺️.</li>
-//                         </ul>
-//                       </p>
-//                       <b> It contains</b>
-//                       <img className="img-fluid" src={contains} alt="" />
-
-//                       <b>✅ Health Review</b>
-//                       <br />
-//                       Energy-dense (~474 kcal per 100 g) → great for winters, boosts energy.
-//                       <br />
-//                       Balanced macros → Carbs from jaggery + healthy fats & protein from sesame.
-//                       <br />
-//                       Rich in minerals → especially Calcium (good for bones), Iron (blood health), Magnesium, and Potassium.
-//                       <br />
-//                       Fiber content (6 g/100 g) → supports digestion.
-//                       <br />
-//                       Antioxidants → Sesamin & sesamolin from sesame + minerals from jaggery.
-//                       <br />
-//                       <b>🏆 Why This Mixture is Powerful</b>
-//                       <br />
-//                       Gives instant energy (from jaggery).
-//                       <br />
-//                       Provides long-lasting satiety & strength (from sesame protein & fats).
-//                       <br />
-//                       Traditional wisdom = perfect winter superfood 🌿.
-//                     </div> */}
-//                     {/* Trust Banner */}
-//                     <div className="alert alert-success text-center mb-4" role="alert">
-//                       <strong>🏆 25 years of trust</strong> | We believe in quality, not in quantity
-//                     </div>
-
-//                     {/* Product Header */}
-//                     <div className="card shadow-sm mb-4">
-//                       <div className="card-body">
-//                         <h2 className="card-title text-primary mb-3">
-//                           {/* <span className="badge bg-primary me-2">Latest</span> */}
-//                           {product.name}
-//                         </h2>
-
-//                         {/* Key Features */}
-//                         <div className="row g-3">
-//                           <div className="col-md-6">
-//                             <ul className="list-group list-group-flush">
-//                               <li className="list-group-item">✓ No added flavours</li>
-//                               <li className="list-group-item">✓ No harmful chemicals</li>
-//                               <li className="list-group-item">✓ Best for winters</li>
-//                             </ul>
-//                           </div>
-//                           <div className="col-md-6">
-//                             <ul className="list-group list-group-flush">
-//                               <li className="list-group-item">✓ No additional colours</li>
-//                               <li className="list-group-item">✓ 100% natural and healthy</li>
-//                               <li className="list-group-item">✓ Healthy for everyone ☺️</li>
-//                             </ul>
-//                           </div>
-//                         </div>
-//                       </div>
-//                     </div>
-
-//                     {/* Ingredients Section */}
-//                     <div className="card shadow-sm mb-4">
-//                       <div className="card-header bg-success text-white">
-//                         <h4 className="mb-0">📦 It Contains</h4>
-//                       </div>
-//                       <div className="card-body text-center">
-//                         <img className="img-fluid rounded" src={contains} alt="Product ingredients" />
-//                       </div>
-//                     </div>
-
-//                     {/* Health Review */}
-//                     <div className="card shadow-sm mb-4">
-//                       <div className="card-header bg-info text-white">
-//                         <h4 className="mb-0">✅ Health Review</h4>
-//                       </div>
-//                       <div className="card-body">
-//                         <div className="row g-3">
-//                           <div className="col-lg-6">
-//                             <div className="p-3 border rounded bg-light">
-//                               <strong>⚡ Energy-dense</strong>
-//                               <p className="mb-0 small">~474 kcal per 100g - great for winters, boosts energy</p>
-//                             </div>
-//                           </div>
-//                           <div className="col-lg-6">
-//                             <div className="p-3 border rounded bg-light">
-//                               <strong>⚖️ Balanced macros</strong>
-//                               <p className="mb-0 small">Carbs from jaggery + healthy fats & protein from sesame</p>
-//                             </div>
-//                           </div>
-//                           <div className="col-lg-6">
-//                             <div className="p-3 border rounded bg-light">
-//                               <strong>💎 Rich in minerals</strong>
-//                               <p className="mb-0 small">Calcium (bones), Iron (blood), Magnesium, Potassium</p>
-//                             </div>
-//                           </div>
-//                           <div className="col-lg-6">
-//                             <div className="p-3 border rounded bg-light">
-//                               <strong>🌾 Fiber content</strong>
-//                               <p className="mb-0 small">6g/100g - supports healthy digestion</p>
-//                             </div>
-//                           </div>
-//                           <div className="col-12">
-//                             <div className="p-3 border rounded bg-light">
-//                               <strong>🛡️ Antioxidants</strong>
-//                               <p className="mb-0 small">Sesamin & sesamolin from sesame + minerals from jaggery</p>
-//                             </div>
-//                           </div>
-//                         </div>
-//                       </div>
-//                     </div>
-
-//                     {/* Why This Mixture is Powerful */}
-//                     <div className="card shadow-sm border-warning">
-//                       <div className="card-header bg-warning">
-//                         <h4 className="mb-0">🏆 Why This Mixture is Powerful</h4>
-//                       </div>
-//                       <div className="card-body">
-//                         <div className="list-group list-group-flush">
-//                           <div className="list-group-item d-flex align-items-start">
-//                             <span className="badge bg-success me-3 mt-1">1</span>
-//                             <div>
-//                               <strong>Instant Energy</strong>
-//                               <p className="mb-0 text-muted">Quick energy boost from natural jaggery</p>
-//                             </div>
-//                           </div>
-//                           <div className="list-group-item d-flex align-items-start">
-//                             <span className="badge bg-success me-3 mt-1">2</span>
-//                             <div>
-//                               <strong>Long-lasting Satiety & Strength</strong>
-//                               <p className="mb-0 text-muted">From sesame protein & healthy fats</p>
-//                             </div>
-//                           </div>
-//                           <div className="list-group-item d-flex align-items-start">
-//                             <span className="badge bg-success me-3 mt-1">3</span>
-//                             <div>
-//                               <strong>Traditional Wisdom</strong>
-//                               <p className="mb-0 text-muted">Perfect winter superfood 🌿</p>
-//                             </div>
-//                           </div>
-//                         </div>
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-
-//         </div>
-//       </div>
-
-//     </>
-//   );
-// };
-
-
-// // Cart Component
-
-// const Cart = () => {
-//   const { cart, removeFromCart, updateQuantity } = useCart();
-//   const navigate = useNavigate();
-
-//   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-//   const shipping = subtotal > 1000 ? 0 : 1;
-//   const discount = 0; // You can add coupon logic later
-//   const total = subtotal + shipping - discount;
-
-//   const handleCheckout = () => {
-//     navigate('/checkout', { state: { cart } });
-//   };
-
-//   const increment = (id) => {
-//     const item = cart.find(i => i.productId === id);
-//     updateQuantity(id, item.quantity + 1);
-//   };
-
-//   const decrement = (id) => {
-//     const item = cart.find(i => i.productId === id);
-//     if (item.quantity > 1) {
-//       updateQuantity(id, item.quantity - 1);
-//     }
-//   };
-
-//   if (cart.length === 0) {
-//     return (
-//       <div className="container py-5 text-center">
-//         <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style={{ width: 120, height: 120 }}>
-//           <ShoppingBag size={60} className="text-primary" />
-//         </div>
-//         <h3 className="mb-3">Your cart is empty</h3>
-//         <p className="text-muted mb-4">Looks like you haven't added anything yet.</p>
-//         <button onClick={() => navigate('/products')} className="btn btn-primary btn-lg px-5">
-//           Continue Shopping
-//         </button>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="container py-4 py-md-5">
-//       <h2 className="text-center mb-4 fw-bold text-primary">Your Cart</h2>
-
-//       {/* Free Shipping Alert */}
-//       <div className="alert alert-success d-flex align-items-center mb-4 shadow-sm rounded">
-//         <Truck className="me-3" size={24} />
-//         <div>
-//           <strong>
-//             {subtotal >= 1 ? (
-//               <>Free Shipping Unlocked!</>
-//             ) : (
-//               <>Add <span className="text-danger">₹{(1000 - subtotal).toLocaleString()}</span> more for FREE shipping</>
-//             )}
-//           </strong>
-//           <div className="progress mt-2" style={{ height: '6px' }}>
-//             <div
-//               className="progress-bar bg-success"
-//               style={{ width: `${Math.min((subtotal / 1000) * 100, 100)}%` }}
-//             />
-//           </div>
-//         </div>
-//       </div>
-
-//       <div className="row g-4">
-//         {/* Cart Items */}
-//         <div className="col-lg-8">
-//           <div className="card shadow-sm border-0">
-//             {cart.map((item) => (
-//               <div key={item.productId} className="card-body border-bottom">
-//                 <div className="row align-items-center g-3">
-//                   {/* Product Image */}
-//                   <div className="col-4 col-md-3 col-lg-2">
-//                     <img
-//                       src={item.image || 'https://via.placeholder.com/150'}
-//                       alt={item.name}
-//                       className="img-fluid rounded shadow-sm"
-//                       style={{ height: 90, objectFit: 'cover' }}
-//                     />
-//                   </div>
-
-//                   {/* Product Details */}
-//                   <div className="col-8 col-md-9 col-lg-10">
-//                     <div className="d-flex justify-content-between align-items-start mb-2">
-//                       <div>
-//                         <h6 className="mb-1 fw-bold">{item.name}</h6>
-//                         <p className="text-muted small mb-0">₹{item.price.toLocaleString()} / kg</p>
-//                       </div>
-//                       <button
-//                         onClick={() => removeFromCart(item.productId)}
-//                         className="btn btn-sm btn-outline-danger d-flex align-items-center"
-//                       >
-//                         <Trash2 size={16} />
-//                       </button>
-//                     </div>
-
-//                     {/* Quantity & Total */}
-//                     <div className="d-flex justify-content-between align-items-center mt-3">
-//                       <div className="input-group" style={{ width: '140px' }}>
-//                         <button
-//                           className="btn btn-outline-secondary"
-//                           onClick={() => decrement(item.productId)}
-//                           disabled={item.quantity <= 1}
-//                         >
-//                           <Minus size={14} />
-//                         </button>
-//                         <input
-//                           type="text"
-//                           className="form-control text-center fw-bold"
-//                           value={item.quantity}
-//                           readOnly
-//                         />
-//                         <button
-//                           className="btn btn-outline-secondary"
-//                           onClick={() => increment(item.productId)}
-//                         >
-//                           <Plus size={14} />
-//                         </button>
-//                       </div>
-
-//                       <div className="text-end">
-//                         <p className="text-muted small mb-0">Item Total</p>
-//                         <h5 className="text-primary mb-0">
-//                           ₹{(item.price * item.quantity).toLocaleString()}
-//                         </h5>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* Order Summary */}
-//         <div className="col-lg-4">
-//           <div className="card shadow-sm sticky-top" style={{ top: '1rem' }}>
-//             <div className="card-header bg-primary text-white">
-//               <h5 className="mb-0">Order Summary</h5>
-//             </div>
-//             <div className="card-body">
-//               <ul className="list-group list-group-flush mb-3">
-//                 <li className="list-group-item d-flex justify-content-between py-2">
-//                   <span>Subtotal</span>
-//                   <strong>₹{subtotal.toLocaleString()}</strong>
-//                 </li>
-//                 <li className="list-group-item d-flex justify-content-between py-2 text-success">
-//                   <span>Discount</span>
-//                   <strong>-₹{discount.toLocaleString()}</strong>
-//                 </li>
-//                 <li className="list-group-item d-flex justify-content-between py-2">
-//                   <span>Shipping</span>
-//                   <strong>
-//                     {shipping === 0 ? (
-//                       <span className="text-success">FREE</span>
-//                     ) : (
-//                       `₹${shipping}`
-//                     )}
-//                   </strong>
-//                 </li>
-//               </ul>
-
-//               <div className="border-top pt-3 mb-3">
-//                 <div className="d-flex justify-content-between align-items-center">
-//                   <h5 className="mb-0">Total</h5>
-//                   <h4 className="text-primary mb-0">₹{total.toLocaleString()}</h4>
-//                 </div>
-//                 <small className="text-muted">Inclusive of all taxes</small>
-//               </div>
-
-//               {/* Coupon Input */}
-//               <div className="input-group mb-3">
-//                 <input
-//                   type="text"
-//                   className="form-control"
-//                   placeholder="Coupon code"
-//                   aria-label="Coupon code"
-//                 />
-
-//                 <button className="btn btn-outline-primary" type="button">
-//                   Apply
-//                 </button>
-//               </div>
-
-//               <button
-//                 onClick={handleCheckout}
-//                 className="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center shadow-sm"
-//               >
-//                 Proceed to Checkout
-//                 <ArrowRight className="ms-2" size={18} />
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// const ProductDetailWrapper = () => {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-//   const [product, setProduct] = useState(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchProduct = async () => {
-//       try {
-//         const res = await fetch(`${import.meta.env.VITE_API_URL}/products/${id}`);
-//         const data = await res.json();
-//         setProduct(data);
-//       } catch (err) {
-//         console.error(err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchProduct();
-//   }, [id]);
-
-//   if (loading) return <div className="container py-5 text-center"><div className="spinner-border"></div></div>;
-//   if (!product) return <div className="container py-5 text-center"><h3>Product not found</h3></div>;
-
-//   return <ProductDetail product={product} onClose={() => navigate(-1)} />;
-// };
-
-
-// // console.log("API URL:", import.meta.env.VITE_API_URL);
-
-// const Contact = () => {
-//   const [formData, setFormData] = useState({
-//     name: '',
-//     email: '',
-//     message: '',
-//   });
-//   const [formErrors, setFormErrors] = useState({});
-//   const [success, setSuccess] = useState(null);
-//   const [loading, setLoading] = useState(false);
-
-//   const handleInputChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//     if (formErrors[name]) {
-//       setFormErrors((prev) => ({ ...prev, [name]: '' }));
-//     }
-//   };
-
-//   const validateForm = () => {
-//     const errors = {};
-//     if (!formData.name.trim()) errors.name = 'Name is required';
-//     if (!formData.email.trim()) {
-//       errors.email = 'Email is required';
-//     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-//       errors.email = 'Invalid email format';
-//     }
-//     if (!formData.message.trim()) errors.message = 'Message is required';
-//     return errors;
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const errors = validateForm();
-//     if (Object.keys(errors).length > 0) {
-//       setFormErrors(errors);
-//       return;
-//     }
-//     setLoading(true);
-//     try {
-//       // Replace with your actual API URL
-//       // const apiUrl = 'https://api.example.com';
-//       const response = await fetch(`${import.meta.env.VITE_API_URL}/contact`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(formData),
-//       });
-//       if (!response.ok) {
-//         const text = await response.text();
-//         console.error('Non-JSON response:', text);
-//         throw new Error(`Failed to submit contact form: ${response.status} ${response.statusText}`);
-//       }
-//       const data = await response.json();
-//       setSuccess('Your message has been sent successfully!');
-//       setFormData({ name: '', email: '', message: '' });
-//       setTimeout(() => setSuccess(null), 3000);
-//     } catch (error) {
-//       console.error('Error submitting contact form:', error);
-//       setFormErrors({ submit: error.message });
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <>
-//       <link
-//         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
-//         rel="stylesheet"
-//       />
-//       <link
-//         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-//         rel="stylesheet"
-//       />
-
-//       <style>{`
-//         body {
-//           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-//           min-height: 100vh;
-//           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-//         }
-
-//         .contact-wrapper {
-//           min-height: 100vh;
-//           display: flex;
-//           align-items: center;
-//           padding: 40px 15px;
-//         }
-
-//         .contact-header {
-//           text-align: center;
-//           color: white;
-//           margin-bottom: 40px;
-//         }
-
-//         .contact-header h2 {
-//           font-size: 2.5rem;
-//           font-weight: 700;
-//           margin-bottom: 10px;
-//           text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-//         }
-
-//         .contact-header p {
-//           font-size: 1.1rem;
-//           opacity: 0.95;
-//         }
-
-//         .contact-card {
-//           background: white;
-//           border-radius: 20px;
-//           box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-//           padding: 50px;
-//           border: none;
-//         }
-
-//         .form-label {
-//           font-weight: 600;
-//           color: #333;
-//           margin-bottom: 10px;
-//           font-size: 0.95rem;
-//         }
-
-//         .input-icon {
-//           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-//           border: none;
-//           color: white;
-//           width: 50px;
-//           display: flex;
-//           align-items: center;
-//           justify-content: center;
-//           border-radius: 10px 0 0 10px;
-//           border: 2px solid #e0e0e0;
-//           border-right: none;
-//         }
-
-//         .form-control, .form-select {
-//           border: 2px solid #e0e0e0;
-//           padding: 12px 15px;
-//           border-radius: 10px;
-//           transition: all 0.3s ease;
-//           font-size: 1rem;
-//         }
-
-//         .input-group .form-control {
-//           border-left: none;
-//           border-radius: 0 10px 10px 0;
-//         }
-
-//         .form-control:focus {
-//           border-color: #667eea;
-//           box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-//         }
-
-//         .input-group:focus-within .input-icon {
-//           border-color: #667eea;
-//         }
-
-//         .input-group:focus-within .form-control {
-//           border-color: #667eea;
-//         }
-
-//         .form-control.is-invalid {
-//           border-color: #dc3545;
-//         }
-
-//         .input-group .form-control.is-invalid {
-//           border-color: #dc3545;
-//         }
-
-//         .input-group:has(.is-invalid) .input-icon {
-//           border-color: #dc3545;
-//           background: #dc3545;
-//         }
-
-//         .btn-submit {
-//           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-//           border: none;
-//           padding: 14px 30px;
-//           font-size: 1.1rem;
-//           font-weight: 600;
-//           border-radius: 10px;
-//           transition: all 0.3s ease;
-//           width: 100%;
-//           color: white;
-//         }
-
-//         .btn-submit:hover:not(:disabled) {
-//           transform: translateY(-2px);
-//           box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-//         }
-
-//         .btn-submit:disabled {
-//           opacity: 0.6;
-//           cursor: not-allowed;
-//         }
-
-//         .alert {
-//           border-radius: 10px;
-//           border: none;
-//           padding: 15px 20px;
-//           display: flex;
-//           align-items: center;
-//           gap: 10px;
-//         }
-
-//         .alert-success {
-//           background-color: #d4edda;
-//           color: #155724;
-//         }
-
-//         .alert-danger {
-//           background-color: #f8d7da;
-//           color: #721c24;
-//         }
-
-//         .footer-text {
-//           text-align: center;
-//           color: white;
-//           margin-top: 20px;
-//           font-size: 0.9rem;
-//           opacity: 0.9;
-//         }
-
-//         @media (max-width: 768px) {
-//           .contact-card {
-//             padding: 30px 20px;
-//           }
-
-//           .contact-header h2 {
-//             font-size: 2rem;
-//           }
-//         }
-//       `}</style>
-
-//       <div className="contact-wrapper">
-//         <div className="container">
-//           <div className="row justify-content-center">
-//             <div className="col-lg-8">
-//               <div className="contact-header">
-//                 <h2>Get In Touch</h2>
-//                 <p>We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
-//               </div>
-
-//               <div className="card contact-card">
-//                 {success && (
-//                   <div className="alert alert-success mb-4">
-//                     <i className="fas fa-check-circle"></i>
-//                     <span>{success}</span>
-//                   </div>
-//                 )}
-
-//                 {formErrors.submit && (
-//                   <div className="alert alert-danger mb-4">
-//                     <i className="fas fa-exclamation-circle"></i>
-//                     <span>{formErrors.submit}</span>
-//                   </div>
-//                 )}
-
-//                 <div>
-//                   <div className="mb-4">
-//                     <label htmlFor="name" className="form-label">
-//                       Full Name
-//                     </label>
-//                     <div className="input-group">
-//                       <span className="input-icon">
-//                         <i className="fas fa-user"></i>
-//                       </span>
-//                       <input
-//                         type="text"
-//                         className={`form-control ${formErrors.name ? 'is-invalid' : ''}`}
-//                         id="name"
-//                         name="name"
-//                         value={formData.name}
-//                         onChange={handleInputChange}
-//                         placeholder="John Doe"
-//                       />
-//                       {formErrors.name && (
-//                         <div className="invalid-feedback d-block">
-//                           <i className="fas fa-exclamation-circle me-1"></i>
-//                           {formErrors.name}
-//                         </div>
-//                       )}
-//                     </div>
-//                   </div>
-
-//                   <div className="mb-4">
-//                     <label htmlFor="email" className="form-label">
-//                       Email Address
-//                     </label>
-//                     <div className="input-group">
-//                       <span className="input-icon">
-//                         <i className="fas fa-envelope"></i>
-//                       </span>
-//                       <input
-//                         type="email"
-//                         className={`form-control ${formErrors.email ? 'is-invalid' : ''}`}
-//                         id="email"
-//                         name="email"
-//                         value={formData.email}
-//                         onChange={handleInputChange}
-//                         placeholder="john@example.com"
-//                       />
-//                       {formErrors.email && (
-//                         <div className="invalid-feedback d-block">
-//                           <i className="fas fa-exclamation-circle me-1"></i>
-//                           {formErrors.email}
-//                         </div>
-//                       )}
-//                     </div>
-//                   </div>
-
-//                   <div className="mb-4">
-//                     <label htmlFor="message" className="form-label">
-//                       Your Message
-//                     </label>
-//                     <div className="input-group">
-//                       <span className="input-icon align-items-start pt-3">
-//                         <i className="fas fa-comment"></i>
-//                       </span>
-//                       <textarea
-//                         className={`form-control ${formErrors.message ? 'is-invalid' : ''}`}
-//                         id="message"
-//                         name="message"
-//                         value={formData.message}
-//                         onChange={handleInputChange}
-//                         placeholder="Tell us what's on your mind..."
-//                         rows="5"
-//                       />
-//                       {formErrors.message && (
-//                         <div className="invalid-feedback d-block">
-//                           <i className="fas fa-exclamation-circle me-1"></i>
-//                           {formErrors.message}
-//                         </div>
-//                       )}
-//                     </div>
-//                   </div>
-
-//                   <button
-//                     type="button"
-//                     onClick={handleSubmit}
-//                     className="btn btn-submit"
-//                     disabled={loading}
-//                   >
-//                     {loading ? (
-//                       <>
-//                         <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-//                         Sending...
-//                       </>
-//                     ) : (
-//                       <>
-//                         Send Message
-//                         <i className="fas fa-paper-plane ms-2"></i>
-//                       </>
-//                     )}
-//                   </button>
-//                 </div>
-//               </div>
-
-//               <p className="footer-text">
-//                 <i className="fas fa-clock me-2"></i>
-//                 We typically respond within 24 hours
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// };
-
-// // Checkout Component
-// const Checkout = () => {
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [formData, setFormData] = useState({
-//     customerName: '',
-//     customerEmail: '',
-//     customerPhone: '',
-//     shippingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-//     billingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-//     useSameAddress: true,
-//     notes: '',
-//   });
-//   const [formErrors, setFormErrors] = useState({});
-//   const navigate = useNavigate();
-//   const { state } = useLocation();
-//   const { cart } = state || {};
-//   const [locating, setLocating] = useState(false);
-//   const [locationError, setLocationError] = useState('');
-
-//   const subtotal = cart?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
-//   const shipping = subtotal >= 1000 ? 0 : 1;
-//   const totalAmount = subtotal + shipping;
-
-//   const handleInputChange = (e) => {
-//     const { name, value } = e.target;
-//     if (name.includes('shippingAddress.') || name.includes('billingAddress.')) {
-//       const [prefix, field] = name.split('.');
-//       setFormData((prev) => ({
-//         ...prev,
-//         [prefix]: { ...prev[prefix], [field]: value },
-//       }));
-//     } else {
-//       setFormData((prev) => ({ ...prev, [name]: value }));
-//     }
-//     if (formErrors[name]) {
-//       setFormErrors((prev) => ({ ...prev, [name]: '' }));
-//     }
-//   };
-
-//   const handleCheckboxChange = (e) => {
-//     const { checked } = e.target;
-//     setFormData((prev) => ({
-//       ...prev,
-//       useSameAddress: checked,
-//       billingAddress: checked ? prev.shippingAddress : { street: '', city: '', state: '', zip: '', country: '' },
-//     }));
-//   };
-
-//   const validateForm = () => {
-//     const errors = {};
-//     if (!formData.customerName.trim()) errors.customerName = 'Name is required';
-//     if (!formData.customerEmail.trim()) {
-//       errors.customerEmail = 'Email is required';
-//     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
-//       errors.customerEmail = 'Invalid email format';
-//     }
-//     if (!formData.customerPhone.trim()) errors.customerPhone = 'Phone is required';
-//     const addr = formData.shippingAddress;
-//     if (!addr.street.trim()) errors['shippingAddress.street'] = 'Street is required';
-//     if (!addr.city.trim()) errors['shippingAddress.city'] = 'City is required';
-//     if (!addr.state.trim()) errors['shippingAddress.state'] = 'State is required';
-//     if (!addr.zip.trim()) errors['shippingAddress.zip'] = 'Pin code is required';
-//     if (!addr.country.trim()) errors['shippingAddress.country'] = 'Country is required';
-//     if (!formData.useSameAddress) {
-//       const billAddr = formData.billingAddress;
-//       if (!billAddr.street.trim()) errors['billingAddress.street'] = 'Street is required';
-//       if (!billAddr.city.trim()) errors['billingAddress.city'] = 'City is required';
-//       if (!billAddr.state.trim()) errors['billingAddress.state'] = 'State is required';
-//       if (!billAddr.zip.trim()) errors['billingAddress.zip'] = 'Zip code is required';
-//       if (!billAddr.country.trim()) errors['billingAddress.country'] = 'Country is required';
-//     }
-//     return errors;
-//   };
-
-//   const handleAutoFillLocation = () => {
-//     if (!navigator.geolocation) {
-//       setLocationError('Geolocation not supported.');
-//       return;
-//     }
-//     setLocating(true);
-//     setLocationError('');
-//     navigator.geolocation.getCurrentPosition(
-//       async (position) => {
-//         const { latitude, longitude } = position.coords;
-//         try {
-//           const indiaRes = await fetch(
-//             `https://api.postalpincode.in/pincode/by-lat-lng?lat=${latitude}&lng=${longitude}`
-//           );
-//           const indiaData = await indiaRes.json();
-//           if (indiaData[0]?.Status === 'Success' && indiaData[0]?.PostOffice?.[0]) {
-//             const po = indiaData[0].PostOffice[0];
-//             const address = {
-//               street: `${po.Name}, ${po.Block || ''}`.trim(),
-//               city: po.District,
-//               state: po.State,
-//               zip: po.Pincode,
-//               country: 'India',
-//             };
-//             fillAddress(address);
-//             setLocating(false);
-//             return;
-//           }
-//           const osmRes = await fetch(
-//             `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
-//           );
-//           const osmData = await osmRes.json();
-//           if (osmData?.address) {
-//             const addr = osmData.address;
-//             const address = {
-//               street: `${addr.road || addr.suburb || ''}, ${addr.hamlet || ''}`.trim(),
-//               city: addr.city || addr.town || addr.village,
-//               state: addr.state || addr.region,
-//               zip: addr.postcode || '',
-//               country: addr.country || 'India',
-//             };
-//             fillAddress(address);
-//           }
-//           setLocating(false);
-//         } catch (err) {
-//           setLocationError('Address not found. Enter manually.');
-//           setLocating(false);
-//         }
-//       },
-//       (error) => {
-//         setLocationError('Location access denied or failed.');
-//         setLocating(false);
-//       },
-//       { enableHighAccuracy: true, timeout: 20000 }
-//     );
-//   };
-
-//   const fillAddress = (address) => {
-//     setFormData(prev => ({
-//       ...prev,
-//       shippingAddress: { ...prev.shippingAddress, ...address },
-//       billingAddress: prev.useSameAddress ? { ...prev.billingAddress, ...address } : prev.billingAddress,
-//     }));
-//     // alert('Location filled successfully!');
-//   };
-
-//   const placeOrder = async () => {
-//     if (!cart || cart.length === 0) {
-//       setError('Cart is empty.');
-//       return;
-//     }
-//     const errors = validateForm();
-//     if (Object.keys(errors).length > 0) {
-//       setFormErrors(errors);
-//       return;
-//     }
-//     setLoading(true);
-//     setError(null);
-
-//     const orderData = {
-//       customerName: formData.customerName,
-//       customerEmail: formData.customerEmail,
-//       customerPhone: formData.customerPhone,
-//       shippingAddress: formData.shippingAddress,
-//       billingAddress: formData.useSameAddress ? formData.shippingAddress : formData.billingAddress,
-//       products: cart.map((item) => ({ productId: item.productId, quantity: item.quantity, price: item.price })),
-//       notes: formData.notes,
-//       subtotal,
-//       shipping,
-//       total: totalAmount,
-//     };
-
-//     try {
-//       const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(orderData),
-//       });
-//       if (!orderRes.ok) throw new Error('Order creation failed');
-//       const { orderId } = await orderRes.json();
-
-//       const razorpayRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ amount: totalAmount }),
-//       });
-//       if (!razorpayRes.ok) throw new Error('Payment setup failed');
-//       const razorpayOrder = await razorpayRes.json();
-
-//       openRazorpayCheckout(razorpayOrder, orderId);
-//     } catch (err) {
-//       setError(err.message || 'Something went wrong');
-//       setLoading(false);
-//     }
-//   };
-
-//   const openRazorpayCheckout = (razorpayOrder, orderId) => {
-//     const script = document.createElement('script');
-//     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-//     script.onload = () => {
-//       const options = {
-//         key: import.meta.env.VITE_RAZORPAY_KEY,
-//         amount: razorpayOrder.amount,
-//         currency: 'INR',
-//         name: 'Dilkhush Kirana',
-//         description: `Order #${orderId}`,
-//         order_id: razorpayOrder.id,
-//         image: 'https://res.cloudinary.com/dyngkb9yx/image/upload/v1762702784/dilkhush_kirana/products/mv2easf2jbr0zq44a8gl.jpg', // YE ADD KARO – 404 FIX!
-//         handler: (response) => {
-//           const paymentData = {
-//             razorpay_order_id: response.razorpay_order_id,
-//             razorpay_payment_id: response.razorpay_payment_id,
-//             razorpay_signature: response.razorpay_signature,
-//           };
-//           // console.log(paymentData)
-//           verifyPayment(paymentData, orderId);
-//         },
-//         prefill: {
-//           name: formData.customerName,
-//           email: formData.customerEmail,
-//           contact: formData.customerPhone,
-//         },
-//         theme: {
-//           color: '#f59e0b'
-//         },
-//         modal: {
-//           ondismiss: () => {
-//             setLoading(false);
-//             navigate('/cancel', { state: { errorMessage: 'Payment cancelled by user.' } });
-//           }
-//         }
-//       };
-
-//       const rzp = new window.Razorpay(options);
-//       rzp.on('payment.failed', (response) => {
-//         navigate('/cancel', { state: { errorMessage: response.error.description } });
-//       });
-//       rzp.open();
-//     };
-//     script.onerror = () => {
-//       setError('Failed to load Razorpay SDK');
-//       setLoading(false);
-//     };
-//     document.body.appendChild(script);
-//   };
-
-//   const verifyPayment = async (paymentData, orderId) => {
-//     try {
-//       const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(paymentData),
-//       });
-
-//       const result = await verifyRes.json();
-
-//       if (verifyRes.ok && result.success) {
-//         navigate('/success', {
-//           state: {
-//             orderId,
-//             totalAmount,
-//             paymentId: paymentData.razorpay_payment_id
-//           }
-//         });
-//       } else {
-//         throw new Error(result.error || 'Payment verification failed');
-//       }
-//     } catch (err) {
-//       console.error('Verification error:', err);
-//       navigate('/cancel', {
-//         state: { errorMessage: err.message || 'Payment failed. Contact support.' }
-//       });
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-
-//   return (
-//     <div className="container mt-4">
-//       <h2 className="section-title text-center my-3">Checkout</h2>
-
-//       {error && <div className="alert alert-danger">{error}</div>}
-
-//       {!cart || cart.length === 0 ? (
-//         <p>Your cart is empty.</p>
-//       ) : (
-//         <>
-//           <h4>Order Summary</h4>
-//           {cart.map((item) => (
-//             <div key={item.productId} className="mb-2">
-//               <p>{item.name} - ₹{item.price} x {item.quantity}</p>
-//             </div>
-//           ))}
-//           <h5>Total: ₹{cart.reduce((total, item) => total + item.price * item.quantity, 0)}</h5>
-
-//           <h4 className="mt-4">Customer Details</h4>
-//           <div className="card p-4 mb-4">
-//             <div className="mb-3">
-//               <label htmlFor="customerName" className="form-label">Full Name</label>
-//               <input
-//                 type="text"
-//                 className={`form-control ${formErrors.customerName ? 'is-invalid' : ''}`}
-//                 id="customerName"
-//                 name="customerName"
-//                 value={formData.customerName}
-//                 onChange={handleInputChange}
-//                 placeholder="Enter your full name"
-//               />
-//               {formErrors.customerName && <div className="invalid-feedback">{formErrors.customerName}</div>}
-//             </div>
-//             <div className="mb-3">
-//               <label htmlFor="customerEmail" className="form-label">Email</label>
-//               <input
-//                 type="email"
-//                 className={`form-control ${formErrors.customerEmail ? 'is-invalid' : ''}`}
-//                 id="customerEmail"
-//                 name="customerEmail"
-//                 value={formData.customerEmail}
-//                 onChange={handleInputChange}
-//                 placeholder="Enter your email"
-//               />
-//               {formErrors.customerEmail && <div className="invalid-feedback">{formErrors.customerEmail}</div>}
-//             </div>
-//             <div className="mb-3">
-//               <label htmlFor="customerPhone" className="form-label">Phone</label>
-//               <input
-//                 type="tel"
-//                 className={`form-control ${formErrors.customerPhone ? 'is-invalid' : ''}`}
-//                 id="customerPhone"
-//                 name="customerPhone"
-//                 value={formData.customerPhone}
-//                 onChange={handleInputChange}
-//                 placeholder="Enter your phone number"
-//               />
-//               {formErrors.customerPhone && <div className="invalid-feedback">{formErrors.customerPhone}</div>}
-//             </div>
-//             {/* SHIPPING ADDRESS WITH AUTO LOCATION */}
-//             <h5 className="mt-4">
-//               <MapPin className="me-2" size={20} />
-//               Shipping Address
-//             </h5>
-
-//             {/* AUTO LOCATION BUTTON */}
-//             <div className="mb-3">
-//               <button
-//                 type="button"
-//                 onClick={handleAutoFillLocation}
-//                 className="btn btn-outline-success btn-sm d-flex align-items-center gap-2"
-//                 disabled={locating}
-//               >
-//                 {locating ? (
-//                   <>
-//                     <span className="spinner-border spinner-border-sm" />
-//                     Detecting location...
-//                   </>
-//                 ) : (
-//                   <>
-//                     <MapPin size={18} />
-//                     Use My Current Location
-//                   </>
-//                 )}
-//               </button>
-//               {locationError && (
-//                 <small className="text-danger d-block mt-1">
-//                   {locationError}
-//                 </small>
-//               )}
-//             </div>
-
-//             {['street', 'city', 'state', 'zip', 'country'].map((field) => (
-//               <div className="mb-3" key={field}>
-//                 <label htmlFor={`shippingAddress.${field}`} className="form-label">
-//                   {field.charAt(0).toUpperCase() + field.slice(1)} {field === 'zip' && '(PIN Code)'}
-//                 </label>
-//                 <input
-//                   type="text"
-//                   className={`form-control ${formErrors[`shippingAddress.${field}`] ? 'is-invalid' : ''}`}
-//                   id={`shippingAddress.${field}`}
-//                   name={`shippingAddress.${field}`}
-//                   value={formData.shippingAddress[field]}
-//                   onChange={handleInputChange}
-//                   placeholder={`Enter ${field === 'zip' ? 'PIN code' : field}`}
-//                   readOnly={field === 'country' && formData.shippingAddress.country === 'India'} // Optional: lock country
-//                 />
-//                 {formErrors[`shippingAddress.${field}`] && (
-//                   <div className="invalid-feedback">{formErrors[`shippingAddress.${field}`]}</div>
-//                 )}
-//               </div>
-//             ))}
-//             <div className="mb-3 form-check">
-//               <input
-//                 type="checkbox"
-//                 className="form-check-input"
-//                 id="useSameAddress"
-//                 checked={formData.useSameAddress}
-//                 onChange={handleCheckboxChange}
-//               />
-//               <label className="form-check-label" htmlFor="useSameAddress">
-//                 Use same address for billing
-//               </label>
-//             </div>
-//             {!formData.useSameAddress && (
-//               <>
-//                 <h5>Billing Address</h5>
-//                 {['street', 'city', 'state', 'Pin Code', 'country'].map((field) => (
-//                   <div className="mb-3" key={field}>
-//                     <label htmlFor={`billingAddress.${field}`} className="form-label">
-//                       {field.charAt(0).toUpperCase() + field.slice(1)}
-//                     </label>
-//                     <input
-//                       type="text"
-//                       className={`form-control ${formErrors[`billingAddress.${field}`] ? 'is-invalid' : ''}`}
-//                       id={`billingAddress.${field}`}
-//                       name={`billingAddress.${field}`}
-//                       value={formData.billingAddress[field]}
-//                       onChange={handleInputChange}
-//                       placeholder={`Enter ${field}`}
-//                     />
-//                     {formErrors[`billingAddress.${field}`] && (
-//                       <div className="invalid-feedback">{formErrors[`billingAddress.${field}`]}</div>
-//                     )}
-//                   </div>
-//                 ))}
-//               </>
-//             )}
-//             <div className="mb-3">
-//               <label htmlFor="notes" className="form-label">Order Notes (Optional)</label>
-//               <textarea
-//                 className={`form-control ${formErrors.notes ? 'is-invalid' : ''}`}
-//                 id="notes"
-//                 name="notes"
-//                 value={formData.notes}
-//                 onChange={handleInputChange}
-//                 placeholder="Any special instructions?"
-//                 rows="3"
-//               />
-//               {formErrors.notes && <div className="invalid-feedback">{formErrors.notes}</div>}
-//             </div>
-//           </div>
-//           <button
-//             onClick={placeOrder}
-//             disabled={loading || !cart || cart.length === 0}
-//             className="btn btn-primary"
-//           >
-//             {loading ? 'Processing...' : 'Place Order'}
-//           </button>
-//         </>
-//       )}
-//     </div>
-//   );
-// };
-
-
-// const API = import.meta.env.VITE_API_URL; // e.g. https://api.dilkhush.shop
-
-
-// const DistributorsSection = () => {
-//   const [distributors, setDistributors] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchDistributors = async () => {
-//       try {
-//         const res = await fetch(`${API}/api/distributors`);
-//         if (!res.ok) throw new Error('Failed to load distributors');
-//         const data = await res.json();
-//         setDistributors(data);
-//       } catch (err) {
-//         setError(err.message);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchDistributors();
-//   }, []);
-
-//   if (loading) {
-//     return (
-//       <section className="py-5" style={{background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)'}}>
-//         <div className="container">
-//           <div className="text-center">
-//             <div className="spinner-border text-info" role="status" style={{width: '3rem', height: '3rem'}}>
-//               <span className="visually-hidden">Loading...</span>
-//             </div>
-//             <p className="mt-3 text-muted">Loading distributors...</p>
-//           </div>
-//         </div>
-//       </section>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <section className="py-5 bg-danger bg-opacity-10">
-//         <div className="container">
-//           <div className="alert alert-danger text-center" role="alert">
-//             <strong>Error:</strong> {error}
-//           </div>
-//         </div>
-//       </section>
-//     );
-//   }
-
-//   if (distributors.length === 0) {
-//     return (
-//       <section className="py-5" style={{background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)'}}>
-//         <div className="container">
-//           <div className="text-center">
-//             <h2 className="display-5 fw-bold mb-3">Our Distributors</h2>
-//             <p className="text-muted">No active distributors at the moment.</p>
-//           </div>
-//         </div>
-//       </section>
-//     );
-//   }
-
-//   return (
-//     <section className="py-5" style={{background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)'}}>
-//       <div className="container">
-//         <div className="text-center mb-5">
-//           <h2 className="display-4 fw-bold text-dark mb-3">Find a Distributor Near You</h2>
-//           <p className="lead text-muted">We deliver fresh products through trusted local partners</p>
-//         </div>
-
-//         <div className="row g-4">
-//           {distributors.map((dist) => (
-//             <div key={dist._id} className="col-12 col-md-6 col-lg-4">
-//               <div className="card h-100 shadow-sm border-0 rounded-3 hover-lift" 
-//                    style={{transition: 'all 0.3s ease'}}>
-//                 <div className="card-body p-4">
-//                   {/* Header */}
-//                   <div className="d-flex justify-content-between align-items-start mb-3">
-//                     <h3 className="h5 fw-bold mb-0">{dist.name}</h3>
-//                     <span className="badge bg-success rounded-pill d-flex align-items-center gap-1 px-3 py-2">
-//                       <Package size={14} />
-//                       <small>In Stock</small>
-//                     </span>
-//                   </div>
-
-//                   {/* City */}
-//                   <div className="d-flex align-items-center gap-2 mb-3">
-//                     <MapPin size={20} className="text-info" />
-//                     <span className="fw-semibold text-dark">{dist.city}</span>
-//                   </div>
-
-//                   {/* Phone */}
-//                   <div className="d-flex align-items-center gap-2 mb-3">
-//                     <Phone size={20} className="text-info" />
-//                     <a href={`tel:${dist.phone}`} 
-//                        className="text-decoration-none text-muted hover-text-info"
-//                        style={{transition: 'color 0.2s'}}>
-//                       {dist.phone}
-//                     </a>
-//                   </div>
-
-//                   {/* Stock */}
-//                   <div className="d-flex justify-content-between align-items-center mb-4 py-2 px-3 bg-light rounded">
-//                     <span className="small text-muted">Available Stock:</span>
-//                     <span className="fw-bold text-info">{dist.stock} units</span>
-//                   </div>
-
-//                   {/* Map Link */}
-//                   <a
-//                     href={dist.locationUrl}
-//                     target="_blank"
-//                     rel="noopener noreferrer"
-//                     className="btn btn-info text-white w-100 d-flex align-items-center justify-content-center gap-2 py-2"
-//                     style={{background: 'linear-gradient(90deg, #0d9488 0%, #0891b2 100%)', border: 'none'}}
-//                   >
-//                     <MapPin size={16} />
-//                     View on Google Maps
-//                     <ExternalLink size={16} />
-//                   </a>
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-
-//         {/* CTA */}
-//         <div className="text-center mt-5">
-//           <p className="text-muted mb-0">
-//             Can't find a distributor in your city?{' '}
-//             <a href="/contact" className="text-info text-decoration-none fw-semibold">
-//               Contact us
-//             </a>{' '}
-//             to become one!
-//           </p>
-//         </div>
-//       </div>
-
-//       <style jsx>{`
-//         .hover-lift:hover {
-//           transform: translateY(-5px);
-//           box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-//         }
-//         .hover-text-info:hover {
-//           color: #0891b2 !important;
-//         }
-//       `}</style>
-//     </section>
-//   );
-// };
-
-
-// // Comments Component
-// const Comments = ({ blogId }) => {
-//   const [comments, setComments] = useState([]);
-//   const [formData, setFormData] = useState({
-//     name: '',
-//     email: '',
-//     comment: '',
-//   });
-//   const [formErrors, setFormErrors] = useState({});
-//   const [loading, setLoading] = useState(false);
-//   const [success, setSuccess] = useState(null);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchComments = async () => {
-//       if (!blogId || !/^[0-9a-fA-F]{24}$/.test(blogId)) {
-//         console.error('Invalid blog ID:', blogId);
-//         setError('Invalid blog ID');
-//         return;
-//       }
-//       setLoading(true);
-//       try {
-//         // console.log('Fetching comments for blog ID:', blogId);
-//         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
-//           method: 'GET',
-//           headers: { 'Content-Type': 'application/json' },
-//         });
-//         if (!response.ok) {
-//           const text = await response.text();
-//           console.error('Non-JSON response:', text);
-//           throw new Error(`Failed to fetch comments: ${response.status} ${response.statusText}`);
-//         }
-//         const data = await response.json();
-//         setComments(data);
-//       } catch (err) {
-//         console.error('Error fetching comments:', err);
-//         setError(err.message);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchComments();
-//   }, [blogId]);
-
-//   const handleInputChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//     if (formErrors[name]) {
-//       setFormErrors((prev) => ({ ...prev, [name]: '' }));
-//     }
-//   };
-
-//   const validateForm = () => {
-//     const errors = {};
-//     if (!formData.name.trim()) errors.name = 'Name is required';
-//     if (!formData.email.trim()) {
-//       errors.email = 'Email is required';
-//     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-//       errors.email = 'Invalid email format';
-//     }
-//     if (!formData.comment.trim()) errors.comment = 'Comment is required';
-//     return errors;
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const errors = validateForm();
-//     if (Object.keys(errors).length > 0) {
-//       setFormErrors(errors);
-//       return;
-//     }
-//     if (!blogId || !/^[0-9a-fA-F]{24}$/.test(blogId)) {
-//       setError('Invalid blog ID');
-//       return;
-//     }
-//     setLoading(true);
-//     setError(null);
-//     try {
-//       // console.log('Submitting comment for blog ID:', blogId, 'Data:', formData);
-//       const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({
-//           ...formData,
-//           createdAt: new Date().toISOString(),
-//         }),
-//       });
-//       if (!response.ok) {
-//         const text = await response.text();
-//         console.error('Non-JSON response:', text);
-//         throw new Error(`Failed to submit comment: ${response.status} ${response.statusText}`);
-//       }
-//       const data = await response.json();
-//       setComments((prev) => [...prev, { ...formData, createdAt: new Date().toISOString(), _id: data._id }]);
-//       setFormData({ name: '', email: '', comment: '' });
-//       setSuccess('Comment submitted successfully!');
-//       setTimeout(() => setSuccess(null), 3000);
-//     } catch (error) {
-//       console.error('Error submitting comment:', error);
-//       setError(error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="mt-5">
-//       <h4 className="mb-3">Comments</h4>
-//       {loading && <p>Loading comments...</p>}
-//       {error && <div className="alert alert-danger mb-3">{error}</div>}
-//       {success && <div className="alert alert-success mb-3">{success}</div>}
-//       {!loading && !error && comments.length === 0 && (
-//         <p>No comments yet. Be the first to comment!</p>
-//       )}
-//       {!loading && comments.length > 0 && (
-//         <div className="mb-4">
-//           {comments.map((comment, index) => (
-//             <div key={comment._id || index} className="card mb-3">
-//               <div className="card-body">
-//                 <div className="d-flex justify-content-between">
-//                   <h6 className="card-title">{comment.name}</h6>
-//                   <small className="text-muted">{new Date(comment.createdAt).toLocaleString()}</small>
-//                 </div>
-//                 <p className="card-text">{comment.comment}</p>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//       <h5 className="mb-3">Leave a Comment</h5>
-//       <form onSubmit={handleSubmit}>
-//         <div className="mb-3">
-//           <label htmlFor="commentName" className="form-label">Name</label>
-//           <input
-//             type="text"
-//             className={`form-control ${formErrors.name ? 'is-invalid' : ''}`}
-//             id="commentName"
-//             name="name"
-//             value={formData.name}
-//             onChange={handleInputChange}
-//             placeholder="Enter your name"
-//           />
-//           {formErrors.name && <div className="invalid-feedback">{formErrors.name}</div>}
-//         </div>
-//         <div className="mb-3">
-//           <label htmlFor="commentEmail" className="form-label">Email</label>
-//           <input
-//             type="email"
-//             className={`form-control ${formErrors.email ? 'is-invalid' : ''}`}
-//             id="commentEmail"
-//             name="email"
-//             value={formData.email}
-//             onChange={handleInputChange}
-//             placeholder="Enter your email"
-//           />
-//           {formErrors.email && <div className="invalid-feedback">{formErrors.email}</div>}
-//         </div>
-//         <div className="mb-3">
-//           <label htmlFor="commentText" className="form-label">Comment</label>
-//           <textarea
-//             className={`form-control ${formErrors.comment ? 'is-invalid' : ''}`}
-//             id="commentText"
-//             name="comment"
-//             value={formData.comment}
-//             onChange={handleInputChange}
-//             placeholder="Enter your comment"
-//             rows="4"
-//           />
-//           {formErrors.comment && <div className="invalid-feedback">{formErrors.comment}</div>}
-//         </div>
-//         <button type="submit" className="btn btn-primary" disabled={loading}>
-//           {loading ? 'Submitting...' : 'Submit Comment'}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// // custom orders--------------------------------------------------------------------
-
-
-
-// const CustomBuilder = () => {
-//   const [ingredients, setIngredients] = useState([]);
-//   const [selected, setSelected] = useState([]);
-//   const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', email: '' });
-//   const [loading, setLoading] = useState(true);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     fetch('https://dilkhush-api.vercel.app/custom/ingredients')
-//       .then(r => r.json())
-//       .then(data => setIngredients(Array.isArray(data) ? data : []))
-//       .finally(() => setLoading(false));
-//   }, []);
-
-//   const addIngredient = (ing, variant) => {
-//     if (selected.some(s => s.ingredientId === ing._id && s.variant === variant.quality)) {
-//       alert('Already added!');
-//       return;
-//     }
-//     setSelected([...selected, {
-//       ingredientId: ing._id,
-//       name: ing.name,
-//       variant: variant.quality,
-//       quantity: variant.unit === 'g' ? 100 : 0.25,
-//       unit: variant.unit,
-//       minQty: variant.minQuantity,
-//       pricePerKg: variant.pricePerKg,
-//       price: variant.pricePerKg * (variant.unit === 'g' ? variant.minQuantity / 1000 : variant.minQuantity)
-//     }]);
-//   };
-
-//   const updateQuantity = (i, qty) => {
-//     if (qty < selected[i].minQty) qty = selected[i].minQty;
-//     setSelected(prev => {
-//       const updated = [...prev];
-//       const item = updated[i];
-//       const qtyInKg = item.unit === 'g' ? qty / 1000 : qty;
-//       item.quantity = qty;
-//       item.price = Math.round(item.pricePerKg * qtyInKg * 100) / 100;
-//       return updated;
-//     });
-//   };
-
-//   const removeItem = (i) => setSelected(selected.filter((_, idx) => idx !== i));
-
-//   const totalPrice = selected.reduce((s, i) => s + i.price, 0).toFixed(2);
-//   const totalWeight = selected.reduce((s, i) => s + (i.unit === 'g' ? i.quantity : i.quantity * 1000), 0);
-//   const totalWeightStr = totalWeight >= 1000
-//     ? `${(totalWeight / 1000).toFixed(2)} kg`
-//     : `${totalWeight.toFixed(0)} g`;
-
-//   const loadRazorpay = () => {
-//     const script = document.createElement('script');
-//     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-//     script.onload = () => initiatePayment();
-//     document.body.appendChild(script);
-//   };
-
-//   const initiatePayment = async () => {
-//     if (!customerInfo.name || !customerInfo.phone) {
-//       alert('Name & Phone required!');
-//       return;
-//     }
-
-//     const res = await fetch('https://dilkhush-api.vercel.app/custom/order', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({
-//         customerName: customerInfo.name,
-//         customerPhone: customerInfo.phone,
-//         customerEmail: customerInfo.email,
-//         selectedIngredients: selected.map(s => ({
-//           ingredientId: s.ingredientId,
-//           variant: s.variant,
-//           quantity: s.quantity,
-//           unit: s.unit
-//         })),
-//         totalPrice: parseFloat(totalPrice),
-//         totalWeight
-//       })
-//     });
-//     const order = await res.json();
-
-//     const options = {
-//       key: 'rzp_test_YourKeyHere', // CHANGE TO YOUR KEY
-//       amount: totalPrice * 100,
-//       currency: 'INR',
-//       name: 'Dilkhush Kirana',
-//       description: 'Custom Mix Order',
-//       order_id: order.razorpayOrderId,
-//       handler: async (response) => {
-//         await fetch('https://dilkhush-api.vercel.app/custom/verify', {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({
-//             razorpay_payment_id: response.razorpay_payment_id,
-//             razorpay_order_id: response.razorpay_order_id,
-//             razorpay_signature: response.razorpay_signature,
-//             orderId: order.orderId
-//           })
-//         });
-//         alert(`₹${totalPrice} Paid! Order ID: ${order.orderId}`);
-//         navigate('/success');
-//       },
-//       prefill: { name: customerInfo.name, contact: customerInfo.phone, email: customerInfo.email },
-//       theme: { color: '#f59e0b' }
-//     };
-//     const rzp = new window.Razorpay(options);
-//     rzp.open();
-//   };
-
-//   if (loading) return <div className="text-center py-20">Loading ingredients...</div>;
-
-//   return (
-//     <div className="container py-5">
-//       <h1 className="text-center text-4xl font-bold mb-8">Build Your Mix</h1>
-//       <div className="row">
-//         <div className="col-lg-8">
-//           <div className="row">
-//             {ingredients.map(ing => (
-//               <div key={ing._id} className="col-md-6 mb-4">
-//                 <div className="card h-100 shadow">
-//                   {ing.image && <img src={ing.image} className="card-img-top" style={{ height: '200px', objectFit: 'cover' }} />}
-//                   <div className="card-body">
-//                     <h5>{ing.name} ({ing.category})</h5>
-//                     {ing.variants.map(v => (
-//                       <button key={v.quality} onClick={() => addIngredient(ing, v)} className="btn btn-success btn-sm m-1">
-//                         {v.quality}<br />
-//                         <small>₹{v.pricePerKg}/kg • Min {v.minQuantity}{v.unit}</small>
-//                       </button>
-//                     ))}
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         <div className="col-lg-4">
-//           <div className="card sticky-top" style={{ top: '20px' }}>
-//             <div className="card-header bg-success text-white">
-//               <h4>Your Mix • ₹{totalPrice}</h4>
-//               <p className="mb-0">Total Weight: <strong>{totalWeightStr}</strong></p>
-//             </div>
-//             <div className="card-body">
-//               {selected.map((item, i) => (
-//                 <div key={i} className="border-bottom pb-2 mb-2">
-//                   <div className="d-flex justify-content-between">
-//                     <div>
-//                       <strong>{item.name}</strong> ({item.variant})
-//                       <br />
-//                       <input
-//                         type="number"
-//                         min={item.minQty}
-//                         step={item.unit === 'g' ? 50 : 0.25}
-//                         value={item.quantity}
-//                         onChange={e => updateQuantity(i, parseFloat(e.target.value))}
-//                         style={{ width: '80px' }}
-//                       /> {item.unit} = ₹{item.price}
-//                     </div>
-//                     <button onClick={() => removeItem(i)} className="btn btn-sm btn-danger">×</button>
-//                   </div>
-//                 </div>
-//               ))}
-
-//               <hr />
-//               <h4>Total: ₹{totalPrice} • {totalWeightStr}</h4>
-
-//               <input placeholder="Name *" className="form-control mb-2" value={customerInfo.name} onChange={e => setCustomerInfo({ ...customerInfo, name: e.target.value })} />
-//               <input placeholder="Phone *" className="form-control mb-2" value={customerInfo.phone} onChange={e => setCustomerInfo({ ...customerInfo, phone: e.target.value })} />
-//               <input placeholder="Email" className="form-control mb-3" value={customerInfo.email} onChange={e => setCustomerInfo({ ...customerInfo, email: e.target.value })} />
-
-//               <button onClick={loadRazorpay} disabled={selected.length === 0} className="btn btn-warning btn-lg w-100">
-//                 PAY ₹{totalPrice} & PLACE ORDER
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// // Blog Details Component
-// const BlogDetails = () => {
-//   const navigate = useNavigate();
-//   const { id } = useParams();
-//   const [blog, setBlog] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchBlog = async () => {
-//       if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
-//         console.error('Invalid blog ID:', id);
-//         setError('Invalid blog ID');
-//         setLoading(false);
-//         return;
-//       }
-//       try {
-//         // console.log('Fetching blog with ID:', id);
-//         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${id}`);
-//         if (!response.ok) {
-//           const text = await response.text();
-//           console.error('Non-JSON response:', text);
-//           throw new Error(`Failed to fetch blog: ${response.status} ${response.statusText}`);
-//         }
-//         const data = await response.json();
-//         setBlog(data);
-//         setLoading(false);
-//       } catch (err) {
-//         console.error('Error fetching blog:', err);
-//         setError(err.message);
-//         setLoading(false);
-//       }
-//     };
-//     fetchBlog();
-//   }, [id]);
-
-//   if (loading) {
-//     return <div className="container mt-4"><p>Loading blog...</p></div>;
-//   }
-
-//   if (error || !blog) {
-//     return (
-//       <div className="container mt-4">
-//         <p className="text-danger">{error || 'Blog not found'}</p>
-//         <button className="btn btn-primary" onClick={() => navigate('/blogs')}>
-//           Back to Blogs
-//         </button>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="container py-5">
-//       {/* Navigation */}
-//       <nav aria-label="breadcrumb" className="mb-4">
-//         <button
-//           className="btn btn-outline-primary d-flex justify-content-between align-items-center "
-//           onClick={() => navigate('/blogs')}
-//         >
-//           <ArrowLeft size={20} className='me-2' />
-//           Back to Blogs
-//         </button>
-//       </nav>
-
-//       {/* Main Blog Card */}
-//       <article className="card shadow-sm border-0 mb-4">
-//         {blog.image && (
-//           <div className="position-relative" style={{ height: '400px', overflow: 'hidden' }}>
-//             <img
-//               src={blog.image}
-//               alt={blog.title}
-//               className="card-img-top w-100 h-100"
-//               style={{ objectFit: 'cover' }}
-//             />
-//             <div className="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-50 text-white p-3">
-//               {blog.tags && blog.tags.length > 0 && (
-//                 <div className="d-flex flex-wrap gap-2">
-//                   {blog.tags.map((tag, idx) => (
-//                     <span key={idx} className="badge bg-primary rounded-pill px-3 py-2">
-//                       {tag}
-//                     </span>
-//                   ))}
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-//         )}
-
-//         <div className="card-body p-4 p-md-5">
-//           {/* Title */}
-//           <h1 className="display-5 fw-bold mb-4">{blog.title}</h1>
-
-//           {/* Meta Information */}
-//           <div className="d-flex flex-wrap align-items-center gap-3 mb-4 pb-4 border-bottom">
-//             <div className="d-flex align-items-center">
-//               <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-//                 style={{ width: '40px', height: '40px' }}>
-//                 <i className="bi bi-person-fill"></i>
-//               </div>
-//               <div>
-//                 <small className="text-muted d-block">Written by</small>
-//                 <strong>{blog.author || 'Anonymous'}</strong>
-//               </div>
-//             </div>
-
-//             <div className="vr d-none d-md-block"></div>
-
-//             <div className="d-flex align-items-center">
-//               <i className="bi bi-calendar3 text-primary me-2"></i>
-//               <div>
-//                 <small className="text-muted d-block">Published on</small>
-//                 <strong>{new Date(blog.createdAt).toLocaleDateString('en-US', {
-//                   year: 'numeric',
-//                   month: 'long',
-//                   day: 'numeric'
-//                 })}</strong>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Content */}
-//           <div className="blog-content">
-//             <p className="lead fs-5 lh-lg text-dark" style={{ whiteSpace: 'pre-wrap' }}>
-//               {blog.content}
-//             </p>
-//           </div>
-//         </div>
-//       </article>
-
-//       {/* Comments Section */}
-//       <div className="card shadow-sm border-0">
-//         <div className="card-body p-4">
-//           <h3 className="mb-4">
-//             <i className="bi bi-chat-left-text me-2"></i>
-//             Comments
-//           </h3>
-//           <Comments blogId={id} />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-
-// // failde order components 
-
-// const OrderFailed = ({ errorMessage = "We couldn't process your payment. Please try again." }) => {
-//   const navigate = useNavigate();
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center px-4 py-8">
-//       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-//         {/* Header - Red Gradient */}
-//         <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white text-center">
-//           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm mb-4 animate-pulse">
-//             <XCircle size={48} className="text-white" />
-//           </div>
-//           <h1 className="text-2xl font-bold">Order Failed</h1>
-//           {/* <p className="text-red-100 mt-2 text-sm">Something went wrong with your payment</p> */}
-//         </div>
-
-//         {/* Body */}
-//         <div className="p-6 space-y-5">
-//           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-//             <p className="text-red-800 text-sm leading-relaxed">
-//               <strong>Error:</strong> {errorMessage}
-//             </p>
-//           </div>
-
-//           <div className="text-center text-gray-600 text-sm">
-//             {/* <p>Don't worry — no money was charged.</p> */}
-//             <p className="mt-1">You can try again or contact support. 7874536227</p>
-//           </div>
-
-//           {/* Action Buttons */}
-//           <div className="flex flex-col gap-3">
-//             <button
-//               onClick={() => window.location.reload()}
-//               className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg"
-//             >
-//               <RefreshCw size={18} />
-//               Try Again
-//             </button>
-
-//             <div className="flex gap-2">
-//               <button
-//                 onClick={() => navigate('/cart')}
-//                 className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
-//               >
-//                 <ArrowLeft size={16} />
-//                 Back to Cart
-//               </button>
-//               <button
-//                 onClick={() => navigate('/')}
-//                 className="flex-1 bg-gray-100 hover:bg-gray- ág-200 text-gray-800 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
-//               >
-//                 <Home size={16} />
-//                 Home
-//               </button>
-//             </div>
-//           </div>
-
-//           {/* Support Info */}
-//           <div className="border-t pt-4 text-center">
-//             <p className="text-xs text-gray-500">
-//               Need help?{' '}
-//               <a href="mailto:support@yoursite.com" className="text-red-600 hover:underline font-medium">
-//                 Contact Support
-//               </a>
-//             </p>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Optional: Decorative background */}
-//       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-//         <div className="absolute top-0 left-0 w-96 h-96 bg-red-100 rounded-full filter blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2"></div>
-//         <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-100 rounded-full filter blur-3xl opacity-30 translate-x-1/2 translate-y-1/2"></div>
-//       </div>
-//     </div>
-//   );
-// };
-
-
-
-// const Blog = () => {
-//   const [blogs, setBlogs] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const navigate = useNavigate()
-//   useEffect(() => {
-//     const fetchBlogs = async () => {
-//       try {
-//         // Replace with your actual API URL
-//         // const apiUrl = 'https://api.example.com';
-//         const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs`);
-//         if (!response.ok) {
-//           const text = await response.text();
-//           console.error('Non-JSON response:', text);
-//           throw new Error(`Failed to fetch blogs: ${response.status} ${response.statusText}`);
-//         }
-//         const data = await response.json();
-//         setBlogs(data);
-//         setLoading(false);
-//       } catch (err) {
-//         console.error('Error fetching blogs:', err);
-//         setError(err.message);
-//         setLoading(false);
-//       }
-//     };
-//     fetchBlogs();
-//   }, []);
-
-//   const handleViewDetails = (blog) => {
-//     // Replace with your navigation logic
-//     console.log('Navigate to:', `/blogs/${blog._id}`);
-//     navigate(`/blogs/${blog._id}`);
-
-//   };
-
-//   return (
-//     <>
-
-
-//       <div className="bg-light min-vh-100 py-5">
-//         <div className="container">
-//           {/* Header */}
-//           <div className="text-center mb-5">
-//             <h2 className="display-4 fw-bold text-primary mb-3">Our Blogs</h2>
-//             <p className="lead text-secondary">Discover insights, stories, and updates from our team</p>
-//           </div>
-
-//           {/* Loading State */}
-//           {loading && (
-//             <div className="text-center py-5">
-//               <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status">
-//                 <span className="visually-hidden">Loading...</span>
-//               </div>
-//               <p className="mt-3 fs-5 text-primary fw-semibold">Loading amazing content...</p>
-//             </div>
-//           )}
-
-//           {/* Error State */}
-//           {error && (
-//             <div className="text-center py-5">
-//               <i className="fas fa-exclamation-circle text-danger mb-3" style={{ fontSize: '4rem' }}></i>
-//               <div className="alert alert-danger d-inline-block" role="alert">
-//                 <strong>Error:</strong> {error}
-//               </div>
-//             </div>
-//           )}
-
-//           {/* Empty State */}
-//           {!loading && !error && blogs.length === 0 && (
-//             <div className="text-center py-5">
-//               <i className="fas fa-inbox text-muted mb-3" style={{ fontSize: '5rem' }}></i>
-//               <p className="fs-4 text-muted fw-semibold">No blogs available</p>
-//             </div>
-//           )}
-
-//           {/* Blog Grid */}
-//           <div className="row g-4">
-//             {blogs.map((blog, index) => (
-//               <div
-//                 className="col-lg-4 col-md-6 rounded-4"
-//                 key={blog._id || index}
-//               >
-//                 <div
-//                   className="card shadow-sm border-0 rounded-4 overflow-hidden"
-//                   onClick={() => handleViewDetails(blog)}
-//                   style={{ cursor: 'pointer', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}
-//                   onMouseEnter={(e) => {
-//                     e.currentTarget.style.transform = 'translateY(-8px)';
-//                     e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.15)';
-//                   }}
-//                   onMouseLeave={(e) => {
-//                     e.currentTarget.style.transform = 'translateY(0)';
-//                     e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
-//                   }}
-//                 >
-//                   {/* Image */}
-//                   <div className="position-relative overflow-hidden" style={{ height: '250px' }}>
-//                     <img
-//                       src={blog.image || 'https://via.placeholder.com/400x250'}
-//                       alt={blog.title}
-//                       className="card-img-top w-100 h-100"
-//                       style={{ objectFit: 'cover' }}
-//                     />
-//                   </div>
-
-//                   {/* Card Body */}
-//                   <div className="card-body p-4">
-//                     <h5 className="card-title fw-bold text-dark mb-3" style={{
-//                       fontSize: '1.3rem',
-//                       display: '-webkit-box',
-//                       WebkitLineClamp: '2',
-//                       WebkitBoxOrient: 'vertical',
-//                       overflow: 'hidden'
-//                     }}>
-//                       {blog.title || 'Untitled Blog'}
-//                     </h5>
-
-//                     <p className="card-text text-muted mb-4" style={{
-//                       display: '-webkit-box',
-//                       WebkitLineClamp: '3',
-//                       WebkitBoxOrient: 'vertical',
-//                       overflow: 'hidden'
-//                     }}>
-//                       {blog.content?.substring(0, 100)}...
-//                     </p>
-
-//                     {/* Meta Info */}
-//                     <div className="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
-//                       <div className="d-flex align-items-center text-primary">
-//                         <i className="fas fa-user-circle me-2"></i>
-//                         <small className="fw-semibold">{blog.author || 'Anonymous'}</small>
-//                       </div>
-//                       <div className="d-flex align-items-center text-muted">
-//                         <i className="fas fa-calendar-alt me-2"></i>
-//                         <small>{new Date(blog.createdAt).toLocaleDateString()}</small>
-//                       </div>
-//                     </div>
-
-//                     {/* Tags */}
-//                     {blog.tags && (
-//                       <div className="d-flex flex-wrap gap-2">
-//                         {(() => {
-//                           let tags = [];
-//                           try {
-//                             tags = typeof blog.tags === "string" ? JSON.parse(blog.tags) : blog.tags;
-//                           } catch {
-//                             tags = blog.tags.split(",").map(t => t.trim());
-//                           }
-
-//                           return Array.isArray(tags) && tags.length > 0 ? (
-//                             tags.map((tag, idx) => (
-//                               <span key={idx} className="badge bg-primary rounded-pill px-3 py-2">
-//                                 {tag}
-//                               </span>
-//                             ))
-//                           ) : null;
-//                         })()}
-//                       </div>
-//                     )}
-//                   </div>
-
-//                   {/* Card Footer */}
-//                   <div className="card-footer bg-white border-0 px-4 pb-4 pt-0">
-//                     <button className="btn btn-outline-primary w-100 rounded-4 fw-semibold">
-//                       Read More <ArrowRight size={15} onClick={() => navigate(`/blogs/${blog._id}`)} />
-//                     </button>
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// };
-
-
-// const CounterDashboard = () => {
-//   const [counts, setCounts] = useState({
-//     offline: 800,
-//     dailySales: 20000,
-//     totalCustomers: 17000,
-//     experience: 25
-//   });
-
-//   const [hovered, setHovered] = useState(null);
-
-//   const targets = {
-//     offline: 28000,
-//     dailySales: 20000,
-//     totalCustomers: 17000,
-//     experience: 25
-//   };
-
-//   useEffect(() => {
-//     const duration = 2000;
-//     const steps = 60;
-//     const interval = duration / steps;
-
-//     let step = 0;
-//     const timer = setInterval(() => {
-//       step++;
-//       const progress = step / steps;
-
-//       setCounts({
-//         offline: Math.floor(targets.offline * progress),
-//         dailySales: Math.floor(targets.dailySales * progress),
-//         totalCustomers: Math.floor(targets.totalCustomers * progress),
-//         experience: Math.floor(targets.experience * progress)
-//       });
-
-//       if (step >= steps) {
-//         clearInterval(timer);
-//         setCounts(targets);
-//       }
-//     }, interval);
-
-//     return () => clearInterval(timer);
-//   }, []);
-
-//   const cards = [
-//     {
-//       title: 'Offline Customers',
-//       value: counts.offline,
-//       icon: '🛍️',
-//       gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-//       glow: '0 20px 60px rgba(102, 126, 234, 0.4)',
-//       pattern: '🛍️',
-//       subtitle: 'Currently Shopping'
-//     },
-//     {
-//       title: 'Per Day Sales',
-//       value: `${counts.dailySales.toLocaleString()}`,
-//       icon: '💸',
-//       gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-//       glow: '0 20px 60px rgba(240, 147, 251, 0.4)',
-//       pattern: '💸',
-//       subtitle: 'Revenue Today'
-//     },
-//     {
-//       title: 'Total Customers',
-//       value: counts.totalCustomers.toLocaleString(),
-//       icon: '👥',
-//       gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-//       glow: '0 20px 60px rgba(79, 172, 254, 0.4)',
-//       pattern: '👥',
-//       subtitle: 'Happy Clients'
-//     },
-//     {
-//       title: 'Experience',
-//       value: `${counts.experience}`,
-//       icon: '🚀',
-//       gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-//       glow: '0 20px 60px rgba(250, 112, 154, 0.4)',
-//       pattern: '🚀',
-//       subtitle: 'Years of Excellence'
-//     }
-//   ];
-
-//   return (
-//     <>
-//       <link
-//         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
-//         rel="stylesheet"
-//       />
-
-//       <div
-//         style={{
-//           background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)',
-//           minHeight: '100vh',
-//           position: 'relative',
-//           overflow: 'hidden'
-//         }}
-//       >
-//         {/* Animated Background Elements */}
-//         <div
-//           style={{
-//             position: 'absolute',
-//             top: '10%',
-//             left: '5%',
-//             fontSize: '100px',
-//             opacity: '0.1',
-//             animation: 'float 6s ease-in-out infinite'
-//           }}
-//         >
-//           💫
-//         </div>
-//         <div
-//           style={{
-//             position: 'absolute',
-//             bottom: '15%',
-//             right: '8%',
-//             fontSize: '80px',
-//             opacity: '0.1',
-//             animation: 'float 8s ease-in-out infinite'
-//           }}
-//         >
-// ✨
-//         </div>
-
-//         <div className="container py-5">
-//           <div className="text-center text-white mb-5 pt-4">
-//             <div
-//               style={{
-//                 display: 'inline-block',
-//                 background: 'rgba(255, 255, 255, 0.1)',
-//                 backdropFilter: 'blur(10px)',
-//                 padding: '10px 30px',
-//                 borderRadius: '50px',
-//                 marginBottom: '20px',
-//                 border: '1px solid rgba(255, 255, 255, 0.2)'
-//               }}
-//             >
-//               <span style={{ fontSize: '14px', letterSpacing: '3px' }}>DASHBOARD</span>
-//             </div>
-//             <h1
-//               className="display-2 fw-bold mb-3"
-//               style={{
-//                 textShadow: '0 10px 30px rgba(0,0,0,0.3)',
-//                 letterSpacing: '-2px'
-//               }}
-//             >
-//               Business Analytics
-//             </h1>
-//             <p className="lead" style={{ opacity: '0.9', fontSize: '1.3rem' }}>
-//               Real-time performance metrics at a glance
-//             </p>
-//           </div>
-
-//           <div className="row g-4 px-2">
-//             {cards.map((card, index) => (
-//               <div key={index} className="col-lg-3 col-md-6">
-//                 <div
-//                   onMouseEnter={() => setHovered(index)}
-//                   onMouseLeave={() => setHovered(null)}
-//                   style={{
-//                     background: hovered === index
-//                       ? 'rgba(255, 255, 255, 0.95)'
-//                       : 'rgba(255, 255, 255, 0.9)',
-//                     backdropFilter: 'blur(20px)',
-//                     borderRadius: '30px',
-//                     padding: '0',
-//                     transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-//                     transform: hovered === index ? 'translateY(-15px) scale(1.02)' : 'translateY(0) scale(1)',
-//                     boxShadow: hovered === index ? card.glow : '0 10px 40px rgba(0,0,0,0.15)',
-//                     border: '1px solid rgba(255, 255, 255, 0.3)',
-//                     overflow: 'hidden',
-//                     position: 'relative'
-//                   }}
-//                 >
-//                   {/* Gradient Header */}
-//                   <div
-//                     style={{
-//                       background: card.gradient,
-//                       padding: '30px 20px',
-//                       position: 'relative',
-//                       overflow: 'hidden'
-//                     }}
-//                   >
-//                     {/* Decorative Pattern */}
-//                     <div
-//                       style={{
-//                         position: 'absolute',
-//                         top: '-10px',
-//                         right: '-10px',
-//                         fontSize: '60px',
-//                         opacity: '0.2',
-//                         transform: hovered === index ? 'rotate(20deg) scale(1.2)' : 'rotate(0deg) scale(1)',
-//                         transition: 'all 0.4s ease'
-//                       }}
-//                     >
-//                       {card.pattern}
-//                     </div>
-
-//                     <div className="text-center">
-//                       <div
-//                         style={{
-//                           fontSize: '50px',
-//                           marginBottom: '10px',
-//                           filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.2))',
-//                           transform: hovered === index ? 'scale(1.1) rotate(5deg)' : 'scale(1)',
-//                           transition: 'all 0.3s ease'
-//                         }}
-//                       >
-//                         {card.icon}
-//                       </div>
-//                       <div
-//                         style={{
-//                           color: 'white',
-//                           fontSize: '11px',
-//                           fontWeight: '600',
-//                           letterSpacing: '2px',
-//                           textTransform: 'uppercase',
-//                           opacity: '0.9'
-//                         }}
-//                       >
-//                         {card.title}
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                   {/* Card Body */}
-//                   <div className="text-center p-4">
-//                     <div
-//                       style={{
-//                         fontSize: '48px',
-//                         fontWeight: '800',
-//                         background: card.gradient,
-//                         WebkitBackgroundClip: 'text',
-//                         WebkitTextFillColor: 'transparent',
-//                         backgroundClip: 'text',
-//                         marginBottom: '10px',
-//                         letterSpacing: '-1px'
-//                       }}
-//                     >
-//                       {card.value} +
-//                     </div>
-//                     <div
-//                       style={{
-//                         color: '#64748b',
-//                         fontSize: '13px',
-//                         fontWeight: '500'
-//                       }}
-//                     >
-//                       {card.subtitle}
-//                     </div>
-//                   </div>
-
-//                   {/* Pulse Indicator */}
-//                   <div
-//                     style={{
-//                       position: 'absolute',
-//                       top: '20px',
-//                       right: '20px',
-//                       width: '10px',
-//                       height: '10px',
-//                       borderRadius: '50%',
-//                       background: 'rgba(255, 255, 255, 0.9)',
-//                       boxShadow: '0 0 0 0 rgba(255, 255, 255, 0.7)',
-//                       animation: 'pulse 2s infinite'
-//                     }}
-//                   ></div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-
-//           <div className="text-center mt-5 pt-4">
-//             <div
-//               style={{
-//                 display: 'inline-block',
-//                 background: 'rgba(255, 255, 255, 0.15)',
-//                 backdropFilter: 'blur(10px)',
-//                 padding: '15px 40px',
-//                 borderRadius: '50px',
-//                 color: 'white',
-//                 fontSize: '14px',
-//                 border: '1px solid rgba(255, 255, 255, 0.2)',
-//                 fontWeight: '500'
-//               }}
-//             >
-//               Last updated: <strong>Today </strong>
-//                {/* {new Date().toLocaleTimeString()} */}
-//             </div>
-//           </div>
-//         </div>
-
-//         <style>{`
-//           @keyframes float {
-//             0%, 100% { transform: translateY(0px); }
-//             50% { transform: translateY(-20px); }
-//           }
-
-//           @keyframes pulse {
-//             0% {
-//               box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
-//             }
-//             70% {
-//               box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-//             }
-//             100% {
-//               box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-//             }
-//           }
-//         `}</style>
-//       </div>
-//     </>
-//   );
-// }
-
-// // Main App Component
-// function App() {
-//   return (
-//     <CartProvider>
-//       <Router>
-//         <GlobalLoader />
-//         <ScrollToTop />
-//         <Routes>
-//           <Route
-//             path="/"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <Slider />
-//                 <Productcard />
-//                 <marquee behavior="" direction="">
-//                   <strong>🏆 25 years of trust</strong> | We believe in quality, not in quantity
-//                 </marquee>
-//                 <CounterDashboard/>
-//                 <DistributorsSection/>
-//                 <Blog />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/products"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <Productcard />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/my"
-//             element={
-//               <>
-//                 <Navbars />
-//              <MyOrders/>
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/about"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <About />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/cart"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <Cart />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route path="/orders" element={<><Navbars /><MyOrders /><Footers /></>} />
-//           <Route path="/order/:id" element={<><Navbars />
-//             {/* <OrderDetails /> */}
-//             <Footers /></>} />
-//           <Route
-//             path="/checkout"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <Checkout />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/contact"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <Contact />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/blogs"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <Blog />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/offers"
-//             element={
-//               <>
-//                 <Navbars />
-//                 {/* <Blog /> */}
-//                 {/* <Offerspage/> */}
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/product/:id"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <ProductDetailWrapper />
-//                 <Footers />
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/blogs/:id"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <BlogDetails />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/success"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <OrderSuccess />
-//                 <div className="container mt-4">
-//                   <h2>Order Placed Successfully!</h2>
-//                   <p>Thank you for your purchase. You will receive a confirmation email soon.</p>
-//                 </div>
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route path="/track-order" element={<><Navbars /><TrackOrder /><Footers /></>} />
-//           <Route
-//             path="/cancel"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <OrderFailed />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route
-//             path="/custom"
-//             element={
-//               <>
-//                 <Navbars />
-//                 <CustomBuilder />
-//                 <div className="">
-//                   <Footers />
-//                 </div>
-
-//               </>
-//             }
-//           />
-//           <Route path="/terms-conditions" element={<TermsPage />} />
-//           <Route path="/privacy-policy" element={<PrivacyPage />} />
-//           <Route path="/refund-policy" element={<RefundPage />} />
-//         </Routes>
-//       </Router>
-//     </CartProvider>
-//   );
-// }
-
-// export default App;
-
-
-
-// // 69183e308b10b0b65f58ae0e
-
-
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate, useParams, useLocation } from 'react-router-dom';
-import white from './img/white.jpeg';
-import black from './img/black.jpeg';
 import Navbars from "./components/Navbar";
 import Footers from "./components/Footer";
 import Slider from "./components/Slider";
 import About from "./components/Aboutsect";
-import OrderSuccess from "./components/pages/OrderSuccess"
+import Contact from "./components/Contact";
+import OrderSuccess from "./components/pages/OrderSuccess";
 import { TermsPage, PrivacyPage, RefundPage } from './components/pages/privacy-policy';
-import { ArrowLeft, ArrowLeftSquare, ArrowRight, Check, ExternalLink, Eye, Heart, Home, Loader2, MessageSquare, Minus, Package, Plus, RefreshCw, Send, Share2, Shield, ShoppingBag, Star, Tag, ToggleLeft, ToggleRight, Trash2, Truck, XCircle } from 'lucide-react';
+import {
+  ArrowLeft, ArrowRight, Check, ExternalLink, Heart, Loader2, MessageSquare,
+  Minus, Package, Plus, RefreshCw, Send, Share2, Shield, ShoppingBag, Star,
+  Trash2, Truck, XCircle
+} from 'lucide-react';
 import {
   Clock, CheckCircle, Package as PackageIcon,
-  MapPin, Calendar, IndianRupee, User, Phone, Mail
+  MapPin, Calendar, User, Phone, Mail
 } from 'lucide-react';
-import contains from "./img/contains.png"
 import Eachprod from './components/pages/Eachprod';
 import GlobalLoader from './GlobalLoader';
-// import ChatBot from './components/ChatBot';
+import Checkout from './components/Checkout';
 
-// Cart Context (unchanged)
+// ─── Cart Context ───────────────────────────────────────────────────────────
 const CartContext = createContext();
+
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [savedAddresses, setSavedAddresses] = useState([]);
-  const [locating, setLocating] = useState(false);
-  const [locationError, setLocationError] = useState('');
-  // Load from localStorage
+
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
     const storedOrders = localStorage.getItem('orders');
@@ -3738,35 +36,25 @@ const CartProvider = ({ children }) => {
     if (storedOrders) setOrders(JSON.parse(storedOrders));
     if (storedAddresses) setSavedAddresses(JSON.parse(storedAddresses));
   }, []);
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-  useEffect(() => {
-    localStorage.setItem('orders', JSON.stringify(orders));
-  }, [orders]);
-  useEffect(() => {
-    localStorage.setItem('savedAddresses', JSON.stringify(savedAddresses));
-  }, [savedAddresses]);
+
+  useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
+  useEffect(() => { localStorage.setItem('orders', JSON.stringify(orders)); }, [orders]);
+  useEffect(() => { localStorage.setItem('savedAddresses', JSON.stringify(savedAddresses)); }, [savedAddresses]);
+
   const addToCart = (product) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.productId === product._id);
-      if (existing) {
-        return prev.map((i) =>
-          i.productId === product._id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
+      if (existing) return prev.map((i) => i.productId === product._id ? { ...i, quantity: i.quantity + 1 } : i);
       return [...prev, { productId: product._id, name: product.name, price: product.price, quantity: 1, image: product.img_url }];
     });
   };
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((i) => i.productId !== id));
-  };
+  const removeFromCart = (id) => setCart((prev) => prev.filter((i) => i.productId !== id));
   const updateQuantity = (id, qty) => {
     if (qty <= 0) removeFromCart(id);
     else setCart((prev) => prev.map((i) => (i.productId === id ? { ...i, quantity: qty } : i)));
   };
   const clearCart = () => setCart([]);
+
   const placeOrder = (orderData) => {
     const order = {
       ...orderData,
@@ -3774,50 +62,46 @@ const CartProvider = ({ children }) => {
       orderId: `ORD-${new Date().getFullYear()}-${String(orders.length + 1).padStart(3, '0')}`,
       status: 'ordered',
       createdAt: new Date().toISOString(),
-      tracking: null,
     };
     setOrders((prev) => [order, ...prev]);
     clearCart();
-    // Save address for reuse
-    const addrKey = `${order.customerEmail}-${order.shippingAddress.street}`;
+    const addrKey = `${order.customerEmail}-${order.shippingAddress?.street}`;
     if (!savedAddresses.find(a => a.key === addrKey)) {
       setSavedAddresses((prev) => [...prev, {
-        key: addrKey,
-        name: order.customerName,
-        email: order.customerEmail,
+        key: addrKey, name: order.customerName, email: order.customerEmail,
         shippingAddress: order.shippingAddress,
         billingAddress: order.billingAddress || order.shippingAddress,
       }]);
     }
   };
+
   const updateOrderStatus = (orderId, newStatus) => {
-    setOrders((prev) =>
-      prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
-    );
+    setOrders((prev) => prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o)));
   };
+
   return (
-    <CartContext.Provider value={{
-      cart, addToCart, removeFromCart, updateQuantity, clearCart,
-      orders, placeOrder, updateOrderStatus,
-      savedAddresses
-    }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, orders, placeOrder, updateOrderStatus, savedAddresses }}>
       {children}
     </CartContext.Provider>
   );
 };
+
 const useCart = () => useContext(CartContext);
 export { CartProvider, useCart };
 
+// ─── ScrollToTop ─────────────────────────────────────────────────────────────
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+};
+
+// ─── MyOrders ────────────────────────────────────────────────────────────────
 const MyOrders = () => {
   const { orders, updateOrderStatus } = useCart();
   const navigate = useNavigate();
   const getStatusIcon = (status) => {
-    const map = {
-      ordered: { Icon: Clock, color: 'text-amber-500' },
-      confirmed: { Icon: PackageIcon, color: 'text-blue-500' },
-      shipped: { Icon: Truck, color: 'text-indigo-600' },
-      delivered: { Icon: CheckCircle, color: 'text-green-500' },
-    };
+    const map = { ordered: { Icon: Clock, color: 'text-amber-500' }, confirmed: { Icon: PackageIcon, color: 'text-blue-500' }, shipped: { Icon: Truck, color: 'text-indigo-600' }, delivered: { Icon: CheckCircle, color: 'text-green-500' } };
     const { Icon, color } = map[status] || map.ordered;
     return <Icon className={color} size={20} />;
   };
@@ -3826,64 +110,35 @@ const MyOrders = () => {
     const idx = flow.indexOf(current);
     return idx < flow.length - 1 ? flow[idx + 1] : null;
   };
-  if (orders.length === 0) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-        <PackageIcon size={80} className="mx-auto mb-3 text-gray-400" />
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">No orders yet</h3>
-        <button onClick={() => navigate('/products')} className="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
-          Start Shopping
-        </button>
-      </div>
-    );
-  }
+  if (!orders.length) return (
+    <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+      <PackageIcon size={80} className="mx-auto mb-3 text-zinc-300" />
+      <h3 className="text-2xl font-bold text-zinc-900 mb-3">No orders yet</h3>
+      <button onClick={() => navigate('/products')} className="mt-3 bg-green-700 hover:bg-green-800 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">Start Shopping</button>
+    </div>
+  );
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h2 className="text-4xl font-bold mb-6">My Orders</h2>
-      <div className="grid gap-6 md:grid-cols-2">
+      <h2 className="text-3xl font-bold mb-6 text-zinc-900">My Orders</h2>
+      <div className="grid gap-5 md:grid-cols-2">
         {orders.map((order) => (
-          <div key={order._id} className="bg-white rounded-lg shadow-sm h-full">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h5 className="text-xl font-bold">#{order.orderId}</h5>
-                  <p className="text-gray-500 text-sm flex items-center">
-                    <Calendar size={14} className="mr-1" />
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  {getStatusIcon(order.status)}
-                  <span className="ml-2 bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full capitalize inline-block">
-                    {order.status}
-                  </span>
-                </div>
+          <div key={order._id} className="bg-white border border-zinc-100 rounded-2xl p-6 hover:border-green-200 hover:shadow-lg transition-all">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h5 className="text-lg font-bold text-zinc-900">#{order.orderId}</h5>
+                <p className="text-zinc-500 text-sm flex items-center gap-1 mt-0.5"><Calendar size={13} />{new Date(order.createdAt).toLocaleDateString()}</p>
               </div>
-              <div className="border-t pt-3 mb-4">
-                <p className="mb-1 font-semibold">Total: ₹{order.total}</p>
-                <p className="text-gray-500 text-sm mb-1">
-                  {order.items.length} item{order.items.length > 1 ? 's' : ''}
-                </p>
-                <p className="text-gray-500 text-sm mb-0 flex items-center">
-                  <MapPin size={14} className="mr-1" />
-                  {order.shippingAddress.city}, {order.shippingAddress.state}
-                </p>
-              </div>
-              {getNextStatus(order.status) && (
-                <button
-                  onClick={() => updateOrderStatus(order._id, getNextStatus(order.status))}
-                  className="w-full text-sm bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded mb-2 transition-colors"
-                >
-                  Mark as {getNextStatus(order.status)}
-                </button>
-              )}
-              <button
-                onClick={() => navigate(`/order/${order._id}`)}
-                className="w-full text-indigo-600 hover:text-indigo-800 font-medium text-sm"
-              >
-                View Details →
-              </button>
+              <div className="flex items-center gap-2">{getStatusIcon(order.status)}<span className="bg-zinc-100 text-zinc-700 text-xs px-2.5 py-1 rounded-full capitalize">{order.status}</span></div>
             </div>
+            <div className="border-t pt-3 mb-4 space-y-1">
+              <p className="font-semibold text-zinc-900">₹{order.total}</p>
+              <p className="text-zinc-500 text-sm">{order.items?.length} item{order.items?.length > 1 ? 's' : ''}</p>
+              <p className="text-zinc-500 text-sm flex items-center gap-1"><MapPin size={12} />{order.shippingAddress?.city}, {order.shippingAddress?.state}</p>
+            </div>
+            {getNextStatus(order.status) && (
+              <button onClick={() => updateOrderStatus(order._id, getNextStatus(order.status))} className="w-full text-sm bg-green-50 hover:bg-green-100 text-green-800 py-2 rounded-lg mb-2 transition-colors">Mark as {getNextStatus(order.status)}</button>
+            )}
+            <button onClick={() => navigate(`/order/${order._id}`)} className="w-full text-green-700 hover:text-green-900 font-medium text-sm transition-colors">View Details →</button>
           </div>
         ))}
       </div>
@@ -3891,21 +146,18 @@ const MyOrders = () => {
   );
 };
 
+// ─── OrderDetails ─────────────────────────────────────────────────────────────
 const OrderDetails = () => {
   const { id } = useParams();
   const { orders, updateOrderStatus } = useCart();
   const navigate = useNavigate();
   const order = orders.find(o => o._id === id);
-  if (!order) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">Order not found</h3>
-        <button onClick={() => navigate('/orders')} className="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
-          Back to Orders
-        </button>
-      </div>
-    );
-  }
+  if (!order) return (
+    <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+      <h3 className="text-2xl font-bold text-zinc-900 mb-3">Order not found</h3>
+      <button onClick={() => navigate('/orders')} className="mt-3 bg-green-700 text-white font-semibold py-2.5 px-6 rounded-xl">Back to Orders</button>
+    </div>
+  );
   const statusFlow = [
     { status: 'ordered', label: 'Order Placed', Icon: Clock },
     { status: 'confirmed', label: 'Confirmed', Icon: PackageIcon },
@@ -3917,120 +169,44 @@ const OrderDetails = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center mb-6">
-        <button onClick={() => navigate(-1)} className="mr-3 text-gray-500 hover:text-gray-700 flex items-center p-2 border border-gray-300 rounded-lg transition-colors">
-          <ArrowLeft size={20} />
-        </button>
-        <h2 className="text-2xl font-bold mb-0">Order #{order.orderId}</h2>
+        <button onClick={() => navigate(-1)} className="mr-3 text-zinc-500 hover:text-zinc-700 flex items-center p-2 border border-zinc-200 rounded-xl"><ArrowLeft size={20} /></button>
+        <h2 className="text-2xl font-bold">Order #{order.orderId}</h2>
       </div>
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="bg-indigo-600 text-white p-4 rounded-t-lg">
-              <h5 className="mb-0 text-lg font-semibold">Tracking</h5>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {statusFlow.map((step, idx) => {
-                  const active = idx <= currentIdx;
-                  const current = idx === currentIdx;
-                  return (
-                    <div key={step.status} className="flex items-center">
-                      <div
-                        className={`mr-3 flex items-center justify-center w-12 h-12 rounded-full ${active ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500'
-                          } ${current ? 'border-4 border-indigo-600' : ''}`}
-                      >
-                        <step.Icon size={22} />
-                      </div>
-                      <div className="flex-1">
-                        <h6 className={`${active ? 'font-bold text-gray-900' : 'text-gray-500'} mb-0`}>
-                          {step.label}
-                        </h6>
-                        {idx < statusFlow.length - 1 && (
-                          <div
-                            className={`ml-3 pl-3 h-10 border-l-2 ${idx < currentIdx ? 'border-indigo-600' : 'border-gray-200'
-                              }`}
-                          />
-                        )}
-                      </div>
+          <div className="bg-white border border-zinc-100 rounded-2xl overflow-hidden">
+            <div className="bg-green-700 text-white p-4"><h5 className="font-semibold">Order Tracking</h5></div>
+            <div className="p-6 space-y-4">
+              {statusFlow.map((step, idx) => {
+                const active = idx <= currentIdx, current = idx === currentIdx;
+                return (
+                  <div key={step.status} className="flex items-center">
+                    <div className={`mr-3 flex items-center justify-center w-11 h-11 rounded-full ${active ? 'bg-green-700 text-white' : 'bg-zinc-100 text-zinc-400'} ${current ? 'ring-4 ring-green-100' : ''}`}>
+                      <step.Icon size={20} />
                     </div>
-                  );
-                })}
-              </div>
-              {nextStatus && (
-                <button
-                  onClick={() => updateOrderStatus(order._id, nextStatus)}
-                  className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition-colors"
-                >
-                  Mark as {statusFlow.find(s => s.status === nextStatus)?.label}
-                </button>
-              )}
+                    <div className="flex-1">
+                      <h6 className={`${active ? 'font-bold text-zinc-900' : 'text-zinc-400'}`}>{step.label}</h6>
+                      {idx < statusFlow.length - 1 && <div className={`ml-3 h-8 border-l-2 ${idx < currentIdx ? 'border-green-600' : 'border-zinc-200'}`} />}
+                    </div>
+                  </div>
+                );
+              })}
+              {nextStatus && <button onClick={() => updateOrderStatus(order._id, nextStatus)} className="w-full mt-2 bg-green-700 hover:bg-green-800 text-white py-3 rounded-xl transition-colors">Mark as {statusFlow.find(s => s.status === nextStatus)?.label}</button>}
             </div>
           </div>
         </div>
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm sticky top-4">
-            <div className="bg-gray-50 p-4 rounded-t-lg">
-              <h5 className="mb-0 font-semibold">Order Summary</h5>
-            </div>
-            <div className="p-6">
+        <div>
+          <div className="bg-white border border-zinc-100 rounded-2xl sticky top-4 overflow-hidden">
+            <div className="bg-zinc-50 p-4 border-b"><h5 className="font-semibold">Order Summary</h5></div>
+            <div className="p-5 space-y-2 text-sm">
               <p><strong>Status:</strong> <span className="capitalize">{order.status}</span></p>
               <p><strong>Total:</strong> ₹{order.total}</p>
-              <p><strong>Items:</strong> {order.items.length}</p>
-              <p><strong>Placed on:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-              <hr className="my-4" />
-              <h6 className="font-bold">Shipping Address</h6>
-              <p className="text-sm">
-                {order.shippingAddress.street},<br />
-                {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.zip}<br />
-                {order.shippingAddress.country}
-              </p>
-              <h6 className="font-bold mt-3">Customer</h6>
-              <p className="text-sm">
-                <User size={14} className="inline mr-1" /> {order.customerName}<br />
-                <Mail size={14} className="inline mr-1" /> {order.customerEmail}<br />
-                <Phone size={14} className="inline mr-1" /> {order.customerPhone}
-              </p>
+              <p><strong>Items:</strong> {order.items?.length}</p>
+              <p><strong>Placed:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
+              <hr className="my-3" />
+              <h6 className="font-bold text-zinc-900">Shipping Address</h6>
+              <p className="text-zinc-600">{order.shippingAddress?.street}, {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.zip}</p>
             </div>
-          </div>
-        </div>
-      </div>
-      <div className="mt-6">
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="p-4 border-b">
-            <h5 className="mb-0 font-semibold">Items</h5>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {order.items.map((item) => (
-                  <tr key={item.productId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <img
-                          src={item.image || 'https://via.placeholder.com/60'}
-                          alt={item.name}
-                          className="mr-3 w-12 h-12 rounded object-cover"
-                        />
-                        <div>
-                          <div className="font-medium text-gray-900">{item.name}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">{item.quantity}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">₹{item.price}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">₹{item.price * item.quantity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
@@ -4038,586 +214,318 @@ const OrderDetails = () => {
   );
 };
 
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-};
-
-// TrackOrder Component (Tailwind converted)
+// ─── TrackOrder ───────────────────────────────────────────────────────────────
 const TrackOrder = () => {
   const location = useLocation();
-  const [orderId, setOrderId] = useState("");
+  const [orderId, setOrderId] = useState('');
   const [order, setOrder] = useState(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [searching, setSearching] = useState(false);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const urlOrderId = params.get("order");
-    if (urlOrderId) {
-      setOrderId(urlOrderId);
-      handleTrack(urlOrderId);
-    }
+    const urlOrderId = params.get('order');
+    if (urlOrderId) { setOrderId(urlOrderId); handleTrack(urlOrderId); }
   }, [location]);
+
   const handleTrack = async (id = orderId) => {
-    if (!id.trim()) {
-      setError("Please enter Order ID");
-      return;
-    }
-    setSearching(true);
-    setError("");
-    setOrder(null);
+    if (!id.trim()) { setError('Please enter Order ID'); return; }
+    setSearching(true); setError(''); setOrder(null);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/${id}`);
-      if (!res.ok) throw new Error("Order not found");
-      const data = await res.json();
-      setOrder(data);
-    } catch (err) {
-      setError("Order not found. Please check your Order ID.");
-    } finally {
-      setSearching(false);
-    }
+      if (!res.ok) throw new Error('Order not found');
+      setOrder(await res.json());
+    } catch { setError('Order not found. Please check your Order ID.'); }
+    finally { setSearching(false); }
   };
+
   const statusFlow = [
-    { status: "ordered", label: "Order Placed", icon: Clock, color: "text-amber-500" },
-    { status: "confirmed", label: "Confirmed", icon: PackageIcon, color: "text-blue-500" },
-    { status: "shipped", label: "Shipped", icon: Truck, color: "text-indigo-600" },
-    { status: "delivered", label: "Delivered", icon: CheckCircle, color: "text-green-500" },
+    { status: 'ordered', label: 'Order Placed', Icon: Clock, color: 'text-amber-500' },
+    { status: 'confirmed', label: 'Confirmed', Icon: PackageIcon, color: 'text-blue-500' },
+    { status: 'shipped', label: 'Shipped', Icon: Truck, color: 'text-green-600' },
+    { status: 'delivered', label: 'Delivered', Icon: CheckCircle, color: 'text-green-700' },
   ];
-  const currentStatus = order?.status || "ordered";
-  const currentIdx = statusFlow.findIndex((s) => s.status === currentStatus);
+  const currentIdx = statusFlow.findIndex(s => s.status === (order?.status || 'ordered'));
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="flex justify-center">
-        <div className="w-full lg:w-1/2">
-          <div className="bg-white shadow-2xl rounded-2xl overflow-hidden">
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-8 px-4">
-              <Truck size={40} className="mx-auto mb-3" />
-              <h2 className="text-2xl font-bold mb-1">Track Your Order</h2>
-              <p className="opacity-90">Enter your Order ID to see live status</p>
-            </div>
-            <div className="p-8">
-              <div className="flex mb-4">
-                <input
-                  type="text"
-                  className="flex-1 border border-indigo-600 shadow-sm px-4 py-3 text-lg rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="e.g. ORD-2025-001 or 69104af8db77bdca89b0a6ba"
-                  value={orderId}
-                  onChange={(e) => setOrderId(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleTrack()}
-                />
-                <button
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-r-lg transition-colors"
-                  onClick={() => handleTrack()}
-                  disabled={searching}
-                >
-                  {searching ? (
-                    <>
-                      <Loader2 size={20} className="mr-2 animate-spin inline" />
-                      Searching...
-                    </>
-                  ) : (
-                    "Track"
-                  )}
-                </button>
-              </div>
-              {error && (
-                <div className="flex items-center bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg">
-                  <XCircle size={20} className="mr-2" />
-                  {error}
-                </div>
-              )}
-            </div>
+    <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="bg-white border border-zinc-100 rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-green-700 text-white text-center py-8 px-4">
+          <Truck size={36} className="mx-auto mb-3" />
+          <h2 className="text-2xl font-bold mb-1">Track Your Order</h2>
+          <p className="opacity-80 text-sm">Enter your Order ID to see live status</p>
+        </div>
+        <div className="p-7">
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text" value={orderId} onChange={e => setOrderId(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleTrack()}
+              placeholder="e.g. ORD-2025-001"
+              className="flex-1 border border-zinc-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+            />
+            <button onClick={() => handleTrack()} disabled={searching} className="bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors">
+              {searching ? <Loader2 size={18} className="animate-spin" /> : 'Track'}
+            </button>
           </div>
-          {order && (
-            <div className="mt-8">
-              <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold text-green-600">Order Found!</h1>
-                <p className="text-lg text-gray-600 mt-2">
-                  Order ID: <strong>{order.orderId || order._id}</strong>
-                </p>
-              </div>
-              <div className="bg-white shadow-sm rounded-lg mb-6 overflow-hidden">
-                <div className="p-6">
-                  <h4 className="text-lg font-semibold text-indigo-600 mb-4 flex items-center">
-                    <PackageIcon className="mr-2" />
-                    Order Status
-                  </h4>
-                  <div className="relative">
-                    {statusFlow.map((step, idx) => {
-                      const isActive = idx <= currentIdx;
-                      const isCurrent = idx === currentIdx;
-                      const Icon = step.icon;
-                      return (
-                        <div key={step.status} className="flex items-center mb-4 relative">
-                          <div
-                            className={`flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full ${isActive ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"
-                              } ${isCurrent ? "shadow-lg border-4 border-white" : ""}`}
-                          >
-                            <Icon size={26} />
-                          </div>
-                          <div className="ml-4 flex-1">
-                            <h6 className={`mb-1 ${isActive ? "font-bold text-gray-900" : "text-gray-500"}`}>
-                              {step.label}
-                            </h6>
-                            <small className={isActive ? step.color : "text-gray-500"}>
-                              {isCurrent && "In Progress"}
-                              {idx < currentIdx && "Completed"}
-                            </small>
-                          </div>
-                          {idx < statusFlow.length - 1 && (
-                            <div
-                              className="absolute top-0 left-7 w-1 h-14 bg-gray-200"
-                              style={{ backgroundColor: idx < currentIdx ? "#0d6efd" : "#e9ecef" }}
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-500 text-sm">
-                  Ordered on: <strong>{new Date(order.createdAt).toLocaleString()}</strong>
-                </p>
-              </div>
-            </div>
-          )}
+          {error && <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm"><XCircle size={16} />{error}</div>}
         </div>
       </div>
-      <style jsx>{`
-        .bg-gradient-primary {
-          background: linear-gradient(135deg, #0d6efd, #6610f2) !important;
-        }
-        .timeline::before {
-          content: '';
-          position: absolute;
-          left: 28px;
-          top: 0;
-          bottom: 0;
-          width: 4px;
-          background: #e9ecef;
-          z-index: 0;
-        }
-      `}</style>
+      {order && (
+        <div className="mt-6 bg-white border border-zinc-100 rounded-2xl p-6">
+          <h3 className="text-lg font-bold text-green-700 mb-1">Order Found!</h3>
+          <p className="text-zinc-500 text-sm mb-5">ID: {order.orderId || order._id}</p>
+          <div className="space-y-4">
+            {statusFlow.map((step, idx) => {
+              const isActive = idx <= currentIdx, isCurrent = idx === currentIdx;
+              return (
+                <div key={step.status} className="flex items-center gap-4">
+                  <div className={`w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center ${isActive ? 'bg-green-700 text-white' : 'bg-zinc-100 text-zinc-400'} ${isCurrent ? 'ring-4 ring-green-100' : ''}`}>
+                    <step.Icon size={22} />
+                  </div>
+                  <div>
+                    <p className={`font-semibold text-sm ${isActive ? 'text-zinc-900' : 'text-zinc-400'}`}>{step.label}</p>
+                    <p className={`text-xs ${isActive ? step.color : 'text-zinc-400'}`}>{isCurrent ? 'In Progress' : idx < currentIdx ? 'Completed' : 'Pending'}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-xs text-zinc-400 mt-5 text-center">Ordered: {new Date(order.createdAt).toLocaleString()}</p>
+        </div>
+      )}
     </div>
   );
 };
 
-// Productcard Component (Tailwind converted)
+// ─── ProductCard ──────────────────────────────────────────────────────────────
+const S = {
+  section: { padding: '88px 0', background: '#f9fafb' },
+  wrap: { maxWidth: 1280, margin: '0 auto', padding: '0 32px' },
+  header: { display:'flex', flexWrap:'wrap', alignItems:'flex-end', justifyContent:'space-between', gap:16, marginBottom:44 },
+  eyebrow: { display:'inline-flex', alignItems:'center', gap:6, background:'#dcfce7', color:'#15803d', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.1em', padding:'5px 13px', borderRadius:100, marginBottom:12 },
+  h2: { fontFamily:"'Playfair Display',Georgia,serif", fontWeight:700, fontSize:'clamp(26px,3.5vw,42px)', color:'#0f0f0f', lineHeight:1.15 },
+  sub: { color:'#9ca3af', fontSize:14, marginTop:6 },
+  viewAll: { display:'inline-flex', alignItems:'center', gap:6, fontSize:13, fontWeight:700, color:'#16a34a', background:'none', border:'none', cursor:'pointer' },
+  grid: { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:20 },
+  card: { background:'#fff', border:'1.5px solid #f0f0f0', borderRadius:18, overflow:'hidden', cursor:'pointer', transition:'border-color .25s,transform .25s,box-shadow .25s' },
+  imgWrap: { position:'relative', aspectRatio:'1/1', background:'#f4f6f4', overflow:'hidden' },
+  img: { width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform .5s ease' },
+  badge: { position:'absolute', top:12, left:12, fontSize:10, fontWeight:800, padding:'4px 9px', borderRadius:100, color:'#fff', letterSpacing:'0.04em', textTransform:'uppercase' },
+  wish: { position:'absolute', top:12, right:12, width:32, height:32, background:'rgba(255,255,255,0.92)', border:'none', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', opacity:0, transition:'opacity .2s,transform .2s' },
+  overlay: { position:'absolute', inset:'auto 0 0 0', background:'linear-gradient(to top,rgba(0,0,0,.70),transparent)', padding:16, transition:'transform .3s ease' },
+  atcBtn: { width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:7, background:'#fff', color:'#15803d', fontSize:13, fontWeight:700, padding:'10px 16px', borderRadius:10, border:'none', cursor:'pointer' },
+  body: { padding:16 },
+  name: { fontWeight:700, fontSize:14, color:'#111', lineHeight:1.4, marginBottom:8, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' },
+  starsRow: { display:'flex', alignItems:'center', gap:2, marginBottom:10 },
+  foot: { display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 },
+  price: { fontSize:18, fontWeight:800, color:'#111' },
+  orig: { fontSize:12, color:'#9ca3af', textDecoration:'line-through', marginLeft:6 },
+  goBtn: { width:34, height:34, background:'#15803d', color:'#fff', border:'none', borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0, transition:'background .2s,transform .2s' },
+  fresh: { display:'flex', alignItems:'center', gap:5, fontSize:11, fontWeight:600, color:'#16a34a', marginTop:10 },
+  freshDot: { width:6, height:6, borderRadius:'50%', background:'#22c55e' },
+  cta: { textAlign:'center', marginTop:48 },
+  ctaBtn: { display:'inline-flex', alignItems:'center', gap:8, background:'#15803d', color:'#fff', fontSize:14, fontWeight:700, padding:'15px 34px', borderRadius:13, border:'none', cursor:'pointer', boxShadow:'0 4px 20px rgba(21,128,61,.28)', transition:'background .2s,transform .2s,box-shadow .2s' },
+};
+
+const mediaStyles = `
+  @media(max-width:1100px){.pcard-grid{grid-template-columns:repeat(3,1fr)!important}}
+  @media(max-width:750px){.pcard-grid{grid-template-columns:repeat(2,1fr)!important;gap:14px!important}}
+  @media(max-width:420px){.pcard-grid{grid-template-columns:1fr!important}}
+  .pcard-item:hover{border-color:#86efac!important;transform:translateY(-4px)!important;box-shadow:0 16px 48px rgba(0,0,0,.10)!important}
+  .pcard-item:hover .pcard-img-el{transform:scale(1.07)!important}
+  .pcard-item:hover .pcard-wish-btn{opacity:1!important}
+  .pcard-item:hover .pcard-overlay-el{transform:translateY(0)!important}
+  .pcard-item:hover .pcard-name-el{color:#15803d!important}
+`;
+
 const ProductCard = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [liked, setLiked] = useState({});
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/products`);
-        if (!response.ok) throw new Error('Failed to load products');
-        const data = await response.json();
-        setProducts(data || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
+    fetch(`${import.meta.env.VITE_API_URL}/products`)
+      .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+      .then(d => setProducts(d || []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleAddToCart = (e, product) => {
-    e.stopPropagation();
-    addToCart(product);
-    // Optional: show toast here
-  };
-
-  if (loading) {
-    return (
-      <div className="py-20 text-center">
-        <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-600 border-t-transparent"></div>
-        <p className="mt-4 text-gray-600 font-medium">Loading fresh products...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="py-20 text-center">
-        <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-        <p className="text-gray-600 text-lg">Oops! Something went wrong.</p>
-        <p className="text-sm text-gray-500 mt-2">{error}</p>
-      </div>
-    );
-  }
-
-  if (products.length === 0) {
-    return (
-      <div className="py-20 text-center">
-        <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-        <h3 className="text-xl font-semibold text-gray-700">No products yet</h3>
-        <p className="text-gray-500 mt-2">New winter specials coming soon!</p>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div style={{ padding:'80px 32px', textAlign:'center', background:'#f9fafb' }}>
+      <div style={{ display:'inline-block', width:36, height:36, border:'3px solid #e5e7eb', borderTopColor:'#16a34a', borderRadius:'50%', animation:'dk-spin .7s linear infinite', marginBottom:12 }} />
+      <p style={{ color:'#9ca3af', fontSize:14 }}>Loading fresh products…</p>
+    </div>
+  );
+  if (error || !products.length) return (
+    <div style={{ padding:'80px 32px', textAlign:'center', background:'#f9fafb' }}>
+      <p style={{ color:'#9ca3af', fontSize:14 }}>{error || 'New arrivals coming soon.'}</p>
+    </div>
+  );
 
   return (
-    <section className="py-16 lg:py-24 bg-gradient-to-b from-amber-50/50 via-white to-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-        {/* Section Header - Warm & Trustworthy */}
-        <div className="text-center mb-16">
-          <p className="text-emerald-700 font-semibold tracking-wider text-sm uppercase mb-3">
-            Handmade with Love • Since 2005`
-          </p>
-          <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-            Our Summmer Specials
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Pure Spices made in Dhasa
-          </p>
-          <div className="mt-6 flex justify-center">
-            <div className="w-32 h-1 bg-gradient-to-r from-emerald-600 to-amber-600 rounded-full"></div>
+    <section style={S.section}>
+      <style>{mediaStyles}</style>
+      <div style={S.wrap}>
+        {/* Header */}
+        <div style={S.header}>
+          <div>
+            <div style={S.eyebrow}>Handmade with Love · Since 1999</div>
+            <h2 style={S.h2}>Our Products</h2>
+            <p style={S.sub}>Pure spices &amp; saani — fresh from Dhasa, Gujarat</p>
           </div>
+          <button style={S.viewAll} onClick={() => navigate('/products')}>
+            View all <ArrowRight size={14} />
+          </button>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {products.map((product) => (
+        {/* Grid */}
+        <div className="pcard-grid" style={S.grid}>
+          {products.map((product, i) => (
             <div
               key={product._id}
-              className="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 cursor-pointer"
+              className="pcard-item"
+              style={S.card}
               onClick={() => navigate(`/product/${product._id}`)}
             >
-              {/* Image Container */}
-              <div className="relative aspect-square overflow-hidden bg-gray-50">
-                <img
-                  src={product.img_url || "/api/placeholder/400/400"}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  loading="lazy"
-                />
-
-                {/* Discount Badge */}
-                {product.originalPrice && (
-                  <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                    {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-                  </div>
-                )}
-
-                {/* Wishlist Button */}
+              {/* Image */}
+              <div style={S.imgWrap}>
+                {product.img_url
+                  ? <img className="pcard-img-el" src={product.img_url} alt={product.name} loading="lazy" style={S.img} />
+                  : <div style={{ width:'100%', height:'100%', background:'#ecfdf5', display:'flex', alignItems:'center', justifyContent:'center' }}><ShoppingBag size={36} color="#86efac" /></div>
+                }
+                <span style={{ ...S.badge, background: product.originalPrice ? '#dc2626' : '#16a34a' }}>
+                  {product.originalPrice
+                    ? `${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF`
+                    : 'Fresh'}
+                </span>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Add to wishlist logic
-                  }}
-                  className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50"
+                  className="pcard-wish-btn"
+                  style={S.wish}
+                  onClick={e => { e.stopPropagation(); setLiked(p => ({ ...p, [product._id]: !p[product._id] })); }}
                 >
-                  <Heart className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" />
+                  <Heart size={14} style={{ color: liked[product._id] ? '#ef4444' : '#9ca3af', fill: liked[product._id] ? '#ef4444' : 'none' }} />
                 </button>
-
-                {/* Quick Add Overlay */}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                  <button
-                    onClick={(e) => handleAddToCart(e, product)}
-                    className="w-full bg-white text-emerald-700 font-semibold py-3 rounded-xl hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <ShoppingBag className="w-5 h-5" />
-                    Add to Cart
+                <div className="pcard-overlay-el" style={{ ...S.overlay, transform: 'translateY(100%)' }}>
+                  <button className="pcard-atc" style={S.atcBtn} onClick={e => { e.stopPropagation(); addToCart(product); navigate('/cart'); }}>
+                    <ShoppingBag size={13} /> Add to Cart
                   </button>
                 </div>
               </div>
 
-              {/* Card Content */}
-              <div className="p-6 space-y-3">
-                <h3 className="font-bold text-lg text-gray-900 line-clamp-2 group-hover:text-emerald-700 transition-colors">
-                  {product.name}
-                </h3>
-
-                {/* Rating */}
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${i < 4.8 ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-gray-600">(128)</span>
+              {/* Body */}
+              <div style={S.body}>
+                <p className="pcard-name-el" style={S.name}>{product.name}</p>
+                <div style={S.starsRow}>
+                  {[...Array(5)].map((_, j) => <Star key={j} size={11} style={{ fill:'#fbbf24', color:'#fbbf24' }} />)}
+                  <span style={{ fontSize:11, color:'#9ca3af', marginLeft:4 }}>(128)</span>
                 </div>
-
-                {/* Price */}
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl font-bold text-gray-900">
-                    ₹{product.price}
-                  </span>
-                  {product.originalPrice && (
-                    <del className="text-gray-500">₹{product.originalPrice}</del>
-                  )}
+                <div style={S.foot}>
+                  <div>
+                    <span style={S.price}>₹{product.price}</span>
+                    {product.originalPrice && <span style={S.orig}>₹{product.originalPrice}</span>}
+                  </div>
+                  <button style={S.goBtn} onClick={e => { e.stopPropagation(); navigate(`/product/${product._id}`); }}>
+                    <ArrowRight size={13} />
+                  </button>
                 </div>
-
-                {/* Subtle Badge */}
-                <div className="flex items-center gap-2 text-xs font-medium text-emerald-700">
-                  <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                  Fresh batch • Made today
-                </div>
+                <div style={S.fresh}><span style={S.freshDot} /> Fresh · Made in Dhasa</div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Optional CTA */}
-        {/* <div className="text-center mt-16">
-          <button
+        {/* CTA */}
+        <div style={S.cta}>
+          <button style={S.ctaBtn}
             onClick={() => navigate('/products')}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-700 text-white font-semibold rounded-full hover:bg-emerald-800 transition-colors shadow-lg hover:shadow-xl"
+            onMouseEnter={e => { e.currentTarget.style.background='#166534'; e.currentTarget.style.transform='translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background='#15803d'; e.currentTarget.style.transform='none'; }}
           >
-            View All Products
+            <ShoppingBag size={16} /> View All Products
           </button>
-        </div> */}
+        </div>
       </div>
     </section>
   );
 };
 
-// ProductDetail Component (Tailwind converted)
+// ─── ProductDetail ────────────────────────────────────────────────────────────
 function ProductDetail({ product, onClose }) {
   const [quantity, setQuantity] = useState(1);
   const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();
   const { addToCart } = useCart();
-
   if (!product) return null;
-
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) addToCart(product);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
     navigate('/cart');
   };
-
-  const increment = () => setQuantity(prev => prev + 1);
-  const decrement = () => setQuantity(prev => Math.max(1, prev - 1));
-
-  const rating = 4.8;
-  const reviews = 428;
   const originalPrice = Math.round(product.price * 1.3);
-
   return (
     <>
-      {/* Toast - Clean & Minimal */}
       {showToast && (
         <div className="fixed top-4 right-4 z-50">
-          <div className="bg-black text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium">
-            <Check className="w-5 h-5" />
-            {quantity} × {product.name} added to cart
+          <div className="bg-zinc-900 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium">
+            <Check className="w-4 h-4 text-green-400" /> {quantity} × {product.name} added
           </div>
         </div>
       )}
-
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-zinc-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-
-          {/* Breadcrumb / Back */}
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm font-medium mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to products
+          <button onClick={onClose} className="flex items-center gap-2 text-zinc-600 hover:text-zinc-900 text-sm font-medium mb-8">
+            <ArrowLeft className="w-4 h-4" /> Back to products
           </button>
-
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
-
-            {/* Image Section */}
-            <div className="space-y-4">
-              <div className="relative bg-white rounded-2xl overflow-hidden shadow-sm">
-                <img
-                  src={product.img_url || "/api/placeholder/800/800"}
-                  alt={product.name}
-                  className="w-full aspect-square object-cover" />
-                <div className="absolute top-4 left-4">
-                  <span className="bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-md">
-                    23% OFF
-                  </span>
-                </div>
-                <button className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow">
-                  <Heart className="w-5 h-5 text-gray-700" />
-                </button>
-              </div>
-
-              {/* Thumbnails */}
-              {/* <div className="grid grid-cols-5 gap-3">
-              {[1,2,3,4,5].map((i) => (
-                <button key={i} className="border-2 border-gray-200 rounded-lg overflow-hidden hover:border-gray-400 transition-colors">
-                  <img src={product.img_url} alt="" className="w-full aspect-square object-cover" />
-                </button>
-              ))}
-            </div> */}
+          <div className="grid lg:grid-cols-2 gap-12">
+            <div className="bg-white rounded-2xl overflow-hidden border border-zinc-100">
+              <img src={product.img_url} alt={product.name} className="w-full aspect-square object-cover" />
             </div>
-
-            {/* Product Info */}
-            <div className="space-y-8">
-
-              {/* Title & Rating */}
+            <div className="space-y-7">
               <div>
-                <h1 className="text-3xl lg:text-4xl font-semibold text-gray-900 leading-tight">
-                  {product.name}
-                </h1>
-
-                <div className="flex items-center gap-4 mt-3">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-5 h-5 ${i < Math.floor(rating) ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`} />
-                    ))}
-                    <span className="ml-2 text-sm font-medium text-gray-700">{rating}</span>
-                  </div>
-                  <span className="text-sm text-gray-500">({reviews} reviews)</span>
+                <h1 className="text-3xl font-bold text-zinc-900 leading-tight">{product.name}</h1>
+                <div className="flex items-center gap-3 mt-3">
+                  <div className="flex">{[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}</div>
+                  <span className="text-sm text-zinc-500">(428 reviews)</span>
                   <span className="text-sm font-medium text-green-600">In stock</span>
                 </div>
               </div>
-
-              {/* Price */}
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-gray-900">₹{product.price}</span>
-                <del className="text-lg text-gray-500">₹{originalPrice}</del>
-                <span className="text-sm font-medium text-green-600">You save ₹{originalPrice - product.price}</span>
+                <span className="text-4xl font-bold text-zinc-900">₹{product.price}</span>
+                <del className="text-lg text-zinc-400">₹{originalPrice}</del>
+                <span className="text-sm font-medium text-green-600">Save ₹{originalPrice - product.price}</span>
               </div>
-
-              {/* Description */}
-              <p className="text-gray-600  text-base">
-                {product.description}
-              </p>
-
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-6 py-4">
-                <span className="text-sm font-medium text-gray-700">Quantity (in KG)</span>
-                <div className="flex items-center border border-gray-300 rounded-lg">
-                  <button
-                    onClick={decrement}
-                    className="p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="w-16 text-center font-medium text-lg">{quantity}</span>
-                  <button
-                    onClick={increment}
-                    className="p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+              {product.description && <p className="text-zinc-600 leading-relaxed">{product.description}</p>}
+              <div className="flex items-center gap-5">
+                <span className="text-sm font-medium text-zinc-700">Quantity (kg)</span>
+                <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden">
+                  <button onClick={() => setQuantity(p => Math.max(1, p - 1))} className="p-3 hover:bg-zinc-50 transition-colors"><Minus className="w-4 h-4" /></button>
+                  <span className="w-14 text-center font-bold">{quantity}</span>
+                  <button onClick={() => setQuantity(p => p + 1)} className="p-3 hover:bg-zinc-50 transition-colors"><Plus className="w-4 h-4" /></button>
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-3 pt-4">
-                <button
-                  onClick={handleAddToCart}
-                  className="w-full bg-black hover:bg-gray-900 text-white font-medium py-4 rounded-xl transition-colors flex items-center justify-center gap-3"
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  Add to Cart — ₹{product.price * quantity}
+              <div className="space-y-3">
+                <button onClick={handleAddToCart} className="w-full bg-zinc-900 hover:bg-green-800 text-white font-semibold py-4 rounded-xl transition-colors flex items-center justify-center gap-3">
+                  <ShoppingBag className="w-5 h-5" /> Add to Cart — ₹{product.price * quantity}
                 </button>
-
-                <button className="w-full border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-3.5 rounded-xl transition-colors flex items-center justify-center gap-3"
-                  onClick={async () => {
-                    const url = window.location.href; // current page URL
-                    const shareData = {
-                      title: `🔥 ${product.name} is a must-have! 🔥`,
-                      text: `✨ Your next favorite purchase is here: ${product.name} ✨\nGrab it now 👉 ${url}`,
-                      url,
-                    }
-                    try {
-                      if (navigator.share) {
-                        await navigator.share(shareData);
-                        // console.log('Product shared successfully');
-                      } else {
-                        // Fallback: copy link to clipboard
-                        await navigator.clipboard.writeText(url);
-                        alert('Link copied to clipboard!');
-                      }
-                    } catch (err) {
-                      console.error('Error sharing:', err);
-                    }
-                  }}
-                >
-                  <Share2 className="w-5 h-5" />
-                  Share Product
+                <button onClick={async () => {
+                  const url = window.location.href;
+                  if (navigator.share) await navigator.share({ title: product.name, url });
+                  else { await navigator.clipboard.writeText(url); alert('Link copied!'); }
+                }} className="w-full border border-zinc-200 hover:border-zinc-300 text-zinc-700 font-medium py-3.5 rounded-xl transition-colors flex items-center justify-center gap-3">
+                  <Share2 className="w-5 h-5" /> Share Product
                 </button>
               </div>
-
-              {/* Trust Indicators */}
-              <div className="border-t pt-6 space-y-4">
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <Truck className="w-5 h-5 text-gray-500" />
-                  <span>Free delivery on orders above ₹499</span>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <Package className="w-5 h-5 text-gray-500" />
-                  <span>100% vegetarian • No preservatives</span>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <Shield className="w-5 h-5 text-gray-500" />
-                  <span>25 years of trusted quality • Made in Dhasa</span>
-                </div>
+              <div className="border-t pt-5 space-y-3">
+                <div className="flex items-center gap-3 text-sm text-zinc-600"><Truck className="w-5 h-5 text-zinc-400" /> Free delivery on orders above ₹499</div>
+                <div className="flex items-center gap-3 text-sm text-zinc-600"><Package className="w-5 h-5 text-zinc-400" /> 100% vegetarian · No preservatives</div>
+                <div className="flex items-center gap-3 text-sm text-zinc-600"><Shield className="w-5 h-5 text-zinc-400" /> 25 years of trusted quality · Made in Dhasa</div>
               </div>
             </div>
-          </div>
-
-          {/* Key Highlights */}
-          <div className="mt-20 bg-white rounded-2xl p-8 lg:p-12 border">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-8">Key Highlights</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {[
-                'No added flavours or colours',
-                'No harmful chemicals',
-                'Rich in iron, calcium & magnesium',
-                'High in healthy fats & protein',
-                'Traditional recipe from Gujarat',
-                'Best consumed in winters'
-              ].map((item, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Why Choose This */}
-          <div className="mt-12 bg-gray-50 rounded-2xl p-8 lg:p-12">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-8">Why This Product Works</h2>
-            <div className="space-y-8 max-w-4xl">
-              {[
-                { title: "Instant + Long-lasting Energy", desc: "Jaggery provides quick energy while sesame seeds offer sustained fuel from healthy fats and protein." },
-                { title: "Traditional ", desc: "Consumed for generations in Gujarat to stay warm, strong, and healthy during cold months." },
-                { title: "Family Recipe Since 1999", desc: "Made exactly like our grandmothers did — pure, authentic, and full of love." }
-              ].map((point, i) => (
-                <div key={i} className="flex gap-6">
-                  <div className="text-3xl font-bold text-gray-400 w-12">{String(i + 1).padStart(2, '0')}</div>
-                  <div>
-                    <h4 className="text-xl font-semibold text-gray-900 mb-2">{point.title}</h4>
-                    <p className="text-gray-600 leading-relaxed">{point.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Final Trust */}
-          <div className="mt-16 text-center py-12 bg-white rounded-2xl border">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-              25 Years of Pure Tradition
-            </h3>
-            <p className="text-gray-600">
-              Handmade in Dhasa • Trusted by over 50,000 families • Made with love
-            </p>
           </div>
         </div>
       </div>
@@ -4631,1230 +539,251 @@ const ProductDetailWrapper = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/products/${id}`);
-        const data = await res.json();
-        setProduct(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProduct();
+    fetch(`${import.meta.env.VITE_API_URL}/products/${id}`)
+      .then(r => r.json()).then(setProduct).catch(console.error).finally(() => setLoading(false));
   }, [id]);
-  if (loading) return <div className="max-w-7xl mx-auto px-4 py-12 text-center"><div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" /></div>;
-  if (!product) return <div className="max-w-7xl mx-auto px-4 py-12 text-center"><h3 className="text-2xl font-bold text-gray-900">Product not found</h3></div>;
+  if (loading) return <div className="py-12 text-center"><div className="inline-block w-8 h-8 border-b-2 border-zinc-900 rounded-full animate-spin" /></div>;
+  if (!product) return <div className="py-12 text-center"><h3 className="text-2xl font-bold text-zinc-900">Product not found</h3></div>;
   return <ProductDetail product={product} onClose={() => navigate(-1)} />;
 };
 
-// Cart Component (Tailwind converted)
+// ─── Cart ────────────────────────────────────────────────────────────────────
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity } = useCart();
   const navigate = useNavigate();
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const shipping = subtotal > 1000 ? 0 : 1;
-  const discount = 0;
-  const total = subtotal + shipping - discount;
-  const handleCheckout = () => {
-    navigate('/checkout', { state: { cart } });
-  };
-  const increment = (id) => {
-    const item = cart.find(i => i.productId === id);
-    updateQuantity(id, item.quantity + 1);
-  };
-  const decrement = (id) => {
-    const item = cart.find(i => i.productId === id);
-    if (item.quantity > 1) {
-      updateQuantity(id, item.quantity - 1);
-    }
-  };
-  if (cart.length === 0) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-        <div className="inline-flex items-center justify-center w-32 h-32 bg-gray-100 rounded-full mb-6">
-          <ShoppingBag size={60} className="text-indigo-600" />
-        </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h3>
-        <p className="text-gray-600 mb-6">Looks like you haven't added anything yet.</p>
-        <button onClick={() => navigate('/products')} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors">
-          Continue Shopping
-        </button>
-      </div>
-    );
-  }
+  const total = subtotal + shipping;
+
+  if (!cart.length) return (
+    <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+      <ShoppingBag size={64} className="mx-auto mb-4 text-zinc-300" />
+      <h3 className="text-2xl font-bold text-zinc-900 mb-2">Your cart is empty</h3>
+      <button onClick={() => navigate('/products')} className="mt-4 bg-green-700 hover:bg-green-800 text-white font-semibold py-3 px-8 rounded-xl transition-colors">Continue Shopping</button>
+    </div>
+  );
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-      <h2 className="text-center text-3xl font-bold text-indigo-600 mb-6">Your Cart</h2>
-      <div className="flex items-center mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-        <Truck size={24} className="mr-3 text-green-600" />
-        <div>
-          <strong>
-            {subtotal >= 1000 ? (
-              <>Free Shipping Unlocked!</>
-            ) : (
-              <>Add <span className="text-red-600">₹{(1000 - subtotal).toLocaleString()}</span> more for FREE shipping</>
-            )}
-          </strong>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div
-              className="bg-green-600 h-2 rounded-full transition-all"
-              style={{ width: `${Math.min((subtotal / 1000) * 100, 100)}%` }}
-            />
-          </div>
+      <h2 className="text-3xl font-bold text-zinc-900 mb-6">Your Cart</h2>
+      <div className="flex items-center mb-6 p-4 bg-green-50 border border-green-100 rounded-xl gap-3">
+        <Truck size={22} className="text-green-600 flex-shrink-0" />
+        <div className="flex-1">
+          <p className="font-semibold text-sm text-zinc-800">{subtotal >= 1000 ? 'Free Shipping Unlocked! 🎉' : `Add ₹${(1000 - subtotal).toLocaleString()} more for FREE shipping`}</p>
+          <div className="w-full bg-zinc-200 rounded-full h-1.5 mt-1.5"><div className="bg-green-600 h-1.5 rounded-full transition-all" style={{ width: `${Math.min((subtotal / 1000) * 100, 100)}%` }} /></div>
         </div>
       </div>
       <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            {cart.map((item) => (
-              <div key={item.productId} className="p-6 border-b border-gray-200 last:border-b-0">
-                <div className="grid items-center gap-4 md:grid-cols-4">
-                  <div className="md:col-span-1">
-                    <img
-                      src={item.image || 'https://via.placeholder.com/150'}
-                      alt={item.name}
-                      className="w-full rounded-lg shadow-sm object-cover"
-                      style={{ height: 90, objectFit: 'cover' }}
-                    />
+        <div className="lg:col-span-2 space-y-3">
+          {cart.map(item => (
+            <div key={item.productId} className="bg-white border border-zinc-100 rounded-2xl p-5 flex gap-4 items-start">
+              <img src={item.image || 'https://via.placeholder.com/80'} alt={item.name} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start gap-2">
+                  <h6 className="font-bold text-zinc-900 text-sm leading-snug">{item.name}</h6>
+                  <button onClick={() => removeFromCart(item.productId)} className="text-zinc-300 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={15} /></button>
+                </div>
+                <p className="text-zinc-400 text-xs mt-0.5">₹{item.price}/kg</p>
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center border border-zinc-200 rounded-lg">
+                    <button onClick={() => updateQuantity(item.productId, item.quantity - 1)} disabled={item.quantity <= 1} className="p-1.5 disabled:opacity-40 hover:bg-zinc-50"><Minus size={12} /></button>
+                    <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.productId, item.quantity + 1)} className="p-1.5 hover:bg-zinc-50"><Plus size={12} /></button>
                   </div>
-                  <div className="md:col-span-3">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h6 className="font-bold text-gray-900 mb-1">{item.name}</h6>
-                        <p className="text-gray-500 text-sm mb-0">₹{item.price.toLocaleString()} / kg</p>
-                      </div>
-                      <button
-                        onClick={() => removeFromCart(item.productId)}
-                        className="text-red-500 hover:text-red-700 flex items-center p-1"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                    <div className="flex justify-between items-center mt-4">
-                      <div className="flex items-center" style={{ width: '140px' }}>
-                        <button
-                          className="p-2 border border-gray-300 rounded-l hover:bg-gray-50 disabled:opacity-50"
-                          onClick={() => decrement(item.productId)}
-                          disabled={item.quantity <= 1}
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <input
-                          type="text"
-                          className="w-12 border-t border-b border-gray-300 text-center font-bold"
-                          value={item.quantity}
-                          readOnly
-                        />
-                        <button
-                          className="p-2 border border-gray-300 rounded-r hover:bg-gray-50"
-                          onClick={() => increment(item.productId)}
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-gray-500 text-sm mb-0">Item Total</p>
-                        <h5 className="text-indigo-600 font-bold mb-0">
-                          ₹{(item.price * item.quantity).toLocaleString()}
-                        </h5>
-                      </div>
-                    </div>
-                  </div>
+                  <span className="font-bold text-green-700">₹{(item.price * item.quantity).toLocaleString()}</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm sticky top-4">
-            <div className="bg-indigo-600 text-white p-4 rounded-t-lg">
-              <h5 className="mb-0 font-semibold">Order Summary</h5>
-            </div>
-            <div className="p-6">
-              <ul className="space-y-2 mb-4">
-                <li className="flex justify-between py-2">
-                  <span>Subtotal</span>
-                  <strong>₹{subtotal.toLocaleString()}</strong>
-                </li>
-                <li className="flex justify-between py-2 text-green-600">
-                  <span>Discount</span>
-                  <strong>-₹{discount.toLocaleString()}</strong>
-                </li>
-                <li className="flex justify-between py-2">
-                  <span>Shipping</span>
-                  <strong>
-                    {shipping === 0 ? (
-                      <span className="text-green-600">FREE</span>
-                    ) : (
-                      `₹${shipping}`
-                    )}
-                  </strong>
-                </li>
-              </ul>
-              <div className="border-t pt-4 mb-4">
-                <div className="flex justify-between items-center">
-                  <h5 className="mb-0 font-bold">Total</h5>
-                  <h4 className="text-indigo-600 mb-0 text-xl font-bold">₹{total.toLocaleString()}</h4>
-                </div>
-                <small className="text-gray-500 block">Inclusive of all taxes</small>
-              </div>
-              <div className="flex mb-4">
-                <input
-                  type="text"
-                  className="flex-1 border border-gray-300 px-3 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Coupon code"
-                />
-                <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-lg transition-colors">
-                  Apply
-                </button>
-              </div>
-              <button
-                onClick={handleCheckout}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center shadow-sm transition-colors"
-              >
-                Proceed to Checkout
-                <ArrowRight className="ml-2" size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Contact Component (Tailwind converted, no Bootstrap CDN)
-const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
-  const [formErrors, setFormErrors] = useState({});
-  const [success, setSuccess] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
-  const validateForm = () => {
-    const errors = {};
-    if (!formData.name.trim()) errors.name = 'Name is required';
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format';
-    }
-    if (!formData.message.trim()) errors.message = 'Message is required';
-    return errors;
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('Non-JSON response:', text);
-        throw new Error(`Failed to submit contact form: ${response.status} ${response.statusText}`);
-      }
-      const data = await response.json();
-      setSuccess('Your message has been sent successfully!');
-      setFormData({ name: '', email: '', message: '' });
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      console.error('Error submitting contact form:', error);
-      setFormErrors({ submit: error.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center py-10 px-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', minHeight: '100vh' }}>
-      <div className="w-full max-w-2xl mx-auto">
-        <div className="text-center text-white mb-8">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.2)' }}>Get In Touch</h2>
-          <p className="text-lg opacity-95">We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
-        </div>
-        <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-xl mb-4 flex items-center">
-              <CheckCircle size={20} className="mr-2" />
-              {success}
-            </div>
-          )}
-          {formErrors.submit && (
-            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl mb-4 flex items-center">
-              <XCircle size={20} className="mr-2" />
-              {formErrors.submit}
-            </div>
-          )}
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="name" className="block font-semibold text-gray-700 mb-2 text-sm">Full Name</label>
-              <div className="flex">
-                <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-3 rounded-l-xl flex items-center justify-center" style={{ borderRadius: '10px 0 0 10px', border: '2px solid #e0e0e0', borderRight: 'none' }}>
-                  <User size={20} />
-                </span>
-                <input
-                  type="text"
-                  className={`flex-1 px-4 py-3 border border-gray-300 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.name ? 'border-red-500' : ''}`}
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="John Doe"
-                />
-              </div>
-              {formErrors.name && (
-                <div className="text-red-600 text-sm mt-1 flex items-center">
-                  <XCircle size={14} className="mr-1" />
-                  {formErrors.name}
-                </div>
-              )}
-            </div>
-            <div className="mb-4">
-              <label htmlFor="email" className="block font-semibold text-gray-700 mb-2 text-sm">Email Address</label>
-              <div className="flex">
-                <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-3 rounded-l-xl flex items-center justify-center" style={{ borderRadius: '10px 0 0 10px', border: '2px solid #e0e0e0', borderRight: 'none' }}>
-                  <Mail size={20} />
-                </span>
-                <input
-                  type="email"
-                  className={`flex-1 px-4 py-3 border border-gray-300 rounded-r-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.email ? 'border-red-500' : ''}`}
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="john@example.com"
-                />
-              </div>
-              {formErrors.email && (
-                <div className="text-red-600 text-sm mt-1 flex items-center">
-                  <XCircle size={14} className="mr-1" />
-                  {formErrors.email}
-                </div>
-              )}
-            </div>
-            <div className="mb-6">
-              <label htmlFor="message" className="block font-semibold text-gray-700 mb-2 text-sm">Your Message</label>
-              <div className="relative">
-                <span className="absolute left-3 top-3 text-indigo-600" style={{ paddingTop: '0.75rem' }}>
-                  <MessageSquare size={20} />
-                </span>
-                <textarea
-                  className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.message ? 'border-red-500' : ''}`}
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  placeholder="Tell us what's on your mind..."
-                  rows="5"
-                />
-              </div>
-              {formErrors.message && (
-                <div className="text-red-600 text-sm mt-1 flex items-center">
-                  <XCircle size={14} className="mr-1" />
-                  {formErrors.message}
-                </div>
-              )}
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:shadow-lg text-white font-semibold py-4 rounded-xl transition-all duration-300"
-              disabled={loading}
-              style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
-              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={20} className="mr-2 animate-spin inline" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  Send Message
-                  <Send size={20} className="ml-2 inline" />
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-        <p className="text-center text-white mt-6 text-sm opacity-90">
-          <Clock size={16} className="inline mr-2" />
-          We typically respond within 24 hours
-        </p>
-      </div>
-      <style jsx>{`
-        body {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          min-height: 100vh;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .contact-wrapper {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          padding: 40px 15px;
-        }
-        .contact-header {
-          text-align: center;
-          color: white;
-          margin-bottom: 40px;
-        }
-        .contact-header h2 {
-          font-size: 2.5rem;
-          font-weight: 700;
-          margin-bottom: 10px;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-        .contact-header p {
-          font-size: 1.1rem;
-          opacity: 0.95;
-        }
-        .contact-card {
-          background: white;
-          border-radius: 20px;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-          padding: 50px;
-          border: none;
-        }
-        .form-label {
-          font-weight: 600;
-          color: #333;
-          margin-bottom: 10px;
-          font-size: 0.95rem;
-        }
-        .input-icon {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border: none;
-          color: white;
-          width: 50px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 10px 0 0 10px;
-          border: 2px solid #e0e0e0;
-          border-right: none;
-        }
-        .form-control, .form-select {
-          border: 2px solid #e0e0e0;
-          padding: 12px 15px;
-          border-radius: 10px;
-          transition: all 0.3s ease;
-          font-size: 1rem;
-        }
-        .input-group .form-control {
-          border-left: none;
-          border-radius: 0 10px 10px 0;
-        }
-        .form-control:focus {
-          border-color: #667eea;
-          box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        .input-group:focus-within .input-icon {
-          border-color: #667eea;
-        }
-        .input-group:focus-within .form-control {
-          border-color: #667eea;
-        }
-        .form-control.is-invalid {
-          border-color: #dc3545;
-        }
-        .input-group .form-control.is-invalid {
-          border-color: #dc3545;
-        }
-        .input-group:has(.is-invalid) .input-icon {
-          border-color: #dc3545;
-          background: #dc3545;
-        }
-        .btn-submit {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border: none;
-          padding: 14px 30px;
-          font-size: 1.1rem;
-          font-weight: 600;
-          border-radius: 10px;
-          transition: all 0.3s ease;
-          width: 100%;
-          color: white;
-        }
-        .btn-submit:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-        .btn-submit:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-        .alert {
-          border-radius: 10px;
-          border: none;
-          padding: 15px 20px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .alert-success {
-          background-color: #d4edda;
-          color: #155724;
-        }
-        .alert-danger {
-          background-color: #f8d7da;
-          color: #721c24;
-        }
-        .footer-text {
-          text-align: center;
-          color: white;
-          margin-top: 20px;
-          font-size: 0.9rem;
-          opacity: 0.9;
-        }
-        @media (max-width: 768px) {
-          .contact-card {
-            padding: 30px 20px;
-          }
-          .contact-header h2 {
-            font-size: 2rem;
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-// Checkout Component (Tailwind converted)
-const Checkout = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
-    customerName: '',
-    customerEmail: '',
-    customerPhone: '',
-    shippingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-    billingAddress: { street: '', city: '', state: '', zip: '', country: '' },
-    useSameAddress: true,
-    notes: '',
-  });
-  const [formErrors, setFormErrors] = useState({});
-  const navigate = useNavigate();
-  const { state } = useLocation();
-  const { cart } = state || {};
-  const [locating, setLocating] = useState(false);
-  const [locationError, setLocationError] = useState('');
-  const subtotal = cart?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
-  const shipping = subtotal >= 1000 ? 0 : 1;
-  const totalAmount = subtotal + shipping;
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes('shippingAddress.') || name.includes('billingAddress.')) {
-      const [prefix, field] = name.split('.');
-      setFormData((prev) => ({
-        ...prev,
-        [prefix]: { ...prev[prefix], [field]: value },
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
-  const handleCheckboxChange = (e) => {
-    const { checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      useSameAddress: checked,
-      billingAddress: checked ? prev.shippingAddress : { street: '', city: '', state: '', zip: '', country: '' },
-    }));
-  };
-  const validateForm = () => {
-    const errors = {};
-    if (!formData.customerName.trim()) errors.customerName = 'Name is required';
-    if (!formData.customerEmail.trim()) {
-      errors.customerEmail = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
-      errors.customerEmail = 'Invalid email format';
-    }
-    if (!formData.customerPhone.trim()) errors.customerPhone = 'Phone is required';
-    const addr = formData.shippingAddress;
-    if (!addr.street.trim()) errors['shippingAddress.street'] = 'Street is required';
-    if (!addr.city.trim()) errors['shippingAddress.city'] = 'City is required';
-    if (!addr.state.trim()) errors['shippingAddress.state'] = 'State is required';
-    if (!addr.zip.trim()) errors['shippingAddress.zip'] = 'Pin code is required';
-    if (!addr.country.trim()) errors['shippingAddress.country'] = 'Country is required';
-    if (!formData.useSameAddress) {
-      const billAddr = formData.billingAddress;
-      if (!billAddr.street.trim()) errors['billingAddress.street'] = 'Street is required';
-      if (!billAddr.city.trim()) errors['billingAddress.city'] = 'City is required';
-      if (!billAddr.state.trim()) errors['billingAddress.state'] = 'State is required';
-      if (!billAddr.zip.trim()) errors['billingAddress.zip'] = 'Zip code is required';
-      if (!billAddr.country.trim()) errors['billingAddress.country'] = 'Country is required';
-    }
-    return errors;
-  };
-  const handleAutoFillLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('Geolocation not supported.');
-      return;
-    }
-    setLocating(true);
-    setLocationError('');
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        try {
-          const indiaRes = await fetch(
-            `https://api.postalpincode.in/pincode/by-lat-lng?lat=${latitude}&lng=${longitude}`
-          );
-          const indiaData = await indiaRes.json();
-          if (indiaData[0]?.Status === 'Success' && indiaData[0]?.PostOffice?.[0]) {
-            const po = indiaData[0].PostOffice[0];
-            const address = {
-              street: `${po.Name}, ${po.Block || ''}`.trim(),
-              city: po.District,
-              state: po.State,
-              zip: po.Pincode,
-              country: 'India',
-            };
-            fillAddress(address);
-            setLocating(false);
-            return;
-          }
-          const osmRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
-          );
-          const osmData = await osmRes.json();
-          if (osmData?.address) {
-            const addr = osmData.address;
-            const address = {
-              street: `${addr.road || addr.suburb || ''}, ${addr.hamlet || ''}`.trim(),
-              city: addr.city || addr.town || addr.village,
-              state: addr.state || addr.region,
-              zip: addr.postcode || '',
-              country: addr.country || 'India',
-            };
-            fillAddress(address);
-          }
-          setLocating(false);
-        } catch (err) {
-          setLocationError('Address not found. Enter manually.');
-          setLocating(false);
-        }
-      },
-      (error) => {
-        setLocationError('Location access denied or failed.');
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 20000 }
-    );
-  };
-  const fillAddress = (address) => {
-    setFormData(prev => ({
-      ...prev,
-      shippingAddress: { ...prev.shippingAddress, ...address },
-      billingAddress: prev.useSameAddress ? { ...prev.billingAddress, ...address } : prev.billingAddress,
-    }));
-  };
-  const placeOrder = async () => {
-    if (!cart || cart.length === 0) {
-      setError('Cart is empty.');
-      return;
-    }
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    const orderData = {
-      customerName: formData.customerName,
-      customerEmail: formData.customerEmail,
-      customerPhone: formData.customerPhone,
-      shippingAddress: formData.shippingAddress,
-      billingAddress: formData.useSameAddress ? formData.shippingAddress : formData.billingAddress,
-      products: cart.map((item) => ({ productId: item.productId, quantity: item.quantity, price: item.price })),
-      notes: formData.notes,
-      subtotal,
-      shipping,
-      total: totalAmount,
-    };
-    try {
-      const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-      if (!orderRes.ok) throw new Error('Order creation failed');
-      const { orderId } = await orderRes.json();
-      const razorpayRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: totalAmount }),
-      });
-      if (!razorpayRes.ok) throw new Error('Payment setup failed');
-      const razorpayOrder = await razorpayRes.json();
-      openRazorpayCheckout(razorpayOrder, orderId);
-    } catch (err) {
-      setError(err.message || 'Something went wrong');
-      setLoading(false);
-    }
-  };
-  const openRazorpayCheckout = (razorpayOrder, orderId) => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => {
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY,
-        amount: razorpayOrder.amount,
-        currency: 'INR',
-        name: 'Dilkhush Kirana',
-        description: `Order #${orderId}`,
-        order_id: razorpayOrder.id,
-        image: 'https://res.cloudinary.com/dyngkb9yx/image/upload/v1762702784/dilkhush_kirana/products/mv2easf2jbr0zq44a8gl.jpg',
-        handler: (response) => {
-          const paymentData = {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-          };
-          verifyPayment(paymentData, orderId);
-        },
-        prefill: {
-          name: formData.customerName,
-          email: formData.customerEmail,
-          contact: formData.customerPhone,
-        },
-        theme: {
-          color: '#f59e0b'
-        },
-        modal: {
-          ondismiss: () => {
-            setLoading(false);
-            navigate('/cancel', { state: { errorMessage: 'Payment cancelled by user.' } });
-          }
-        }
-      };
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', (response) => {
-        navigate('/cancel', { state: { errorMessage: response.error.description } });
-      });
-      rzp.open();
-    };
-    script.onerror = () => {
-      setError('Failed to load Razorpay SDK');
-      setLoading(false);
-    };
-    document.body.appendChild(script);
-  };
-  const verifyPayment = async (paymentData, orderId) => {
-    try {
-      const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/orders/${orderId}/razorpay/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentData),
-      });
-      const result = await verifyRes.json();
-      if (verifyRes.ok && result.success) {
-        navigate('/success', {
-          state: {
-            orderId,
-            totalAmount,
-            paymentId: paymentData.razorpay_payment_id
-          }
-        });
-      } else {
-        throw new Error(result.error || 'Payment verification failed');
-      }
-    } catch (err) {
-      console.error('Verification error:', err);
-      navigate('/cancel', {
-        state: { errorMessage: err.message || 'Payment failed. Contact support.' }
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  return (
-    <div className="max-w-4xl mx-auto px-4 mt-8">
-      <h2 className="text-3xl font-bold text-center mb-6 text-gray-900">Checkout</h2>
-      {error && <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg mb-6">{error}</div>}
-      {!cart || cart.length === 0 ? (
-        <p className="text-center text-gray-600">Your cart is empty.</p>
-      ) : (
-        <>
-          <h4 className="text-xl font-semibold mb-4">Order Summary</h4>
-          {cart.map((item) => (
-            <div key={item.productId} className="mb-2 p-3 bg-gray-50 rounded">
-              <p>{item.name} - ₹{item.price} x {item.quantity}</p>
             </div>
           ))}
-          <h5 className="text-xl font-semibold mt-4">Total: ₹{cart.reduce((total, item) => total + item.price * item.quantity, 0).toLocaleString()}</h5>
-          <h4 className="mt-8 text-xl font-semibold">Customer Details</h4>
-          <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-            <div className="mb-4">
-              <label htmlFor="customerName" className="block font-semibold text-gray-700 mb-2">Full Name</label>
-              <input
-                type="text"
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.customerName ? 'border-red-500' : 'border-gray-300'}`}
-                id="customerName"
-                name="customerName"
-                value={formData.customerName}
-                onChange={handleInputChange}
-                placeholder="Enter your full name"
-              />
-              {formErrors.customerName && <div className="text-red-600 text-sm mt-1">{formErrors.customerName}</div>}
-            </div>
-            <div className="mb-4">
-              <label htmlFor="customerEmail" className="block font-semibold text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.customerEmail ? 'border-red-500' : 'border-gray-300'}`}
-                id="customerEmail"
-                name="customerEmail"
-                value={formData.customerEmail}
-                onChange={handleInputChange}
-                placeholder="Enter your email"
-              />
-              {formErrors.customerEmail && <div className="text-red-600 text-sm mt-1">{formErrors.customerEmail}</div>}
-            </div>
-            <div className="mb-6">
-              <label htmlFor="customerPhone" className="block font-semibold text-gray-700 mb-2">Phone</label>
-              <input
-                type="tel"
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.customerPhone ? 'border-red-500' : 'border-gray-300'}`}
-                id="customerPhone"
-                name="customerPhone"
-                value={formData.customerPhone}
-                onChange={handleInputChange}
-                placeholder="Enter your phone number"
-              />
-              {formErrors.customerPhone && <div className="text-red-600 text-sm mt-1">{formErrors.customerPhone}</div>}
-            </div>
-            <h5 className="font-semibold flex items-center mb-4">
-              <MapPin className="mr-2" size={20} />
-              Shipping Address
-            </h5>
-            <div className="mb-4">
-              <button
-                type="button"
-                onClick={handleAutoFillLocation}
-                className="bg-green-100 hover:bg-green-200 text-green-800 font-medium py-2 px-4 rounded flex items-center gap-2 text-sm transition-colors"
-                disabled={locating}
-              >
-                {locating ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Detecting location...
-                  </>
-                ) : (
-                  <>
-                    <MapPin size={16} />
-                    Use My Current Location
-                  </>
-                )}
-              </button>
-              {locationError && (
-                <small className="text-red-600 block mt-1">{locationError}</small>
-              )}
-            </div>
-            {['street', 'city', 'state', 'zip', 'country'].map((field) => (
-              <div className="mb-4" key={field}>
-                <label htmlFor={`shippingAddress.${field}`} className="block font-semibold text-gray-700 mb-2">
-                  {field.charAt(0).toUpperCase() + field.slice(1)} {field === 'zip' && '(PIN Code)'}
-                </label>
-                <input
-                  type="text"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors[`shippingAddress.${field}`] ? 'border-red-500' : 'border-gray-300'}`}
-                  id={`shippingAddress.${field}`}
-                  name={`shippingAddress.${field}`}
-                  value={formData.shippingAddress[field]}
-                  onChange={handleInputChange}
-                  placeholder={`Enter ${field === 'zip' ? 'PIN code' : field}`}
-                />
-                {formErrors[`shippingAddress.${field}`] && (
-                  <div className="text-red-600 text-sm mt-1">{formErrors[`shippingAddress.${field}`]}</div>
-                )}
-              </div>
-            ))}
-            <div className="mb-4 flex items-center">
-              <input
-                type="checkbox"
-                className="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                id="useSameAddress"
-                checked={formData.useSameAddress}
-                onChange={handleCheckboxChange}
-              />
-              <label className="text-gray-700" htmlFor="useSameAddress">
-                Use same address for billing
-              </label>
-            </div>
-            {!formData.useSameAddress && (
-              <>
-                <h5 className="font-semibold mb-4">Billing Address</h5>
-                {['street', 'city', 'state', 'zip', 'country'].map((field) => (
-                  <div className="mb-4" key={field}>
-                    <label htmlFor={`billingAddress.${field}`} className="block font-semibold text-gray-700 mb-2">
-                      {field.charAt(0).toUpperCase() + field.slice(1)}
-                    </label>
-                    <input
-                      type="text"
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors[`billingAddress.${field}`] ? 'border-red-500' : 'border-gray-300'}`}
-                      id={`billingAddress.${field}`}
-                      name={`billingAddress.${field}`}
-                      value={formData.billingAddress[field]}
-                      onChange={handleInputChange}
-                      placeholder={`Enter ${field}`}
-                    />
-                    {formErrors[`billingAddress.${field}`] && (
-                      <div className="text-red-600 text-sm mt-1">{formErrors[`billingAddress.${field}`]}</div>
-                    )}
-                  </div>
-                ))}
-              </>
-            )}
-            <div className="mb-6">
-              <label htmlFor="notes" className="block font-semibold text-gray-700 mb-2">Order Notes (Optional)</label>
-              <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                placeholder="Any special instructions?"
-                rows="3"
-              />
-            </div>
+        </div>
+        <div className="bg-white border border-zinc-100 rounded-2xl overflow-hidden sticky top-4 self-start">
+          <div className="bg-zinc-900 text-white p-4"><h5 className="font-semibold">Order Summary</h5></div>
+          <div className="p-5 space-y-3">
+            <div className="flex justify-between text-sm"><span className="text-zinc-500">Subtotal</span><span className="font-semibold">₹{subtotal.toLocaleString()}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-zinc-500">Shipping</span><span className="font-semibold">{shipping === 0 ? <span className="text-green-600">FREE</span> : `₹${shipping}`}</span></div>
+            <div className="border-t pt-3 flex justify-between"><span className="font-bold text-zinc-900">Total</span><span className="font-bold text-xl text-green-700">₹{total.toLocaleString()}</span></div>
+            <button onClick={() => navigate('/checkout', { state: { cart } })} className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors mt-2">
+              Proceed to Checkout <ArrowRight size={16} />
+            </button>
           </div>
-          <button
-            onClick={placeOrder}
-            disabled={loading || !cart || cart.length === 0}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition-colors"
-          >
-            {loading ? 'Processing...' : 'Place Order'}
-          </button>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 };
 
-// DistributorsSection (Tailwind converted)
+// ─── DistributorsSection ──────────────────────────────────────────────────────
 const API = import.meta.env.VITE_API_URL;
 const DistributorsSection = () => {
   const [distributors, setDistributors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   useEffect(() => {
-    const fetchDistributors = async () => {
-      try {
-        const res = await fetch(`${API}/api/distributors`);
-        if (!res.ok) throw new Error('Failed to load distributors');
-        const data = await res.json();
-        setDistributors(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDistributors();
+    fetch(`${API}/api/distributors`)
+      .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+      .then(d => setDistributors(d))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
   }, []);
-  if (loading) {
-    return (
-      <section className="py-12" style={{ background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto" role="status">
-              <span className="sr-only">Loading...</span>
-            </div>
-            <p className="mt-3 text-gray-600">Loading distributors...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-  if (error) {
-    return (
-      <section className="py-12 bg-red-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg text-center">
-            <strong>Error:</strong> {error}
-          </div>
-        </div>
-      </section>
-    );
-  }
-  if (distributors.length === 0) {
-    return (
-      <section className="py-12" style={{ background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-3">Our Distributors</h2>
-            <p className="text-gray-600">No active distributors at the moment.</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  if (loading) return <section className="py-12 text-center"><div className="inline-block w-7 h-7 border-4 border-zinc-200 border-t-green-600 rounded-full animate-spin" /></section>;
+  if (error || !distributors.length) return null;
   return (
-    <section className="py-12" style={{ background: 'linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%)' }}>
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-gray-900 mb-3">Find a Distributor Near You</h2>
-          <p className="text-xl text-gray-600">We deliver fresh products through trusted local partners</p>
+    <section className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="text-center mb-10">
+          <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-widest mb-3">Local Network</span>
+          <h2 className="text-zinc-900 font-bold text-3xl lg:text-4xl" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Find a Distributor Near You</h2>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {distributors.map((dist) => (
-            <div key={dist._id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 h-full" style={{ transition: 'all 0.3s ease' }}>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-bold mb-0">{dist.name}</h3>
-                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                    <Package size={14} />
-                    In Stock
-                  </span>
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {distributors.map(dist => (
+            <div key={dist._id} className="group bg-white border border-zinc-100 rounded-2xl p-6 hover:border-green-200 hover:shadow-lg transition-all duration-300">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-zinc-900">{dist.name}</h3>
+                  <div className="flex items-center gap-1.5 mt-1"><MapPin className="w-3.5 h-3.5 text-zinc-400" /><span className="text-sm text-zinc-500">{dist.city}</span></div>
                 </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <MapPin size={20} className="text-blue-500" />
-                  <span className="font-semibold text-gray-900">{dist.city}</span>
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Phone size={20} className="text-blue-500" />
-                  <a href={`tel:${dist.phone}`}
-                    className="text-gray-600 hover:text-blue-500 text-sm transition-colors"
-                    style={{ transition: 'color 0.2s' }}>
-                    {dist.phone}
-                  </a>
-                </div>
-                <div className="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-gray-500 text-sm">Available Stock:</span>
-                  <span className="font-bold text-blue-500">{dist.stock} units</span>
-                </div>
-                <a
-                  href={dist.locationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
-                  style={{ background: 'linear-gradient(90deg, #0d9488 0%, #0891b2 100%)', border: 'none' }}
-                >
-                  <MapPin size={16} />
-                  View on Google Maps
-                  <ExternalLink size={16} />
-                </a>
+                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />In Stock</span>
               </div>
+              <div className="space-y-2 mb-5">
+                <a href={`tel:${dist.phone}`} className="flex items-center gap-2 text-sm text-zinc-600 hover:text-green-700 transition-colors"><Phone className="w-4 h-4 text-zinc-400" />{dist.phone}</a>
+                <div className="flex justify-between text-sm"><span className="text-zinc-400">Stock</span><span className="font-semibold text-zinc-900">{dist.stock} units</span></div>
+              </div>
+              <a href={dist.locationUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                className="w-full flex items-center justify-center gap-2 bg-zinc-900 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-all duration-200">
+                <MapPin className="w-4 h-4" /> View on Maps <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <p className="text-gray-600">
-            Can't find a distributor in your city?{' '}
-            <a href="/contact" className="text-blue-500 hover:text-blue-600 font-semibold no-underline">
-              Contact us
-            </a>{' '}
-            to become one!
-          </p>
-        </div>
+        <p className="text-center text-zinc-500 text-sm mt-8">Can't find one near you? <a href="/contact" className="text-green-700 font-semibold hover:text-green-900">Contact us</a> to become a distributor.</p>
       </div>
-      <style jsx>{`
-        .hover-lift:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-        }
-        .hover-text-info:hover {
-          color: #0891b2 !important;
-        }
-      `}</style>
     </section>
   );
 };
 
-// Comments Component (Tailwind converted)
-const Comments = ({ blogId }) => {
-  const [comments, setComments] = useState([]);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    comment: '',
-  });
-  const [formErrors, setFormErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(null);
-  const [error, setError] = useState(null);
+// ─── Blog ─────────────────────────────────────────────────────────────────────
+const Blog = () => {
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   useEffect(() => {
-    const fetchComments = async () => {
-      if (!blogId || !/^[0-9a-fA-F]{24}$/.test(blogId)) {
-        console.error('Invalid blog ID:', blogId);
-        setError('Invalid blog ID');
-        return;
-      }
-      setLoading(true);
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!response.ok) {
-          const text = await response.text();
-          console.error('Non-JSON response:', text);
-          throw new Error(`Failed to fetch comments: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        setComments(data);
-      } catch (err) {
-        console.error('Error fetching comments:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchComments();
-  }, [blogId]);
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
-  const validateForm = () => {
-    const errors = {};
-    if (!formData.name.trim()) errors.name = 'Name is required';
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format';
-    }
-    if (!formData.comment.trim()) errors.comment = 'Comment is required';
-    return errors;
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-    if (!blogId || !/^[0-9a-fA-F]{24}$/.test(blogId)) {
-      setError('Invalid blog ID');
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${blogId}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          createdAt: new Date().toISOString(),
-        }),
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('Non-JSON response:', text);
-        throw new Error(`Failed to submit comment: ${response.status} ${response.statusText}`);
-      }
-      const data = await response.json();
-      setComments((prev) => [...prev, { ...formData, createdAt: new Date().toISOString(), _id: data._id }]);
-      setFormData({ name: '', email: '', comment: '' });
-      setSuccess('Comment submitted successfully!');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      console.error('Error submitting comment:', error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetch(`${import.meta.env.VITE_API_URL}/blogs`)
+      .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+      .then(d => setBlogs(d || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+  if (loading) return <section className="py-16 bg-zinc-50 text-center"><div className="inline-block w-8 h-8 border-4 border-zinc-200 border-t-green-600 rounded-full animate-spin" /></section>;
+  if (!blogs.length) return null;
   return (
-    <div className="mt-8">
-      <h4 className="mb-4 text-lg font-semibold">Comments</h4>
-      {loading && <p>Loading comments...</p>}
-      {error && <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded mb-4">{error}</div>}
-      {success && <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded mb-4">{success}</div>}
-      {!loading && !error && comments.length === 0 && (
-        <p>No comments yet. Be the first to comment!</p>
-      )}
-      {!loading && comments.length > 0 && (
-        <div className="space-y-4 mb-6">
-          {comments.map((comment, index) => (
-            <div key={comment._id || index} className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="flex justify-between items-start">
-                <h6 className="font-semibold text-gray-900">{comment.name}</h6>
-                <small className="text-gray-500">{new Date(comment.createdAt).toLocaleString()}</small>
+    <section className="py-16 lg:py-24 bg-zinc-50">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+          <div>
+            <span className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-widest mb-3">From Our Kitchen</span>
+            <h2 className="text-zinc-900 font-bold text-3xl lg:text-4xl" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Stories of Tradition &amp; Taste</h2>
+          </div>
+          <button onClick={() => navigate('/blogs')} className="inline-flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-900 group flex-shrink-0">
+            All stories <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {blogs.slice(0, 6).map(blog => (
+            <article key={blog._id} className="group bg-white border border-zinc-100 rounded-2xl overflow-hidden hover:border-green-200 hover:shadow-xl transition-all duration-300 cursor-pointer" onClick={() => navigate(`/blogs/${blog._id}`)}>
+              <div className="relative aspect-video overflow-hidden bg-zinc-100">
+                <img src={blog.image} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={e => { e.target.style.display = 'none'; }} />
               </div>
-              <p className="text-gray-700 mt-2">{comment.comment}</p>
-            </div>
+              <div className="p-5 space-y-3">
+                <h3 className="font-bold text-zinc-900 text-base leading-snug line-clamp-2 group-hover:text-green-700 transition-colors">{blog.title}</h3>
+                <p className="text-zinc-500 text-sm line-clamp-2">{blog.content?.substring(0, 100)}…</p>
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-50 text-xs text-zinc-400">
+                  <div className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" />{blog.author || 'Dilkhush Family'}</div>
+                  <div className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" />{new Date(blog.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
+                </div>
+              </div>
+            </article>
           ))}
         </div>
-      )}
-      <h5 className="mb-4 text-lg font-semibold">Leave a Comment</h5>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="commentName" className="block font-semibold text-gray-700 mb-2">Name</label>
-          <input
-            type="text"
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.name ? 'border-red-500' : 'border-gray-300'}`}
-            id="commentName"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="Enter your name"
-          />
-          {formErrors.name && <div className="text-red-600 text-sm mt-1">{formErrors.name}</div>}
+        <div className="text-center mt-10">
+          <button onClick={() => navigate('/blogs')} className="inline-flex items-center gap-2 px-8 py-4 border-2 border-green-700 text-green-700 font-semibold rounded-xl hover:bg-green-700 hover:text-white transition-all duration-200">
+            Explore All Stories <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
-        <div>
-          <label htmlFor="commentEmail" className="block font-semibold text-gray-700 mb-2">Email</label>
-          <input
-            type="email"
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.email ? 'border-red-500' : 'border-gray-300'}`}
-            id="commentEmail"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            placeholder="Enter your email"
-          />
-          {formErrors.email && <div className="text-red-600 text-sm mt-1">{formErrors.email}</div>}
+      </div>
+    </section>
+  );
+};
+
+// ─── BlogDetails ──────────────────────────────────────────────────────────────
+const BlogDetails = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) { setError('Invalid blog ID'); setLoading(false); return; }
+    fetch(`${import.meta.env.VITE_API_URL}/blogs/${id}`)
+      .then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); })
+      .then(setBlog)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [id]);
+  if (loading) return <div className="max-w-4xl mx-auto px-4 py-12 text-center"><div className="inline-block w-8 h-8 border-4 border-zinc-200 border-t-green-600 rounded-full animate-spin" /></div>;
+  if (error || !blog) return (
+    <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+      <p className="text-red-600">{error || 'Blog not found'}</p>
+      <button className="mt-4 bg-green-700 text-white px-5 py-2.5 rounded-xl" onClick={() => navigate('/blogs')}>Back to Blogs</button>
+    </div>
+  );
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <button onClick={() => navigate('/blogs')} className="flex items-center gap-2 text-zinc-600 hover:text-zinc-900 text-sm font-medium mb-6">
+        <ArrowLeft size={16} /> Back to Blogs
+      </button>
+      <article className="bg-white border border-zinc-100 rounded-2xl overflow-hidden">
+        {blog.image && <img src={blog.image} alt={blog.title} className="w-full aspect-video object-cover" />}
+        <div className="p-6 md:p-8">
+          <h1 className="text-3xl font-bold text-zinc-900 mb-4">{blog.title}</h1>
+          <div className="flex gap-4 text-sm text-zinc-500 mb-6 pb-6 border-b">
+            <span className="flex items-center gap-1"><User size={14} />{blog.author || 'Dilkhush Family'}</span>
+            <span className="flex items-center gap-1"><Calendar size={14} />{new Date(blog.createdAt).toLocaleDateString()}</span>
+          </div>
+          <div className="text-zinc-700 leading-relaxed whitespace-pre-wrap">{blog.content}</div>
         </div>
-        <div>
-          <label htmlFor="commentText" className="block font-semibold text-gray-700 mb-2">Comment</label>
-          <textarea
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${formErrors.comment ? 'border-red-500' : 'border-gray-300'}`}
-            id="commentText"
-            name="comment"
-            value={formData.comment}
-            onChange={handleInputChange}
-            placeholder="Enter your comment"
-            rows="4"
-          />
-          {formErrors.comment && <div className="text-red-600 text-sm mt-1">{formErrors.comment}</div>}
-        </div>
-        <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg disabled:opacity-50" disabled={loading}>
-          {loading ? 'Submitting...' : 'Submit Comment'}
-        </button>
-      </form>
+      </article>
     </div>
   );
 };
 
-// CustomBuilder (Tailwind converted)
+// ─── OrderFailed ──────────────────────────────────────────────────────────────
+const OrderFailed = ({ errorMessage = "We couldn't process your payment. Please try again." }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-zinc-50">
+      <div className="max-w-md w-full bg-white border border-zinc-100 rounded-2xl overflow-hidden">
+        <div className="bg-red-600 p-6 text-white text-center">
+          <XCircle size={48} className="mx-auto mb-3" />
+          <h1 className="text-2xl font-bold">Order Failed</h1>
+        </div>
+        <div className="p-6 space-y-4">
+          <p className="text-red-700 text-sm bg-red-50 border border-red-100 rounded-xl p-4">{errorMessage}</p>
+          <p className="text-center text-zinc-500 text-sm">Need help? Call 7874536227</p>
+          <button onClick={() => window.location.reload()} className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors">
+            <RefreshCw size={16} /> Try Again
+          </button>
+          <div className="flex gap-2">
+            <button onClick={() => navigate('/cart')} className="flex-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-medium py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+              <ArrowLeft size={15} /> Cart
+            </button>
+            <button onClick={() => navigate('/')} className="flex-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-medium py-2.5 rounded-xl transition-colors">Home</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── CustomBuilder ────────────────────────────────────────────────────────────
 const CustomBuilder = () => {
   const [ingredients, setIngredients] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -5863,732 +792,73 @@ const CustomBuilder = () => {
   const navigate = useNavigate();
   useEffect(() => {
     fetch('https://dilkhush-api.vercel.app/custom/ingredients')
-      .then(r => r.json())
-      .then(data => setIngredients(Array.isArray(data) ? data : []))
-      .finally(() => setLoading(false));
+      .then(r => r.json()).then(d => setIngredients(Array.isArray(d) ? d : [])).finally(() => setLoading(false));
   }, []);
   const addIngredient = (ing, variant) => {
-    if (selected.some(s => s.ingredientId === ing._id && s.variant === variant.quality)) {
-      alert('Already added!');
-      return;
-    }
-    setSelected([...selected, {
-      ingredientId: ing._id,
-      name: ing.name,
-      variant: variant.quality,
-      quantity: variant.unit === 'g' ? 100 : 0.25,
-      unit: variant.unit,
-      minQty: variant.minQuantity,
-      pricePerKg: variant.pricePerKg,
-      price: variant.pricePerKg * (variant.unit === 'g' ? variant.minQuantity / 1000 : variant.minQuantity)
-    }]);
+    if (selected.some(s => s.ingredientId === ing._id && s.variant === variant.quality)) { alert('Already added!'); return; }
+    setSelected([...selected, { ingredientId: ing._id, name: ing.name, variant: variant.quality, quantity: variant.unit === 'g' ? 100 : 0.25, unit: variant.unit, minQty: variant.minQuantity, pricePerKg: variant.pricePerKg, price: variant.pricePerKg * (variant.unit === 'g' ? variant.minQuantity / 1000 : variant.minQuantity) }]);
   };
-  const updateQuantity = (i, qty) => {
+  const updateQty = (i, qty) => {
     if (qty < selected[i].minQty) qty = selected[i].minQty;
-    setSelected(prev => {
-      const updated = [...prev];
-      const item = updated[i];
-      const qtyInKg = item.unit === 'g' ? qty / 1000 : qty;
-      item.quantity = qty;
-      item.price = Math.round(item.pricePerKg * qtyInKg * 100) / 100;
-      return updated;
-    });
+    setSelected(prev => { const u = [...prev]; const item = u[i]; item.quantity = qty; item.price = Math.round(item.pricePerKg * (item.unit === 'g' ? qty / 1000 : qty) * 100) / 100; return u; });
   };
-  const removeItem = (i) => setSelected(selected.filter((_, idx) => idx !== i));
   const totalPrice = selected.reduce((s, i) => s + i.price, 0).toFixed(2);
-  const totalWeight = selected.reduce((s, i) => s + (i.unit === 'g' ? i.quantity : i.quantity * 1000), 0);
-  const totalWeightStr = totalWeight >= 1000
-    ? `${(totalWeight / 1000).toFixed(2)} kg`
-    : `${totalWeight.toFixed(0)} g`;
-  const loadRazorpay = () => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => initiatePayment();
-    document.body.appendChild(script);
-  };
-  const initiatePayment = async () => {
-    if (!customerInfo.name || !customerInfo.phone) {
-      alert('Name & Phone required!');
-      return;
-    }
-    const res = await fetch('https://dilkhush-api.vercel.app/custom/order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customerName: customerInfo.name,
-        customerPhone: customerInfo.phone,
-        customerEmail: customerInfo.email,
-        selectedIngredients: selected.map(s => ({
-          ingredientId: s.ingredientId,
-          variant: s.variant,
-          quantity: s.quantity,
-          unit: s.unit
-        })),
-        totalPrice: parseFloat(totalPrice),
-        totalWeight
-      })
-    });
-    const order = await res.json();
-    const options = {
-      key: 'rzp_test_YourKeyHere',
-      amount: totalPrice * 100,
-      currency: 'INR',
-      name: 'Dilkhush Kirana',
-      description: 'Custom Mix Order',
-      order_id: order.razorpayOrderId,
-      handler: async (response) => {
-        await fetch('https://dilkhush-api.vercel.app/custom/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_signature: response.razorpay_signature,
-            orderId: order.orderId
-          })
-        });
-        alert(`₹${totalPrice} Paid! Order ID: ${order.orderId}`);
-        navigate('/success');
-      },
-      prefill: { name: customerInfo.name, contact: customerInfo.phone, email: customerInfo.email },
-      theme: { color: '#f59e0b' }
-    };
-    const rzp = new window.Razorpay(options);
-    rzp.open();
-  };
-  if (loading) return <div className="text-center py-20">Loading ingredients...</div>;
+  if (loading) return <div className="text-center py-20">Loading ingredients…</div>;
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-center text-4xl font-bold mb-8">Build Your Mix</h1>
+      <h1 className="text-center text-3xl font-bold text-zinc-900 mb-8">Build Your Mix</h1>
       <div className="grid lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-3">
-          <div className="grid md:grid-cols-2 gap-6">
-            {ingredients.map(ing => (
-              <div key={ing._id} className="bg-white shadow rounded-lg h-full">
-                {ing.image && <img src={ing.image} className="w-full rounded-t-lg object-cover" style={{ height: '200px', objectFit: 'cover' }} />}
-                <div className="p-6">
-                  <h5 className="font-bold mb-4">{ing.name} ({ing.category})</h5>
-                  <div className="space-y-2">
-                    {ing.variants.map(v => (
-                      <button key={v.quality} onClick={() => addIngredient(ing, v)} className="w-full bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded text-sm transition-colors">
-                        {v.quality}
-                        <br />
-                        <small>₹{v.pricePerKg}/kg • Min {v.minQuantity}{v.unit}</small>
-                      </button>
-                    ))}
+        <div className="lg:col-span-3 grid md:grid-cols-2 gap-5">
+          {ingredients.map(ing => (
+            <div key={ing._id} className="bg-white border border-zinc-100 rounded-2xl overflow-hidden">
+              {ing.image && <img src={ing.image} className="w-full h-48 object-cover" />}
+              <div className="p-5">
+                <h5 className="font-bold text-zinc-900 mb-3">{ing.name} ({ing.category})</h5>
+                <div className="space-y-2">
+                  {ing.variants.map(v => (
+                    <button key={v.quality} onClick={() => addIngredient(ing, v)} className="w-full bg-green-50 hover:bg-green-100 text-green-800 py-2 rounded-lg text-sm transition-colors text-left px-3">
+                      <span className="font-semibold">{v.quality}</span>
+                      <span className="text-xs text-zinc-500 ml-2">₹{v.pricePerKg}/kg · Min {v.minQuantity}{v.unit}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white border border-zinc-100 rounded-2xl overflow-hidden sticky top-6 self-start">
+          <div className="bg-green-700 text-white p-4">
+            <h4 className="font-bold">Your Mix · ₹{totalPrice}</h4>
+          </div>
+          <div className="p-5 space-y-4">
+            {selected.map((item, i) => (
+              <div key={i} className="pb-3 border-b border-zinc-50">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold text-sm text-zinc-900">{item.name} ({item.variant})</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <input type="number" min={item.minQty} value={item.quantity} onChange={e => updateQty(i, parseFloat(e.target.value))} className="w-16 px-2 py-1 border border-zinc-200 rounded-lg text-xs" />
+                      <span className="text-xs text-zinc-500">{item.unit} = ₹{item.price}</span>
+                    </div>
                   </div>
+                  <button onClick={() => setSelected(selected.filter((_, idx) => idx !== i))} className="text-zinc-300 hover:text-red-500 transition-colors">×</button>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow sticky top-6" style={{ top: '20px' }}>
-            <div className="bg-green-600 text-white p-4 rounded-t-lg">
-              <h4 className="mb-0 font-bold">Your Mix • ₹{totalPrice}</h4>
-              <p className="mb-0 text-sm">Total Weight: <strong>{totalWeightStr}</strong></p>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4 mb-4">
-                {selected.map((item, i) => (
-                  <div key={i} className="border-b pb-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <strong>{item.name}</strong> ({item.variant})
-                        <br />
-                        <input
-                          type="number"
-                          min={item.minQty}
-                          step={item.unit === 'g' ? 50 : 0.25}
-                          value={item.quantity}
-                          onChange={e => updateQuantity(i, parseFloat(e.target.value))}
-                          className="w-20 px-2 py-1 border rounded text-sm"
-                        /> {item.unit} = ₹{item.price}
-                      </div>
-                      <button onClick={() => removeItem(i)} className="text-red-500 hover:text-red-700 text-sm">×</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <hr />
-              <h4 className="font-bold mb-4">Total: ₹{totalPrice} • {totalWeightStr}</h4>
-              <input placeholder="Name *" className="w-full px-3 py-2 border rounded-lg mb-3" value={customerInfo.name} onChange={e => setCustomerInfo({ ...customerInfo, name: e.target.value })} />
-              <input placeholder="Phone *" className="w-full px-3 py-2 border rounded-lg mb-3" value={customerInfo.phone} onChange={e => setCustomerInfo({ ...customerInfo, phone: e.target.value })} />
-              <input placeholder="Email" className="w-full px-3 py-2 border rounded-lg mb-4" value={customerInfo.email} onChange={e => setCustomerInfo({ ...customerInfo, email: e.target.value })} />
-              <button onClick={loadRazorpay} disabled={selected.length === 0} className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-lg disabled:opacity-50">
-                PAY ₹{totalPrice} & PLACE ORDER
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// BlogDetails (Tailwind converted)
-const BlogDetails = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
-  const [blog, setBlog] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  useEffect(() => {
-    const fetchBlog = async () => {
-      if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
-        console.error('Invalid blog ID:', id);
-        setError('Invalid blog ID');
-        setLoading(false);
-        return;
-      }
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs/${id}`);
-        if (!response.ok) {
-          const text = await response.text();
-          console.error('Non-JSON response:', text);
-          throw new Error(`Failed to fetch blog: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        setBlog(data);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching blog:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-    fetchBlog();
-  }, [id]);
-  if (loading) {
-    return <div className="max-w-4xl mx-auto px-4 mt-8"><p className="text-center">Loading blog...</p></div>;
-  }
-  if (error || !blog) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 mt-8">
-        <p className="text-red-600 text-center">{error || 'Blog not found'}</p>
-        <button className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg mx-auto block transition-colors" onClick={() => navigate('/blogs')}>
-          Back to Blogs
-        </button>
-      </div>
-    );
-  }
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <nav className="mb-6">
-        <button
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-          onClick={() => navigate('/blogs')}
-        >
-          <ArrowLeft size={20} />
-          Back to Blogs
-        </button>
-      </nav>
-      <article className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-        {blog.image && (
-          <div className="relative h-96 overflow-hidden">
-            <img
-              src={blog.image}
-              alt={blog.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-4">
-              {blog.tags && blog.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {blog.tags.map((tag, idx) => (
-                    <span key={idx} className="bg-indigo-600 px-3 py-1 rounded-full text-sm">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        <div className="p-6 md:p-8">
-          <h1 className="text-4xl font-bold mb-4">{blog.title}</h1>
-          <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 border-b">
-            <div className="flex items-center">
-              <div className="bg-indigo-600 text-white rounded-full w-10 h-10 flex items-center justify-center mr-3">
-                <User size={20} />
-              </div>
-              <div>
-                <small className="text-gray-500 block">Written by</small>
-                <strong>{blog.author || 'Anonymous'}</strong>
-              </div>
-            </div>
-            <div className="hidden md:block w-px bg-gray-300 h-6" />
-            <div className="flex items-center">
-              <Calendar size={20} className="text-indigo-600 mr-2" />
-              <div>
-                <small className="text-gray-500 block">Published on</small>
-                <strong>{new Date(blog.createdAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}</strong>
-              </div>
-            </div>
-          </div>
-          <div className="prose max-w-none" style={{ whiteSpace: 'pre-wrap' }}>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              {blog.content}
-            </p>
-          </div>
-        </div>
-      </article>
-      <div className="bg-white rounded-lg shadow-sm">
-        <div className="p-6">
-          <h3 className="mb-4 flex items-center font-semibold">
-            <MessageSquare size={20} className="mr-2" />
-            Comments
-          </h3>
-          <Comments blogId={id} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// OrderFailed (Tailwind converted)
-const OrderFailed = ({ errorMessage = "We couldn't process your payment. Please try again." }) => {
-  const navigate = useNavigate();
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-50 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 mb-4 animate-pulse">
-            <XCircle size={48} />
-          </div>
-          <h1 className="text-2xl font-bold">Order Failed</h1>
-        </div>
-        <div className="p-6 space-y-5">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <p className="text-red-800 text-sm leading-relaxed">
-              <strong>Error:</strong> {errorMessage}
-            </p>
-          </div>
-          <div className="text-center text-gray-600 text-sm">
-            <p className="mt-1">You can try again or contact support. 7874536227</p>
-          </div>
-          <div className="space-y-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 shadow-lg"
-            >
-              <RefreshCw size={18} />
-              Try Again
+            <input placeholder="Name *" className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm" value={customerInfo.name} onChange={e => setCustomerInfo({ ...customerInfo, name: e.target.value })} />
+            <input placeholder="Phone *" className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm" value={customerInfo.phone} onChange={e => setCustomerInfo({ ...customerInfo, phone: e.target.value })} />
+            <input placeholder="Email" className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm" value={customerInfo.email} onChange={e => setCustomerInfo({ ...customerInfo, email: e.target.value })} />
+            <button disabled={!selected.length} className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-colors">
+              PAY ₹{totalPrice} & PLACE ORDER
             </button>
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigate('/cart')}
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <ArrowLeft size={16} />
-                Back to Cart
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <Home size={16} />
-                Home
-              </button>
-            </div>
-          </div>
-          <div className="border-t pt-4 text-center">
-            <p className="text-xs text-gray-500">
-              Need help?{' '}
-              <a href="mailto:support@yoursite.com" className="text-red-600 hover:underline font-medium">
-                Contact Support
-              </a>
-            </p>
           </div>
         </div>
-      </div>
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-red-100 rounded-full blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-100 rounded-full blur-3xl opacity-30 translate-x-1/2 translate-y-1/2"></div>
       </div>
     </div>
   );
 };
 
-// Blog Component (Tailwind converted)
-const Blog = () => {
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/blogs`);
-        if (!response.ok) throw new Error('Failed to load stories');
-        const data = await response.json();
-        setBlogs(data || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBlogs();
-  }, []);
-
-  const handleViewDetails = (blog) => {
-    navigate(`/blogs/${blog._id}`);
-  };
-
-  if (loading) {
-    return (
-      <div className="py-24 text-center bg-gradient-to-b from-amber-50 to-white">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent"></div>
-        <p className="mt-6 text-xl text-gray-700 font-medium">Brewing fresh stories from Dhasa...</p>
-      </div>
-    );
-  }
-
-  if (error || blogs.length === 0) {
-    return (
-      <div className="py-32 text-center bg-gradient-to-b from-amber-50 to-white">
-        <Leaf className="w-20 h-20 mx-auto text-emerald-200 mb-6" />
-        <h3 className="text-3xl font-bold text-gray-800 mb-3">Stories Coming Soon</h3>
-        <p className="text-lg text-gray-600 max-w-md mx-auto">
-          We're crafting beautiful tales about tradition, winters, and saani — just like we make our products.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <section className="py-20 lg:py-28 bg-gradient-to-b from-amber-50 via-white to-emerald-50/30">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-        {/* Warm Header */}
-        <div className="text-center mb-16 lg:mb-20">
-          <p className="text-emerald-700 font-semibold tracking-wider text-sm uppercase mb-4">
-            From Our Factory
-          </p>
-          <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-            Stories of <span className="text-emerald-700">Tradition & Taste</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Every Summer has a story. Every Spices pack carries memories.
-            Here are a few we’d love to share with you.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <div className="w-32 h-1 bg-gradient-to-r from-emerald-600 to-amber-600 rounded-full"></div>
-          </div>
-        </div>
-
-        {/* Blog Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {blogs.map((blog) => (
-            <article
-              key={blog._id}
-              className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 cursor-pointer"
-              onClick={() => handleViewDetails(blog)}
-            >
-              {/* Image */}
-              <div className="relative aspect-video overflow-hidden">
-                <img
-                  src={blog.image || "/api/placeholder/600/400"}
-                  alt={blog.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                {/* Read More Overlay */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                  <span className="bg-white text-emerald-700 px-6 py-3 rounded-full font-semibold text-sm shadow-lg flex items-center gap-2">
-                    Read Story <ArrowRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-8 space-y-5">
-                <h3 className="text-2xl font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-emerald-700 transition-colors">
-                  {blog.title}
-                </h3>
-
-                <p className="text-gray-600 leading-relaxed line-clamp-3">
-                  {blog.content?.substring(0, 130).trim()}...
-                </p>
-
-                {/* Meta */}
-                <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-emerald-600" />
-                    <span className="font-medium text-gray-700">{blog.author || 'Dilkhush Family'}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-amber-600" />
-                    <span>{new Date(blog.createdAt).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}</span>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {/* Optional CTA */}
-        <div className="text-center mt-16">
-          <button
-            onClick={() => navigate('/blogs')}
-            className="inline-flex items-center gap-3 px-10 py-5 bg-emerald-700 text-white font-semibold text-lg rounded-full hover:bg-emerald-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
-          >
-            Explore All Stories
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// CounterDashboard (Tailwind converted)
-const CounterDashboard = () => {
-  const [counts, setCounts] = useState({
-    offline: 800,
-    dailySales: 20000,
-    totalCustomers: 17000,
-    experience: 25
-  });
-  const [hovered, setHovered] = useState(null);
-  const targets = {
-    offline: 28000,
-    dailySales: 20000,
-    totalCustomers: 17000,
-    experience: 25
-  };
-  useEffect(() => {
-    const duration = 2000;
-    const steps = 60;
-    const interval = duration / steps;
-    let step = 0;
-    const timer = setInterval(() => {
-      step++;
-      const progress = step / steps;
-      setCounts({
-        offline: Math.floor(targets.offline * progress),
-        dailySales: Math.floor(targets.dailySales * progress),
-        totalCustomers: Math.floor(targets.totalCustomers * progress),
-        experience: Math.floor(targets.experience * progress)
-      });
-      if (step >= steps) {
-        clearInterval(timer);
-        setCounts(targets);
-      }
-    }, interval);
-    return () => clearInterval(timer);
-  }, []);
-  const cards = [
-    {
-      title: 'Offline Customers',
-      value: counts.offline,
-      icon: '🛍️',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      glow: '0 20px 60px rgba(102, 126, 234, 0.4)',
-      pattern: '🛍️',
-      subtitle: 'Currently Shopping'
-    },
-    {
-      title: 'Per Day Sales',
-      value: `${counts.dailySales.toLocaleString()}`,
-      icon: '💸',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      glow: '0 20px 60px rgba(240, 147, 251, 0.4)',
-      pattern: '💸',
-      subtitle: 'Revenue Today'
-    },
-    {
-      title: 'Total Customers',
-      value: counts.totalCustomers.toLocaleString(),
-      icon: '👥',
-      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-      glow: '0 20px 60px rgba(79, 172, 254, 0.4)',
-      pattern: '👥',
-      subtitle: 'Happy Clients'
-    },
-    {
-      title: 'Experience',
-      value: `${counts.experience}`,
-      icon: '🚀',
-      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      glow: '0 20px 60px rgba(250, 112, 154, 0.4)',
-      pattern: '🚀',
-      subtitle: 'Years of Excellence'
-    }
-  ];
-  return (
-    <div
-      className="min-h-screen relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)',
-      }}
-    >
-      <div
-        className="absolute top-10 left-5 text-6xl opacity-10 animate-pulse"
-        style={{ animation: 'float 6s ease-in-out infinite' }}
-      >
-        💫
-      </div>
-      <div
-        className="absolute bottom-16 right-8 text-5xl opacity-10 animate-pulse"
-        style={{ animation: 'float 8s ease-in-out infinite' }}
-      >
-        ✨
-      </div>
-      <div className="max-w-7xl mx-auto px-4 py-12 relative z-10">
-        <div className="text-center text-white mb-8 pt-4">
-          <div
-            className="inline-block px-8 py-2 rounded-full mb-6 border border-white/20 backdrop-blur-sm"
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}
-          >
-            <span className="text-sm uppercase tracking-widest">DASHBOARD</span>
-          </div>
-          <h1
-            className="text-5xl md:text-6xl font-bold mb-4"
-            style={{
-              textShadow: '0 10px 30px rgba(0,0,0,0.3)',
-              letterSpacing: '-2px'
-            }}
-          >
-            Business Analytics
-          </h1>
-          <p className="text-xl opacity-90 leading-relaxed">
-            Real-time performance metrics at a glance
-          </p>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 px-2">
-          {cards.map((card, index) => (
-            <div key={index} className="col-span-1"
-              onMouseEnter={() => setHovered(index)}
-              onMouseLeave={() => setHovered(null)}
-              style={{
-                background: hovered === index
-                  ? 'rgba(255, 255, 255, 0.95)'
-                  : 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '30px',
-                padding: '0',
-                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                transform: hovered === index ? 'translateY(-15px) scale(1.02)' : 'translateY(0) scale(1)',
-                boxShadow: hovered === index ? card.glow : '0 10px 40px rgba(0,0,0,0.15)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                overflow: 'hidden',
-                position: 'relative'
-              }}
-            >
-              <div
-                style={{
-                  background: card.gradient,
-                  padding: '30px 20px',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-              >
-                <div
-                  className="absolute top-0 right-0 text-4xl opacity-20"
-                  style={{
-                    transform: hovered === index ? 'rotate(20deg) scale(1.2)' : 'rotate(0deg) scale(1)',
-                    transition: 'all 0.4s ease'
-                  }}
-                >
-                  {card.pattern}
-                </div>
-                <div className="text-center relative z-10">
-                  <div
-                    style={{
-                      fontSize: '50px',
-                      marginBottom: '10px',
-                      filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.2))',
-                      transform: hovered === index ? 'scale(1.1) rotate(5deg)' : 'scale(1)',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    {card.icon}
-                  </div>
-                  <div
-                    className="uppercase tracking-wide text-xs font-semibold"
-                    style={{ opacity: '0.9' }}
-                  >
-                    {card.title}
-                  </div>
-                </div>
-              </div>
-              <div className="text-center p-4">
-                <div
-                  className="text-4xl font-black mb-2"
-                  style={{
-                    background: card.gradient,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    letterSpacing: '-1px'
-                  }}
-                >
-                  {card.value} +
-                </div>
-                <div className="text-gray-600 text-sm font-medium">
-                  {card.subtitle}
-                </div>
-              </div>
-              <div
-                className="absolute top-5 right-5 w-2.5 h-2.5 rounded-full bg-white/90 shadow-lg"
-                style={{
-                  boxShadow: '0 0 0 0 rgba(255, 255, 255, 0.7)',
-                  animation: 'pulse 2s infinite'
-                }}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-8 pt-4">
-          <div
-            className="inline-block px-10 py-4 rounded-full text-white text-sm font-medium border border-white/20 backdrop-blur-sm"
-            style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}
-          >
-            Last updated: <strong>Today</strong>
-          </div>
-        </div>
-      </div>
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        @keyframes pulse {
-          0% {
-            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
-          }
-          70% {
-            box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-          }
-          100% {
-            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-// Main App (unchanged structure, components now Tailwind)
+// ─── Main App ─────────────────────────────────────────────────────────────────
 function App() {
   return (
     <CartProvider>
@@ -6596,160 +866,25 @@ function App() {
         <GlobalLoader />
         <ScrollToTop />
         <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <Navbars />
-                <Slider />
-                <ProductCard />
-
-                {/* <CounterDashboard/> */}
-                <DistributorsSection />
-                <Blog />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/products"
-            element={
-              <>
-                <Navbars />
-                <ProductCard />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/my"
-            element={
-              <>
-                <Navbars />
-                <MyOrders />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <>
-                <Navbars />
-                <About />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/cart"
-            element={
-              <>
-                <Navbars />
-                <Cart />
-                <Footers />
-              </>
-            }
-          />
+          <Route path="/" element={<><Navbars /><Slider /><ProductCard /><DistributorsSection /><Blog /><Footers /></>} />
+          <Route path="/products" element={<><Navbars /><ProductCard /><Footers /></>} />
+          <Route path="/my" element={<><Navbars /><MyOrders /><Footers /></>} />
+          <Route path="/about" element={<><Navbars /><About /><Footers /></>} />
+          <Route path="/cart" element={<><Navbars /><Cart /><Footers /></>} />
           <Route path="/orders" element={<><Navbars /><MyOrders /><Footers /></>} />
           <Route path="/order/:id" element={<><Navbars /><OrderDetails /><Footers /></>} />
-          <Route
-            path="/checkout"
-            element={
-              <>
-                <Navbars />
-                <Checkout />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              <>
-                <Navbars />
-                <Contact />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/blogs"
-            element={
-              <>
-                <Navbars />
-                <Blog />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/offers"
-            element={
-              <>
-                <Navbars />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/product/:id"
-            element={
-              <>
-                <Navbars />
-                <ProductDetailWrapper />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/blogs/:id"
-            element={
-              <>
-                <Navbars />
-                <BlogDetails />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/success"
-            element={
-              <>
-                <Navbars />
-                <OrderSuccess />
-                <div className="max-w-7xl mx-auto px-4 mt-4">
-                  <h2 className="text-2xl font-bold">Order Placed Successfully!</h2>
-                  <p className="text-gray-600">Thank you for your purchase. You will receive a confirmation email soon.</p>
-                </div>
-                <Footers />
-              </>
-            }
-          />
+          <Route path="/checkout" element={<><Navbars /><Checkout /><Footers /></>} />
+          <Route path="/contact" element={<><Navbars /><Contact /><Footers /></>} />
+          <Route path="/blogs" element={<><Navbars /><Blog /><Footers /></>} />
+          <Route path="/offers" element={<><Navbars /><Footers /></>} />
+          <Route path="/product/:id" element={<><Navbars /><ProductDetailWrapper /><Footers /></>} />
+          <Route path="/blogs/:id" element={<><Navbars /><BlogDetails /><Footers /></>} />
+          <Route path="/success" element={<><Navbars /><OrderSuccess /><Footers /></>} />
           <Route path="/track-order" element={<><Navbars /><TrackOrder /><Footers /></>} />
-          <Route
-            path="/cancel"
-            element={
-              <>
-                <Navbars />
-                <OrderFailed />
-                <Footers />
-              </>
-            }
-          />
-          <Route
-            path="/custom"
-            element={
-              <>
-                <Navbars />
-                <CustomBuilder />
-                <Footers />
-              </>
-            }
-          />
+          <Route path="/cancel" element={<><Navbars /><OrderFailed /><Footers /></>} />
+          <Route path="/custom" element={<><Navbars /><CustomBuilder /><Footers /></>} />
           <Route path="/terms-conditions" element={<TermsPage />} />
           <Route path="/privacy-policy" element={<PrivacyPage />} />
-          {/* <Route path="/chat" element={<ChatBot />} /> */}
           <Route path="/refund-policy" element={<RefundPage />} />
         </Routes>
       </Router>

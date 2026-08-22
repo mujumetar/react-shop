@@ -1,1 +1,2 @@
-@import "tailwindcss";
+/* App-level overrides — Tailwind is imported in index.css */
+.font-primary { font-family: "Pacifico", cursive; }

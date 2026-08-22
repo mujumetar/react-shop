@@ -1,104 +1,95 @@
-import React from 'react';
-import shopimg from "../img/shop.png";
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, MapPin } from 'lucide-react';
+import shopimg from '../img/shop.png';
 
-const Aboutsect = () => {
+const highlights = [
+  'Pure, homemade saani & kachariyu — zero additives',
+  'Sourced from trusted local suppliers in Dhasa',
+  'Transparent pricing — no hidden charges ever',
+  'Packed with care to ensure quality on arrival',
+];
+
+const stats = [
+  { value: '25+', label: 'Years in Business' },
+  { value: '500+', label: 'Happy Families' },
+  { value: '100%', label: 'Natural' },
+];
+
+export default function Aboutsect() {
+  const navigate = useNavigate();
+
   return (
-    <section className="py-16 lg:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900">
-            Our Shop
-          </h2>
-          <div className="mt-4 w-24 h-1 bg-emerald-600 mx-auto rounded-full"></div>
-        </div>
+    <section className="dk-section" style={{ background: '#f9fafb' }}>
+      <div className="dk-wrap">
+        <div className="dk-about-grid">
 
-        {/* Main Content - Image + Text */}
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          
-          {/* Image Side */}
-          <div className="order-2  lg:order-1">
-            <div className="relative">
-              <div className="aspect-w-4 aspect-h-3 lg:aspect-w-16 lg:aspect-h-12 rounded-2xl overflow-hidden shadow-xl">
-                <img
-                  src={shopimg}
-                  alt="Dilkhush Kirana Store - Dhasa, Gujarat"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+          {/* Image */}
+          <div style={{ position: 'relative', paddingBottom: 24, paddingRight: 24 }}>
+            <div className="dk-about-img-wrap">
+              <img src={shopimg} alt="Dilkhush Kirana Store, Dhasa" loading="lazy" />
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(to top, rgba(0,0,0,0.18), transparent)',
+              }} />
+              <div className="dk-about-loc">
+                <MapPin size={13} style={{ color: '#16a34a' }} />
+                Dhasa Junction, Gujarat
               </div>
-              {/* Optional overlay badge */}
-              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-5 py-3 rounded-full shadow-lg">
-                <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                  <span className="text-emerald-600">Location</span> Dhasa Junction, Gujarat
-                </p>
-              </div>
+            </div>
+            <div className="dk-about-badge" style={{ position: 'absolute', bottom: 0, right: 0 }}>
+              <strong>25+</strong>
+              <span>Years of<br />Trust</span>
             </div>
           </div>
 
-          {/* Text Side */}
-          <div className="order-1 lg:order-2 space-y-8">
-            <div>
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                About <span className="text-emerald-600">Dilkhush Kirana Store</span>
-              </h1>
+          {/* Text */}
+          <div>
+            <span className="dk-eyebrow dk-eyebrow-green">Our Story</span>
+            <h2 className="dk-heading" style={{ marginTop: 14, marginBottom: 16 }}>
+              Your trusted neighbourhood<br />
+              <em style={{ fontStyle: 'normal', color: '#15803d' }}>kirana store</em> — now online
+            </h2>
+            <p style={{ fontSize: 15, color: '#6b7280', lineHeight: 1.8, marginBottom: 24 }}>
+              Dilkhush started as a small corner store in Dhasa with a simple promise: offer the
+              freshest products at honest prices. Today we bring that same trust directly to your
+              home — with a hand-picked catalogue of pure homemade saani, kachariyu, spices, and
+              daily essentials.
+            </p>
+
+            <ul className="dk-check-list">
+              {highlights.map((h, i) => (
+                <li key={i}>
+                  <span className="dk-check-icon">
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                      <polyline points="2,6 5,9 10,3" stroke="#15803d" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  {h}
+                </li>
+              ))}
+            </ul>
+
+            <div className="dk-stats-row">
+              {stats.map((s, i) => (
+                <div key={i} className="dk-stat-cell">
+                  <div className="dk-stat-val">{s.value}</div>
+                  <div className="dk-stat-lbl">{s.label}</div>
+                </div>
+              ))}
             </div>
 
-            <div className="space-y-5 text-lg text-gray-700 leading-relaxed">
-              <p>
-                Welcome to <strong>Dilkhush Kirana Store</strong> — your trusted neighborhood grocery partner in <strong>Dhasa, Gujarat</strong> since 1999.
-              </p>
-              <p>
-                We take pride in offering the finest quality <strong>homemade saani, kachariyu, spices, and daily essentials</strong> — all made with pure ingredients, traditional recipes, and a whole lot of love.
-              </p>
-              <p>
-                From winter-special Black & White Saani to fresh spices and premium groceries, everything you see here is sourced and crafted with care — because we believe quality should never be compromised.
-              </p>
-              <p className="text-gray-800 font-medium">
-                Our promise: Fresh. Authentic. Affordable. Always.
-              </p>
-            </div>
-
-            {/* Trust Highlights */}
-            <div className="grid grid-cols-2 gap-6 pt-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl">25 Years</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">25+ Years</p>
-                  <p className="text-sm text-gray-600">Serving Dhasa</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl">100% Natural</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Pure Ingredients</p>
-                  <p className="text-sm text-gray-600">No additives</p>
-                </div>
-              </div>
-              
-            </div>
-            <div className="pt-8">
-              <p className="text-2xl font-semibold text-gray-900">
-                Dilkhush isn’t just a name — it’s a promise.
-              </p>
-              <p className="text-lg text-emerald-700 mt-2">
-                Thank you for being part of our family story.
-              </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+              <button className="dk-btn-primary" onClick={() => navigate('/products')}>
+                Browse Products <ArrowRight size={15} />
+              </button>
+              <button className="dk-btn-outline" onClick={() => navigate('/contact')}>
+                Get in Touch
+              </button>
             </div>
           </div>
-          
+
         </div>
-         
       </div>
-
-      
     </section>
   );
-};
-
-export default Aboutsect;
+}

@@ -1,38 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Truck } from 'lucide-react';
+import { Menu, X, Truck, ShoppingBag } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import logo from "../assets/logo2.jpg";
+import logo from '../assets/logo2.jpg';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const currentPath = location.pathname.toLowerCase();
-  const isActive = (path) => currentPath === path || currentPath.includes(path);
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.toLowerCase().startsWith(path.toLowerCase());
+  };
 
-  const handleNav = (path) => {
+  const go = (path) => {
     navigate(path);
-    setMobileMenuOpen(false);
+    setMobileOpen(false);
     window.scrollTo(0, 0);
   };
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
   }, []);
 
   useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [mobileMenuOpen]);
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
-  const navItems = [
+  const links = [
     { name: 'Home', path: '/' },
     { name: 'Products', path: '/products' },
     { name: 'Blogs', path: '/blogs' },
@@ -42,137 +41,189 @@ const Navbar = () => {
 
   return (
     <>
-      <style jsx>{`
-        @keyframes slideDown {
-          from { transform: translateY(-100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .logo-gradient {
-          background: linear-gradient(90deg, #1e40af, #3b82f6, #06b6d4);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .nav-link-hover {
-          position: relative;
-        }
-        .nav-link-hover::after {
-          content: '';
-          position: absolute;
-          width: 0;
-          height: 2px;
-          bottom: -6px;
-          left: 50%;
-          background: #3b82f6;
-          transition: all 0.3s ease;
-          transform: translateX(-50%);
-        }
-        .nav-link-hover:hover::after {
-          width: 70%;
-        }
-        .track-btn {
-          background: linear-gradient(135deg, #10b981, #059669);
-          transition: all 0.3s ease;
-        }
-        .track-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
-        }
-      `}</style>
+      {/* Announcement bar */}
+      <div style={{
+        width: '100%', background: '#15803d', color: '#fff',
+        textAlign: 'center', fontSize: 12, padding: '7px 16px',
+        fontWeight: 500, letterSpacing: '0.02em',
+      }}>
+        🚚 Free delivery on orders above ₹299 — Homemade &amp; fresh from Dhasa, Gujarat
+      </div>
 
-      {/* Main Header - Always Visible */}
-      <header className={`sticky top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
-          ? 'bg-white/95 backdrop-blur-lg shadow-lg'
-          : 'bg-white/90 backdrop-blur-md'
-        }`}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
+      {/* Main nav */}
+      <header style={{
+        position: 'sticky', top: 0, left: 0, right: 0, zIndex: 1000,
+        background: 'rgba(255,255,255,0.97)',
+        borderBottom: '1px solid #f4f4f5',
+        boxShadow: scrolled ? '0 1px 16px rgba(0,0,0,0.07)' : 'none',
+        transition: 'box-shadow 0.3s ease',
+      }}>
+        <div style={{
+          maxWidth: 1280, margin: '0 auto',
+          padding: '0 24px', height: 64,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24,
+        }}>
           {/* Logo */}
-          <div
-            className="flex items-center space-x-3 cursor-pointer"
-            onClick={() => handleNav('/')}
-          >
-            <div className='flex items-end'>
-              <img src={logo} alt="Dilkhush" className='w-20 h-10 rounded-xl ' />
-              <p className="text-xs text-gray-500 -mt-1 w-full text-end font-bold font-primary">.Shop</p>
-            </div>
-          </div>
+          <button onClick={() => go('/')} style={{
+            display: 'flex', alignItems: 'flex-end', gap: 4,
+            background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0, padding: 0,
+          }}>
+            <img src={logo} alt="Dilkhush" style={{ height: 40, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+            <span className="font-primary" style={{ fontSize: 10, fontWeight: 700, color: '#a1a1aa', marginBottom: 2 }}>.Shop</span>
+          </button>
 
-          {/* Desktop Menu - Hidden on Mobile */}
-          <nav className="hidden lg:flex items-center space-x-10">
-            {navItems.map((item) => (
+          {/* Desktop links */}
+          <nav style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center' }} className="nav-desktop">
+            {links.map(l => (
               <button
-                key={item.name}
-                onClick={() => handleNav(item.path)}
-                className={`text-gray-700 font-medium text-lg transition-all duration-300 nav-link-hover ${isActive(item.path) ? 'text-blue-600 font-semibold' : 'hover:text-blue-600'
-                  }`}
+                key={l.path}
+                onClick={() => go(l.path)}
+                style={{
+                  position: 'relative', padding: '7px 14px',
+                  fontSize: 14, fontWeight: 500, borderRadius: 8,
+                  border: 'none', cursor: 'pointer',
+                  background: isActive(l.path) ? '#f0fdf4' : 'none',
+                  color: isActive(l.path) ? '#15803d' : '#52525b',
+                  transition: 'background 0.2s, color 0.2s',
+                }}
+                onMouseEnter={e => { if (!isActive(l.path)) { e.currentTarget.style.background = '#fafafa'; e.currentTarget.style.color = '#18181b'; }}}
+                onMouseLeave={e => { if (!isActive(l.path)) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#52525b'; }}}
               >
-                {item.name}
+                {l.name}
+                {isActive(l.path) && (
+                  <span style={{
+                    position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+                    width: 16, height: 2, background: '#16a34a', borderRadius: 2,
+                  }} />
+                )}
               </button>
             ))}
-
-            <button
-              onClick={() => handleNav('/track-order')}
-              className="track-btn text-white px-6 py-3 rounded-full font-semibold flex items-center gap-2 shadow-lg"
-            >
-              <Truck size={20} />
-              Track Order
-            </button>
           </nav>
 
-          {/* Mobile Menu Toggle - Only Visible on Mobile */}
+          {/* Desktop CTAs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }} className="nav-desktop">
+            <button
+              onClick={() => go('/track-order')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 16px', fontSize: 13, fontWeight: 600,
+                color: '#15803d', border: '1.5px solid #bbf7d0',
+                borderRadius: 10, background: 'none', cursor: 'pointer',
+                transition: 'background 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f0fdf4'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            >
+              <Truck size={15} /> Track Order
+            </button>
+            <button
+              onClick={() => go('/products')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 20px', fontSize: 13, fontWeight: 600,
+                color: '#fff', background: '#15803d', border: 'none',
+                borderRadius: 10, cursor: 'pointer',
+                transition: 'background 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#166534'}
+              onMouseLeave={e => e.currentTarget.style.background = '#15803d'}
+            >
+              <ShoppingBag size={15} /> Shop Now
+            </button>
+          </div>
+
+          {/* Mobile toggle */}
           <button
-            className="lg:hidden text-gray-800 z-50"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setMobileOpen(v => !v)}
+            aria-label="Toggle menu"
+            className="nav-mobile-toggle"
+            style={{
+              display: 'none', padding: 8, background: 'none',
+              border: 'none', cursor: 'pointer', color: '#27272a',
+            }}
           >
-            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
+      {/* Mobile overlay */}
+      {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+            zIndex: 998, display: 'none',
+          }}
+          className="nav-mobile-overlay"
         />
       )}
 
-      {/* Mobile Menu - Slides Down */}
-      <div className={`fixed top-0 left-0 right-0 bg-white shadow-2xl z-40 lg:hidden transition-all duration-500 ease-out ${mobileMenuOpen
-          ? 'translate-y-0 opacity-100'
-          : '-translate-y-full opacity-0 pointer-events-none'
-        }`}>
-        <div className="px-6 py-6 pt-20"> {/* pt-20 to avoid header overlap */}
-          <nav className="space-y-y-4">
-            {navItems.map((item, i) => (
-              <button
-                key={item.name}
-                onClick={() => handleNav(item.path)}
-                className={`block my-2 w-full text-left text-2xl font-medium py-4 px-6 rounded-xl transition-all ${isActive(item.path)
-                    ? 'bg-blue-50 text-blue-600 font-bold'
-                    : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                style={{ animation: mobileMenuOpen ? `fadeInUp 0.5s ease-out ${i * 0.1}s both` : '' }}
-              >
-                {item.name}
-              </button>
-            ))}
+      {/* Mobile panel */}
+      <div
+        className="nav-mobile-panel"
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0,
+          background: '#fff', zIndex: 999,
+          borderBottom: '1px solid #f4f4f5',
+          transform: mobileOpen ? 'translateY(0)' : 'translateY(-100%)',
+          opacity: mobileOpen ? 1 : 0,
+          pointerEvents: mobileOpen ? 'auto' : 'none',
+          transition: 'transform 0.35s ease, opacity 0.35s ease',
+          display: 'none',
+        }}
+      >
+        {/* Panel header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', height: 56, borderBottom: '1px solid #f4f4f5' }}>
+          <button onClick={() => go('/')} style={{ display: 'flex', alignItems: 'flex-end', gap: 4, background: 'none', border: 'none', cursor: 'pointer' }}>
+            <img src={logo} alt="Dilkhush" style={{ height: 34, borderRadius: 7 }} />
+            <span className="font-primary" style={{ fontSize: 9, fontWeight: 700, color: '#a1a1aa', marginBottom: 2 }}>.Shop</span>
+          </button>
+          <button onClick={() => setMobileOpen(false)} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#52525b' }}>
+            <X size={20} />
+          </button>
+        </div>
 
+        {/* Links */}
+        <div style={{ padding: '12px 16px 20px' }}>
+          {links.map(l => (
             <button
-              onClick={() => handleNav('/track-order')}
-              className="w-full mt-6 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-xl font-bold py-5 rounded-2xl shadow-xl flex items-center justify-center gap-3 track-btn"
+              key={l.path}
+              onClick={() => go(l.path)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                width: '100%', padding: '12px 16px', marginBottom: 4,
+                borderRadius: 12, border: 'none', cursor: 'pointer',
+                fontSize: 15, fontWeight: isActive(l.path) ? 700 : 500,
+                background: isActive(l.path) ? '#f0fdf4' : 'none',
+                color: isActive(l.path) ? '#15803d' : '#3f3f46',
+                textAlign: 'left',
+              }}
             >
-              <Truck size={24} />
-              Track Order
+              {l.name}
+              {isActive(l.path) && <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#16a34a' }} />}
             </button>
-          </nav>
+          ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+            <button onClick={() => go('/track-order')} style={{ width: '100%', padding: '12px', border: '1.5px solid #bbf7d0', borderRadius: 12, fontSize: 14, fontWeight: 600, color: '#15803d', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <Truck size={16} /> Track Order
+            </button>
+            <button onClick={() => go('/products')} style={{ width: '100%', padding: '13px', background: '#15803d', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <ShoppingBag size={16} /> Shop Now
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Responsive styles */}
+      <style>{`
+        @media (max-width: 1024px) {
+          .nav-desktop { display: none !important; }
+          .nav-mobile-toggle { display: flex !important; }
+          .nav-mobile-panel { display: block !important; }
+          .nav-mobile-overlay { display: block !important; }
+        }
+      `}</style>
     </>
   );
 };
