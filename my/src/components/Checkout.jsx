@@ -32,8 +32,8 @@ const baseInput = {
   boxSizing: 'border-box', transition: 'border-color .18s, box-shadow .18s',
 };
 
-const focusInput  = e => { e.target.style.borderColor = '#16a34a'; e.target.style.boxShadow = '0 0 0 3px rgba(22,163,74,0.12)'; };
-const blurInput   = e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; };
+const focusInput = e => { e.target.style.borderColor = '#16a34a'; e.target.style.boxShadow = '0 0 0 3px rgba(22,163,74,0.12)'; };
+const blurInput = e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; };
 
 /* ─── Step pill ─── */
 const Step = ({ num, label, active, done }) => (
@@ -59,17 +59,17 @@ const Step = ({ num, label, active, done }) => (
 export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const cart     = location.state?.cart || [];
+  const cart = location.state?.cart || [];
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const shipping = subtotal >= 1000 ? 0 : 50;
   const [discount, setDiscount] = useState(0);
-  const total    = subtotal + shipping - discount;
+  const total = subtotal + shipping - discount;
 
   const [loading, setLoading] = useState(false);
-  const [coupon,  setCoupon]  = useState('');
+  const [coupon, setCoupon] = useState('');
   const [couponStatus, setCouponStatus] = useState(null); // null | 'ok' | 'err'
-  const [couponMsg, setCouponMsg]       = useState('');
+  const [couponMsg, setCouponMsg] = useState('');
 
   const [form, setForm] = useState({
     customerName: '', customerEmail: '',
@@ -84,7 +84,7 @@ export default function Checkout() {
   const applyCoupon = async () => {
     if (!coupon.trim()) return;
     try {
-      const res  = await fetch(`${API_URL}/coupons/apply`, {
+      const res = await fetch(`${API_URL}/coupons/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: coupon, totalAmount: subtotal }),
@@ -110,11 +110,12 @@ export default function Checkout() {
     if (!cart.length) return;
     setLoading(true);
     try {
-      const orderRes  = await fetch(`${API_URL}/orders`, {
+      const orderRes = await fetch(`${API_URL}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          shippingAddress: form.customerAddress, // Map to backend requirement
           products: cart.map(i => ({ productId: i.productId || i._id, quantity: i.quantity })),
         }),
       });
@@ -123,14 +124,14 @@ export default function Checkout() {
 
       const mongoOrderId = orderData.orderId;
 
-      const rzpRes  = await fetch(`${API_URL}/orders/${mongoOrderId}/razorpay/create`, {
+      const rzpRes = await fetch(`${API_URL}/orders/${mongoOrderId}/razorpay/create`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
       });
       const rzpData = await rzpRes.json();
       if (!rzpRes.ok) throw new Error('Failed to create Razorpay order');
 
       const rzp = new window.Razorpay({
-        key: 'rzp_live_Re1i7zytUrHedP',
+        key: 'rzp_live_TgK2N78f0AOXB0',
         order_id: rzpData.id,
         amount: rzpData.amount,
         currency: rzpData.currency || 'INR',
@@ -194,27 +195,27 @@ export default function Checkout() {
             {/* Logo */}
             <button
               onClick={() => navigate('/')}
-              style={{ display:'flex', alignItems:'flex-end', gap:4, background:'none', border:'none', cursor:'pointer', padding:0, marginBottom:40 }}
+              style={{ display: 'flex', alignItems: 'flex-end', gap: 4, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 40 }}
             >
-              <img src={logo} alt="Dilkhush" style={{ height:38, width:'auto', borderRadius:8, objectFit:'contain' }} />
-              <span style={{ fontFamily:'Pacifico,cursive', fontSize:10, fontWeight:700, color:'#bbb', marginBottom:2 }}>.Shop</span>
+              <img src={logo} alt="Dilkhush" style={{ height: 38, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+              <span style={{ fontFamily: 'Pacifico,cursive', fontSize: 10, fontWeight: 700, color: '#bbb', marginBottom: 2 }}>.Shop</span>
             </button>
 
             {/* Steps */}
-            <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:44 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 44 }}>
               <Step num={1} label="Cart" done />
-              <div style={{ flex:1, height:1, background:'#e5e7eb' }} />
+              <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
               <Step num={2} label="Details" active />
-              <div style={{ flex:1, height:1, background:'#e5e7eb' }} />
+              <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
               <Step num={3} label="Payment" />
             </div>
 
             {/* Title */}
-            <h1 style={{ fontFamily:"'Playfair Display',Georgia,serif", fontSize:32, fontWeight:700, color:'#0f0f0f', marginBottom:6, lineHeight:1.15 }}>
+            <h1 style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: 32, fontWeight: 700, color: '#0f0f0f', marginBottom: 6, lineHeight: 1.15 }}>
               Shipping &amp; Payment
             </h1>
-            <p style={{ fontSize:14, color:'#9ca3af', marginBottom:40 }}>
-              All fields marked <span style={{ color:'#ef4444' }}>*</span> are required.
+            <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 40 }}>
+              All fields marked <span style={{ color: '#ef4444' }}>*</span> are required.
             </p>
 
             <form onSubmit={placeOrder}>
@@ -222,18 +223,18 @@ export default function Checkout() {
               {/* ── Contact ── */}
               <div className="co-section-divider"><span className="co-section-label">Contact Information</span></div>
 
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <Field label="Email" required>
-                  <div style={{ position:'relative' }}>
-                    <Mail size={15} style={{ position:'absolute', left:13, top:'50%', transform:'translateY(-50%)', color:'#9ca3af' }} />
-                    <input className="co-input" style={{ ...baseInput, paddingLeft:38 }} type="email" required
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                    <input className="co-input" style={{ ...baseInput, paddingLeft: 38 }} type="email" required
                       value={form.customerEmail} onChange={set('customerEmail')} placeholder="you@example.com" />
                   </div>
                 </Field>
                 <Field label="Phone" required>
-                  <div style={{ position:'relative' }}>
-                    <Phone size={15} style={{ position:'absolute', left:13, top:'50%', transform:'translateY(-50%)', color:'#9ca3af' }} />
-                    <input className="co-input" style={{ ...baseInput, paddingLeft:38 }} type="tel" required
+                  <div style={{ position: 'relative' }}>
+                    <Phone size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                    <input className="co-input" style={{ ...baseInput, paddingLeft: 38 }} type="tel" required
                       value={form.customerPhone} onChange={set('customerPhone')} placeholder="+91 XXXXX XXXXX" />
                   </div>
                 </Field>
@@ -243,17 +244,17 @@ export default function Checkout() {
               <div className="co-section-divider"><span className="co-section-label">Shipping Address</span></div>
 
               <Field label="Full Name" required>
-                <div style={{ position:'relative' }}>
-                  <User size={15} style={{ position:'absolute', left:13, top:'50%', transform:'translateY(-50%)', color:'#9ca3af' }} />
-                  <input className="co-input" style={{ ...baseInput, paddingLeft:38 }} type="text" required
+                <div style={{ position: 'relative' }}>
+                  <User size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                  <input className="co-input" style={{ ...baseInput, paddingLeft: 38 }} type="text" required
                     value={form.customerName} onChange={set('customerName')} placeholder="Your full name" />
                 </div>
               </Field>
 
               <Field label="Full Address" required>
-                <div style={{ position:'relative' }}>
-                  <MapPin size={15} style={{ position:'absolute', left:13, top:14, color:'#9ca3af' }} />
-                  <textarea className="co-input" style={{ ...baseInput, paddingLeft:38, resize:'vertical', minHeight:88 }}
+                <div style={{ position: 'relative' }}>
+                  <MapPin size={15} style={{ position: 'absolute', left: 13, top: 14, color: '#9ca3af' }} />
+                  <textarea className="co-input" style={{ ...baseInput, paddingLeft: 38, resize: 'vertical', minHeight: 88 }}
                     required rows={3}
                     value={form.customerAddress} onChange={set('customerAddress')}
                     placeholder="House No, Street, Area, City, State — PIN" />
@@ -262,13 +263,13 @@ export default function Checkout() {
 
               {/* ── Delivery notice ── */}
               <div style={{
-                display:'flex', alignItems:'center', gap:10,
+                display: 'flex', alignItems: 'center', gap: 10,
                 background: shipping === 0 ? '#f0fdf4' : '#fff8f0',
                 border: `1px solid ${shipping === 0 ? '#bbf7d0' : '#fed7aa'}`,
-                borderRadius:12, padding:'12px 16px', marginBottom:28,
+                borderRadius: 12, padding: '12px 16px', marginBottom: 28,
               }}>
-                <Truck size={16} style={{ color: shipping === 0 ? '#16a34a' : '#d97706', flexShrink:0 }} />
-                <p style={{ fontSize:13, fontWeight:500, color: shipping === 0 ? '#15803d' : '#92400e' }}>
+                <Truck size={16} style={{ color: shipping === 0 ? '#16a34a' : '#d97706', flexShrink: 0 }} />
+                <p style={{ fontSize: 13, fontWeight: 500, color: shipping === 0 ? '#15803d' : '#92400e' }}>
                   {shipping === 0
                     ? '🎉 You\'ve unlocked free delivery!'
                     : <>Add <strong>₹{1000 - subtotal}</strong> more for free delivery. Current shipping: ₹{shipping}</>}
@@ -281,20 +282,20 @@ export default function Checkout() {
                 disabled={loading}
                 className="co-pay-btn"
                 style={{
-                  width:'100%',
-                  display:'flex', alignItems:'center', justifyContent:'center', gap:10,
+                  width: '100%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                   background: loading ? '#86efac' : '#15803d',
-                  color:'#fff', fontSize:16, fontWeight:800,
-                  padding:'17px', borderRadius:14, border:'none',
+                  color: '#fff', fontSize: 16, fontWeight: 800,
+                  padding: '17px', borderRadius: 14, border: 'none',
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  transition:'background .2s,transform .2s,box-shadow .2s',
-                  boxShadow:'0 4px 20px rgba(21,128,61,0.28)',
-                  letterSpacing:'-0.01em',
+                  transition: 'background .2s,transform .2s,box-shadow .2s',
+                  boxShadow: '0 4px 20px rgba(21,128,61,0.28)',
+                  letterSpacing: '-0.01em',
                 }}
               >
                 {loading ? (
                   <>
-                    <div style={{ width:20, height:20, border:'2.5px solid rgba(255,255,255,.3)', borderTopColor:'#fff', borderRadius:'50%', animation:'spin-co .7s linear infinite' }} />
+                    <div style={{ width: 20, height: 20, border: '2.5px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin-co .7s linear infinite' }} />
                     Processing payment…
                   </>
                 ) : (
@@ -306,15 +307,15 @@ export default function Checkout() {
               </button>
 
               {/* Security row */}
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginTop:14 }}>
-                <ShieldCheck size={14} style={{ color:'#16a34a' }} />
-                <span style={{ fontSize:12, color:'#9ca3af' }}>256-bit SSL · Secured by Razorpay</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 14 }}>
+                <ShieldCheck size={14} style={{ color: '#16a34a' }} />
+                <span style={{ fontSize: 12, color: '#9ca3af' }}>256-bit SSL · Secured by Razorpay</span>
               </div>
 
               {/* Accepted payment methods */}
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:18, flexWrap:'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 18, flexWrap: 'wrap' }}>
                 {['UPI', 'Cards', 'NetBanking', 'Wallets', 'EMI'].map(m => (
-                  <span key={m} style={{ fontSize:10, fontWeight:700, padding:'4px 9px', background:'#f4f4f5', borderRadius:6, color:'#6b7280', letterSpacing:'0.04em' }}>{m}</span>
+                  <span key={m} style={{ fontSize: 10, fontWeight: 700, padding: '4px 9px', background: '#f4f4f5', borderRadius: 6, color: '#6b7280', letterSpacing: '0.04em' }}>{m}</span>
                 ))}
               </div>
             </form>
@@ -328,43 +329,43 @@ export default function Checkout() {
           <div className="co-right-inner">
 
             {/* Header */}
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:28 }}>
-              <h3 style={{ fontSize:16, fontWeight:800, color:'#111', display:'flex', alignItems:'center', gap:8 }}>
-                <ShoppingBag size={17} style={{ color:'#16a34a' }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <ShoppingBag size={17} style={{ color: '#16a34a' }} />
                 Order Summary
               </h3>
-              <span style={{ fontSize:12, color:'#9ca3af', fontWeight:500 }}>{cart.length} item{cart.length !== 1 ? 's' : ''}</span>
+              <span style={{ fontSize: 12, color: '#9ca3af', fontWeight: 500 }}>{cart.length} item{cart.length !== 1 ? 's' : ''}</span>
             </div>
 
             {/* Item list */}
-            <div style={{ marginBottom:24 }}>
+            <div style={{ marginBottom: 24 }}>
               {cart.map((item, i) => (
-                <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'12px 0', borderBottom:'1px solid #f0f0f0' }}>
-                  <div style={{ position:'relative', flexShrink:0 }}>
-                    <div style={{ width:60, height:60, background:'#fff', border:'1.5px solid #e5e7eb', borderRadius:12, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <div style={{ width: 60, height: 60, background: '#fff', border: '1.5px solid #e5e7eb', borderRadius: 12, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {item.image
-                        ? <img src={item.image} alt={item.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
-                        : <ShoppingBag size={18} style={{ color:'#d1d5db' }} />
+                        ? <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        : <ShoppingBag size={18} style={{ color: '#d1d5db' }} />
                       }
                     </div>
                     <span style={{
-                      position:'absolute', top:-6, right:-6,
-                      width:19, height:19,
-                      background:'#16a34a', color:'#fff',
-                      fontSize:10, fontWeight:800, borderRadius:'50%',
-                      display:'flex', alignItems:'center', justifyContent:'center',
-                      border:'2px solid #f8f8f6',
+                      position: 'absolute', top: -6, right: -6,
+                      width: 19, height: 19,
+                      background: '#16a34a', color: '#fff',
+                      fontSize: 10, fontWeight: 800, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: '2px solid #f8f8f6',
                     }}>
                       {item.quantity}
                     </span>
                   </div>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <p style={{ fontSize:13, fontWeight:700, color:'#111', lineHeight:1.35, marginBottom:3, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: '#111', lineHeight: 1.35, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {item.name}
                     </p>
-                    <p style={{ fontSize:12, color:'#9ca3af' }}>₹{item.price} × {item.quantity} kg</p>
+                    <p style={{ fontSize: 12, color: '#9ca3af' }}>₹{item.price} × {item.quantity} kg</p>
                   </div>
-                  <span style={{ fontSize:14, fontWeight:800, color:'#111', flexShrink:0 }}>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: '#111', flexShrink: 0 }}>
                     ₹{(item.price * item.quantity).toLocaleString()}
                   </span>
                 </div>
@@ -372,73 +373,73 @@ export default function Checkout() {
             </div>
 
             {/* Coupon */}
-            <div style={{ marginBottom:24 }}>
-              <div style={{ display:'flex', gap:8 }}>
-                <div style={{ flex:1, position:'relative' }}>
-                  <Tag size={14} style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'#9ca3af' }} />
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ flex: 1, position: 'relative' }}>
+                  <Tag size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
                   <input
                     type="text"
                     placeholder="Coupon code"
                     value={coupon}
                     onChange={e => { setCoupon(e.target.value); setCouponStatus(null); setCouponMsg(''); }}
-                    style={{ ...baseInput, paddingLeft:34, fontSize:13 }}
+                    style={{ ...baseInput, paddingLeft: 34, fontSize: 13 }}
                     onFocus={focusInput} onBlur={blurInput}
                   />
                 </div>
                 <button
                   type="button"
                   onClick={applyCoupon}
-                  style={{ padding:'0 18px', background: couponStatus === 'ok' ? '#16a34a' : '#111', color:'#fff', border:'none', borderRadius:12, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', flexShrink:0, transition:'background .2s' }}
-                  onMouseEnter={e => { if(couponStatus !== 'ok') e.currentTarget.style.background='#374151'; }}
-                  onMouseLeave={e => { if(couponStatus !== 'ok') e.currentTarget.style.background='#111'; }}
+                  style={{ padding: '0 18px', background: couponStatus === 'ok' ? '#16a34a' : '#111', color: '#fff', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, transition: 'background .2s' }}
+                  onMouseEnter={e => { if (couponStatus !== 'ok') e.currentTarget.style.background = '#374151'; }}
+                  onMouseLeave={e => { if (couponStatus !== 'ok') e.currentTarget.style.background = '#111'; }}
                 >
                   {couponStatus === 'ok' ? <CheckCircle size={15} /> : 'Apply'}
                 </button>
               </div>
               {couponMsg && (
-                <p style={{ fontSize:12, marginTop:6, fontWeight:600, color: couponStatus === 'ok' ? '#16a34a' : '#ef4444' }}>
+                <p style={{ fontSize: 12, marginTop: 6, fontWeight: 600, color: couponStatus === 'ok' ? '#16a34a' : '#ef4444' }}>
                   {couponStatus === 'ok' ? '✓ ' : '✕ '}{couponMsg}
                 </p>
               )}
             </div>
 
             {/* Totals */}
-            <div style={{ background:'#fff', border:'1.5px solid #ebebeb', borderRadius:16, padding:20 }}>
+            <div style={{ background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 16, padding: 20 }}>
               {[
-                { label:'Subtotal', val:`₹${subtotal.toLocaleString()}` },
-                { label:'Shipping', val: shipping === 0 ? 'FREE' : `₹${shipping}`, green: shipping === 0 },
-                ...(discount > 0 ? [{ label:'Discount', val:`–₹${discount}`, green:true }] : []),
+                { label: 'Subtotal', val: `₹${subtotal.toLocaleString()}` },
+                { label: 'Shipping', val: shipping === 0 ? 'FREE' : `₹${shipping}`, green: shipping === 0 },
+                ...(discount > 0 ? [{ label: 'Discount', val: `–₹${discount}`, green: true }] : []),
               ].map((r, i) => (
-                <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
-                  <span style={{ fontSize:14, color:'#6b7280' }}>{r.label}</span>
-                  <span style={{ fontSize:14, fontWeight:600, color: r.green ? '#16a34a' : '#111' }}>{r.val}</span>
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 14, color: '#6b7280' }}>{r.label}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: r.green ? '#16a34a' : '#111' }}>{r.val}</span>
                 </div>
               ))}
 
-              <div style={{ height:1, background:'#ebebeb', margin:'8px 0 16px' }} />
+              <div style={{ height: 1, background: '#ebebeb', margin: '8px 0 16px' }} />
 
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <span style={{ fontSize:16, fontWeight:800, color:'#111' }}>Total</span>
-                <div style={{ textAlign:'right' }}>
-                  <div style={{ fontSize:26, fontWeight:900, color:'#0f0f0f', lineHeight:1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>Total</span>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 26, fontWeight: 900, color: '#0f0f0f', lineHeight: 1 }}>
                     ₹{total.toLocaleString()}
                   </div>
-                  <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>Incl. all taxes</div>
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>Incl. all taxes</div>
                 </div>
               </div>
             </div>
 
             {/* Trust badges */}
-            <div style={{ marginTop:20, display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+            <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
-                { icon:<ShieldCheck size={14}/>, text:'Secure checkout' },
-                { icon:<Truck size={14}/>, text:'Fast delivery' },
-                { icon:<CheckCircle size={14}/>, text:'Easy returns' },
-                { icon:<Lock size={14}/>, text:'100% safe' },
+                { icon: <ShieldCheck size={14} />, text: 'Secure checkout' },
+                { icon: <Truck size={14} />, text: 'Fast delivery' },
+                { icon: <CheckCircle size={14} />, text: 'Easy returns' },
+                { icon: <Lock size={14} />, text: '100% safe' },
               ].map((b, i) => (
-                <div key={i} style={{ display:'flex', alignItems:'center', gap:7, background:'#fff', border:'1px solid #ebebeb', borderRadius:10, padding:'9px 12px' }}>
-                  <span style={{ color:'#16a34a' }}>{b.icon}</span>
-                  <span style={{ fontSize:12, fontWeight:600, color:'#6b7280' }}>{b.text}</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff', border: '1px solid #ebebeb', borderRadius: 10, padding: '9px 12px' }}>
+                  <span style={{ color: '#16a34a' }}>{b.icon}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{b.text}</span>
                 </div>
               ))}
             </div>
