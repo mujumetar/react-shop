@@ -3,36 +3,219 @@
 
 <head>
   <meta charset="UTF-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Primary Meta Tags -->
-  <meta name="title" content="Dilkhush Kirana Store – Saani & Spices" />
-  <meta name="description" content="Dilkhush Kirana Store – Get fresh groceries, quality spices, snacks & daily needs delivered in Gujarat. Fast delivery, secure online payments, affordable prices." />
-  <meta name="keywords" content="kirana store, grocery store dhasa, spices shop, masala shop, dilkhush kirana, online kirana store, dhasa kirana shop, saani , kachariyu , marchu , spices" />
-  <meta name="author" content="Dilkhush" />
+  <meta name="theme-color" content="#15803d" />
 
-  <title>Dilkhush 💖</title>
-  <link rel="icon" href="/black.jpeg" type="image/x-icon">
-  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <!-- Canonical URL (Authority signal for Google ranking) -->
+  <link rel="canonical" href="https://dilkhush-kirana.vercel.app/" />
+
+  <!-- Primary Meta Tags -->
+  <title>Dilkhush Kirana Store | Homemade Saani, Kachariyu &amp; Pure Spices | Dhasa, Gujarat</title>
+  <meta name="title" content="Dilkhush Kirana Store | Homemade Saani, Kachariyu &amp; Pure Spices | Dhasa, Gujarat" />
+  <meta name="description"
+    content="Dilkhush Kirana Store (Est. 1999, Dhasa, Gujarat) delivers 100% pure homemade Saani, traditional Kachariyu, freshly ground spices &amp; daily groceries. Free delivery on orders above ₹299 across Gujarat." />
+  <meta name="keywords"
+    content="dilkhush kirana, dilkhush kirana store, dhasa kirana store, homemade saani, buy saani online, kachariyu gujarat, black til saani, white til saani, pure spices dhasa, marchu powder, grocery delivery gujarat, online kirana store, kathiyawadi saani, buy spices online india" />
+  <meta name="author" content="Dilkhush Kirana Store" />
+  <meta name="publisher" content="Dilkhush Kirana Store" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="google-site-verification" content="V9Xycigmxwa8ybp0Gc2rsvlmQLAdqdQIDD9AZ5K1uHw" />
+  <!-- Geographic Meta Tags (GEO / Local SEO) -->
+  <meta name="geo.region" content="IN-GJ" />
+  <meta name="geo.placename" content="Dhasa Junction, Gujarat, India" />
+  <meta name="geo.position" content="21.8025;71.8496" />
+  <meta name="ICBM" content="21.8025, 71.8496" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Dilkhush Kirana Store" />
+  <meta property="og:url" content="https://dilkhush-kirana.vercel.app/" />
+  <meta property="og:title" content="Dilkhush Kirana Store | Homemade Saani, Kachariyu &amp; Pure Spices" />
+  <meta property="og:description"
+    content="Authentic homemade Gujarati Saani, Kachariyu &amp; pure ground spices from Dhasa, Gujarat. Serving pure taste since 1999. Fast delivery across Gujarat." />
+  <meta property="og:image" content="https://dilkhush-kirana.vercel.app/og-image.png" />
+  <meta property="og:image:secure_url" content="https://dilkhush-kirana.vercel.app/og-image.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Dilkhush Kirana Store, Dhasa, Gujarat" />
+  <meta property="og:locale" content="en_IN" />
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://dilkhush-kirana.vercel.app/" />
+  <meta name="twitter:title" content="Dilkhush Kirana Store | Homemade Saani &amp; Pure Spices" />
+  <meta name="twitter:description"
+    content="Pure homemade Gujarati Saani, Kachariyu &amp; ground spices from Dhasa, Gujarat. Free delivery on orders above ₹299." />
+  <meta name="twitter:image" content="https://dilkhush-kirana.vercel.app/og-image.png" />
+  <meta name="twitter:image:alt" content="Dilkhush Kirana Store" />
+
+  <!-- Favicons & App Manifest -->
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- External Styles & Fonts -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Pacifico&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Razorpay Payment Gateway SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <link href="/src/style.css" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+  <!-- Structured Data / JSON-LD for SEO, AEO & GEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["GroceryStore", "Store", "LocalBusiness"],
+        "@id": "https://dilkhush-kirana.vercel.app/#store",
+        "name": "Dilkhush Kirana Store",
+        "alternateName": ["Dilkhush Kirana", "Dilkhush Dhasa"],
+        "url": "https://dilkhush-kirana.vercel.app/",
+        "logo": "https://dilkhush-kirana.vercel.app/logo.png",
+        "image": "https://dilkhush-kirana.vercel.app/og-image.png",
+        "description": "Authentic Gujarati grocery and spice shop established in 1999 in Dhasa, Gujarat. Specializing in homemade sesame Saani, traditional Kachariyu, pure unadulterated spices, and daily household groceries.",
+        "telephone": "+919723089786",
+        "email": "mustakmetar82@gmail.com",
+        "priceRange": "₹₹",
+        "currenciesAccepted": "INR",
+        "paymentAccepted": "Cash, UPI, Credit Card, Debit Card, Net Banking",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Main Road, Dhasa Junction",
+          "addressLocality": "Dhasa",
+          "addressRegion": "Gujarat",
+          "postalCode": "364730",
+          "addressCountry": "IN"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 21.8025,
+          "longitude": 71.8496
+        },
+        "hasMap": "https://maps.app.goo.gl/2yeV6Ern1uCUVyEV8",
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Saturday", "Sunday"],
+            "opens": "09:00",
+            "closes": "14:00"
+          }
+        ],
+        "areaServed": [
+          {
+            "@type": "AdministrativeArea",
+            "name": "Gujarat"
+          },
+          {
+            "@type": "Country",
+            "name": "India"
+          }
+        ],
+        "sameAs": [
+          "https://www.instagram.com/dilkhush_kirana",
+          "https://wa.me/919723089786"
+        ]
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://dilkhush-kirana.vercel.app/#organization",
+        "name": "Dilkhush Kirana Store",
+        "url": "https://dilkhush-kirana.vercel.app/",
+        "logo": "https://dilkhush-kirana.vercel.app/logo.png",
+        "foundingDate": "1999",
+        "founder": {
+          "@type": "Person",
+          "name": "Dilkhush Family"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+919723089786",
+          "contactType": "customer service",
+          "areaServed": "IN",
+          "availableLanguage": ["Gujarati", "Hindi", "English"]
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://dilkhush-kirana.vercel.app/#website",
+        "url": "https://dilkhush-kirana.vercel.app/",
+        "name": "Dilkhush Kirana Store",
+        "description": "Online store for homemade Saani, Kachariyu & pure ground spices from Dhasa, Gujarat.",
+        "publisher": {
+          "@id": "https://dilkhush-kirana.vercel.app/#organization"
+        },
+        "inLanguage": "en-IN"
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://dilkhush-kirana.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why choose Dilkhush over other stores?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We've been serving Dhasa for 25+ years with 100% homemade, pure-ingredient products. Every item is made fresh in-house — no preservatives, no shortcuts. You get the authentic quality your grandparents trusted."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What specialty products does Dilkhush Kirana sell?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Our specialty is homemade Saani (black and white sesame), authentic Gujarati Kachariyu, freshly ground pure spices (red chilli, turmeric, dhana-jeeru), and daily grocery essentials with zero chemical preservatives."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How long does delivery take and what is the shipping cost?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Orders placed before 6 PM are dispatched the same day and typically arrive within 24-48 hours across Gujarat. Shipping is completely free on all orders above ₹299."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I build a custom spice or ingredient blend?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! Dilkhush offers an interactive online Custom Builder at https://dilkhush-kirana.vercel.app/custom where you can select ingredients, qualities, and custom quantities with real-time pricing."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Where is Dilkhush Kirana Store located?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Dilkhush Kirana Store is located at Main Road, Dhasa Junction, Gujarat 364730, India. You can also order directly via WhatsApp at +91 97230 89786."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-    crossorigin="anonymous"></script> -->
   <script>
-    AOS.init();
+    AOS.init({ once: true, duration: 600 });
   </script>
   <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
 </body>

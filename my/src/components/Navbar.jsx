@@ -68,8 +68,8 @@ const Navbar = () => {
             display: 'flex', alignItems: 'flex-end', gap: 4,
             background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0, padding: 0,
           }}>
-            <img src={logo} alt="Dilkhush" style={{ height: 40, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
-            <span className="font-primary" style={{ fontSize: 10, fontWeight: 700, color: '#a1a1aa', marginBottom: 2 }}>.Shop</span>
+            <img src={logo} alt="Dilkhush Kirana Store" style={{ height: 40, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+            <span className="font-primary" style={{ fontSize: 10, fontWeight: 700, color: '#15803d', marginBottom: 2 }}>Kirana</span>
           </button>
 
           {/* Desktop links */}
@@ -176,8 +176,8 @@ const Navbar = () => {
         {/* Panel header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', height: 56, borderBottom: '1px solid #f4f4f5' }}>
           <button onClick={() => go('/')} style={{ display: 'flex', alignItems: 'flex-end', gap: 4, background: 'none', border: 'none', cursor: 'pointer' }}>
-            <img src={logo} alt="Dilkhush" style={{ height: 34, borderRadius: 7 }} />
-            <span className="font-primary" style={{ fontSize: 9, fontWeight: 700, color: '#a1a1aa', marginBottom: 2 }}>.Shop</span>
+            <img src={logo} alt="Dilkhush Kirana Store" style={{ height: 34, borderRadius: 7 }} />
+            <span className="font-primary" style={{ fontSize: 9, fontWeight: 700, color: '#15803d', marginBottom: 2 }}>Kirana</span>
           </button>
           <button onClick={() => setMobileOpen(false)} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#52525b' }}>
             <X size={20} />

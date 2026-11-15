@@ -86,8 +86,8 @@ export default function Footer() {
             onClick={() => go('/')}
             style={{ display: 'flex', alignItems: 'flex-end', gap: 4, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 20 }}
           >
-            <img src={logo} alt="Dilkhush" style={{ height: 40, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
-            <span className="font-primary" style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', marginBottom: 2 }}>.Shop</span>
+            <img src={logo} alt="Dilkhush Kirana Store" style={{ height: 40, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+            <span className="font-primary" style={{ fontSize: 10, fontWeight: 700, color: '#4ade80', marginBottom: 2 }}>Kirana</span>
           </button>
 
           <p style={{ ...dimText, maxWidth: 280, marginBottom: 16 }}>

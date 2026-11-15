@@ -19,6 +19,7 @@ import {
 import Eachprod from './components/pages/Eachprod';
 import GlobalLoader from './GlobalLoader';
 import Checkout from './components/Checkout';
+import Qna from './components/Qna';
 
 // ─── Cart Context ───────────────────────────────────────────────────────────
 const CartContext = createContext();
@@ -866,7 +867,7 @@ function App() {
         <GlobalLoader />
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<><Navbars /><Slider /><ProductCard /><DistributorsSection /><Blog /><Footers /></>} />
+          <Route path="/" element={<><Navbars /><Slider /><ProductCard /><DistributorsSection /><Blog /><Qna /><Footers /></>} />
           <Route path="/products" element={<><Navbars /><ProductCard /><Footers /></>} />
           <Route path="/my" element={<><Navbars /><MyOrders /><Footers /></>} />
           <Route path="/about" element={<><Navbars /><About /><Footers /></>} />
