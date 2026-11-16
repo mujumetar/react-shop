@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, MapPin } from 'lucide-react';
 import shopimg from '../img/shop.png';
+import { Ornament } from './Ornament';
 
 const highlights = [
   'Pure, homemade saani & kachariyu — zero additives',
@@ -10,8 +11,8 @@ const highlights = [
 ];
 
 const stats = [
-  { value: '25+', label: 'Years in Business' },
-  { value: '500+', label: 'Happy Families' },
+  { value: '25+', label: 'Years' },
+  { value: '500+', label: 'Families' },
   { value: '100%', label: 'Natural' },
 ];
 
@@ -19,24 +20,22 @@ export default function Aboutsect() {
   const navigate = useNavigate();
 
   return (
-    <section className="dk-section" style={{ background: '#f9fafb' }}>
+    <section className="dk-section bandhani" style={{ background: 'var(--paper)' }}>
       <div className="dk-wrap">
         <div className="dk-about-grid">
 
-          {/* Image */}
-          <div style={{ position: 'relative', paddingBottom: 24, paddingRight: 24 }}>
-            <div className="dk-about-img-wrap">
+          {/* Image — jharokha arch */}
+          <div className="about-visual">
+            <div className="about-arch-outline" />
+            <div className="about-arch">
               <img src={shopimg} alt="Dilkhush Kirana Store, Dhasa" loading="lazy" />
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.18), transparent)',
-              }} />
-              <div className="dk-about-loc">
-                <MapPin size={13} style={{ color: '#16a34a' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(36,18,12,0.35), transparent 45%)' }} />
+              <div className="about-loc">
+                <MapPin size={14} style={{ color: 'var(--maroon)' }} />
                 Dhasa Junction, Gujarat
               </div>
             </div>
-            <div className="dk-about-badge" style={{ position: 'absolute', bottom: 0, right: 0 }}>
+            <div className="about-seal">
               <strong>25+</strong>
               <span>Years of<br />Trust</span>
             </div>
@@ -44,12 +43,12 @@ export default function Aboutsect() {
 
           {/* Text */}
           <div>
-            <span className="dk-eyebrow dk-eyebrow-green">Our Story</span>
-            <h2 className="dk-heading" style={{ marginTop: 14, marginBottom: 16 }}>
-              Your trusted neighbourhood<br />
-              <em style={{ fontStyle: 'normal', color: '#15803d' }}>kirana store</em> — now online
+            <span className="dk-eyebrow">Our Story</span>
+            <h2 className="dk-heading" style={{ marginBottom: 18 }}>
+              Your trusted neighbourhood <em>kirana store</em> — now online
             </h2>
-            <p style={{ fontSize: 15, color: '#6b7280', lineHeight: 1.8, marginBottom: 24 }}>
+            <Ornament className="ornament-left" size={20} />
+            <p style={{ fontSize: 17, color: 'var(--ink-2)', lineHeight: 1.8, margin: '18px 0 22px' }}>
               Dilkhush started as a small corner store in Dhasa with a simple promise: offer the
               freshest products at honest prices. Today we bring that same trust directly to your
               home — with a hand-picked catalogue of pure homemade saani, kachariyu, spices, and
@@ -57,16 +56,7 @@ export default function Aboutsect() {
             </p>
 
             <ul className="dk-check-list">
-              {highlights.map((h, i) => (
-                <li key={i}>
-                  <span className="dk-check-icon">
-                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                      <polyline points="2,6 5,9 10,3" stroke="#15803d" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                  {h}
-                </li>
-              ))}
+              {highlights.map((h, i) => <li key={i}>{h}</li>)}
             </ul>
 
             <div className="dk-stats-row">
@@ -79,10 +69,10 @@ export default function Aboutsect() {
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              <button className="dk-btn-primary" onClick={() => navigate('/products')}>
-                Browse Products <ArrowRight size={15} />
+              <button className="btn btn-primary" onClick={() => navigate('/products')}>
+                Browse Products <ArrowRight size={16} />
               </button>
-              <button className="dk-btn-outline" onClick={() => navigate('/contact')}>
+              <button className="btn btn-outline" onClick={() => navigate('/contact')}>
                 Get in Touch
               </button>
             </div>

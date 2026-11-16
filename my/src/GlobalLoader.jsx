@@ -38,7 +38,7 @@ const GlobalLoader = () => {
   const overlay = {
     position: "fixed",
     inset: 0,
-    background: "rgba(255,255,255,0.85)",
+    background: "rgba(251,245,234,0.88)",
     backdropFilter: "blur(6px)",
     display: "flex",
     flexDirection: "column",

@@ -13,48 +13,36 @@ const F = ({ children }) => <>{children}</>;
 
 const Field = ({ label, required, children }) => (
   <div style={{ marginBottom: 18 }}>
-    <label style={{
-      display: 'block', fontSize: 11, fontWeight: 700,
-      textTransform: 'uppercase', letterSpacing: '0.09em',
-      color: '#6b7280', marginBottom: 7,
-    }}>
-      {label}{required && <span style={{ color: '#ef4444', marginLeft: 3 }}>*</span>}
+    <label className="t-label">
+      {label}{required && <span className="req">*</span>}
     </label>
     {children}
   </div>
 );
 
-const baseInput = {
-  width: '100%', padding: '13px 16px',
-  border: '1.5px solid #e5e7eb', borderRadius: 12,
-  fontSize: 14, fontFamily: "'Inter',system-ui,sans-serif",
-  color: '#111', background: '#fff', outline: 'none',
-  boxSizing: 'border-box', transition: 'border-color .18s, box-shadow .18s',
-};
-
-const focusInput = e => { e.target.style.borderColor = '#16a34a'; e.target.style.boxShadow = '0 0 0 3px rgba(22,163,74,0.12)'; };
-const blurInput = e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = 'none'; };
-
 /* ─── Step pill ─── */
 const Step = ({ num, label, active, done }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
     <div style={{
-      width: 26, height: 26, borderRadius: '50%',
+      width: 30, height: 30, borderRadius: '50%',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexShrink: 0,
-      background: done ? '#16a34a' : active ? '#111' : '#f0f0f0',
-      color: done || active ? '#fff' : '#9ca3af',
-      fontSize: 12, fontWeight: 800,
+      background: done ? 'var(--leaf)' : active ? 'var(--maroon)' : 'var(--sand)',
+      color: done || active ? '#FFF7EA' : 'var(--muted)',
+      border: done || active ? 'none' : '1px solid var(--line-2)',
+      boxShadow: active ? '0 0 0 4px var(--haldi-50)' : 'none',
+      fontSize: 13, fontWeight: 800,
       transition: 'all .25s',
     }}>
-      {done ? <CheckCircle size={14} /> : num}
+      {done ? <CheckCircle size={15} /> : num}
     </div>
-    <span style={{ fontSize: 13, fontWeight: active ? 700 : 500, color: active ? '#111' : done ? '#16a34a' : '#9ca3af' }}>
+    <span className="co-step-label" style={{ fontSize: 14, fontWeight: active ? 700 : 500, color: active ? 'var(--ink)' : done ? 'var(--leaf)' : 'var(--muted)' }}>
       {label}
     </span>
   </div>
 );
 
+/* ─── Main Component ─── */
 /* ─── Main Component ─── */
 export default function Checkout() {
   const navigate = useNavigate();
@@ -138,7 +126,7 @@ export default function Checkout() {
         name: 'Dilkhush Kirana',
         description: 'Fresh from Dhasa, Gujarat',
         prefill: { name: form.customerName, email: form.customerEmail, contact: form.customerPhone },
-        theme: { color: '#16a34a' },
+        theme: { color: '#8A1C1C' },
         handler: async res => {
           const verify = await fetch(`${API_URL}/orders/${mongoOrderId}/razorpay/verify`, {
             method: 'POST',
@@ -161,61 +149,53 @@ export default function Checkout() {
     }
   };
 
+
   /* ─── RENDER ─── */
   return (
     <>
       <style>{`
-        @keyframes spin-co{to{transform:rotate(360deg)}}
-        .co-page{display:flex;min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:#fff;}
-        .co-left{flex:0 0 56%;background:#fff;padding:52px 72px 72px;display:flex;justify-content:flex-end;}
-        .co-right{flex:0 0 44%;background:#f8f8f6;border-left:1.5px solid #ebebeb;padding:52px 64px 72px;display:flex;justify-content:flex-start;}
-        .co-left-inner{width:100%;max-width:500px;}
-        .co-right-inner{width:100%;max-width:420px;position:sticky;top:88px;height:fit-content;}
+        .co-page{display:flex;min-height:100vh;background:var(--paper);}
+        .co-left{flex:0 0 56%;padding:52px 64px 80px;display:flex;justify-content:flex-end;}
+        .co-right{flex:0 0 44%;background:var(--sand);border-left:1px solid var(--line);padding:52px 56px 80px;display:flex;justify-content:flex-start;}
+        .co-left-inner{width:100%;max-width:520px;}
+        .co-right-inner{width:100%;max-width:420px;position:sticky;top:100px;height:fit-content;}
+        .co-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
         @media(max-width:920px){
           .co-page{flex-direction:column;}
-          .co-left{flex:none;padding:32px 24px;}
-          .co-right{flex:none;padding:32px 24px;border-left:none;border-top:1.5px solid #ebebeb;}
+          .co-left{flex:none;padding:32px 16px;}
+          .co-right{flex:none;padding:32px 16px 56px;border-left:none;border-top:1px solid var(--line);}
           .co-left-inner,.co-right-inner{max-width:100%;position:static;}
         }
-        .co-input:focus{border-color:#16a34a!important;box-shadow:0 0 0 3px rgba(22,163,74,0.12)!important;}
-        .co-pay-btn:hover:not(:disabled){background:#166534!important;transform:translateY(-1px)!important;box-shadow:0 8px 28px rgba(22,163,74,0.4)!important;}
-        .co-section-divider{display:flex;align-items:center;gap:12px;margin:28px 0 22px;}
-        .co-section-divider::before,.co-section-divider::after{content:'';flex:1;height:1px;background:#ebebeb;}
-        .co-section-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.14em;color:#b0b0b0;white-space:nowrap;}
+        @media(max-width:560px){ .co-grid-2{grid-template-columns:1fr;gap:0;} }
+        @media(max-width:380px){ .co-step-label{font-size:12px!important;} }
+        .co-section-divider{display:flex;align-items:center;gap:12px;margin:28px 0 20px;}
+        .co-section-divider::before,.co-section-divider::after{content:'';flex:1;height:1px;background:var(--line-2);}
+        .co-section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.18em;color:var(--maroon);white-space:nowrap;display:inline-flex;align-items:center;gap:8px;}
+        .co-section-label::before,.co-section-label::after{content:'';width:5px;height:5px;background:var(--haldi);transform:rotate(45deg);}
       `}</style>
 
-      <div className="co-page">
+      <div className="co-page bandhani">
 
-        {/* ════════════════════════════════════
-            LEFT — checkout form
-        ════════════════════════════════════ */}
+        {/* LEFT — checkout form */}
         <div className="co-left">
           <div className="co-left-inner">
 
-            {/* Logo */}
-            <button
-              onClick={() => navigate('/')}
-              style={{ display: 'flex', alignItems: 'flex-end', gap: 4, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 40 }}
-            >
-              <img src={logo} alt="Dilkhush" style={{ height: 38, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
-              <span style={{ fontFamily: 'Pacifico,cursive', fontSize: 10, fontWeight: 700, color: '#bbb', marginBottom: 2 }}>.Shop</span>
-            </button>
-
             {/* Steps */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 44 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
               <Step num={1} label="Cart" done />
-              <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+              <div style={{ flex: 1, height: 1, background: 'var(--line-2)' }} />
               <Step num={2} label="Details" active />
-              <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+              <div style={{ flex: 1, height: 1, background: 'var(--line-2)' }} />
               <Step num={3} label="Payment" />
             </div>
 
             {/* Title */}
-            <h1 style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: 32, fontWeight: 700, color: '#0f0f0f', marginBottom: 6, lineHeight: 1.15 }}>
+            <span className="dk-eyebrow">Secure Checkout</span>
+            <h1 className="font-display" style={{ fontSize: 'clamp(30px, 4vw, 40px)', color: 'var(--ink)', margin: '0 0 6px', lineHeight: 1.12 }}>
               Shipping &amp; Payment
             </h1>
-            <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 40 }}>
-              All fields marked <span style={{ color: '#ef4444' }}>*</span> are required.
+            <p style={{ fontSize: 15, color: 'var(--muted)', marginBottom: 24 }}>
+              All fields marked <span style={{ color: 'var(--maroon)' }}>*</span> are required.
             </p>
 
             <form onSubmit={placeOrder}>
@@ -223,18 +203,18 @@ export default function Checkout() {
               {/* ── Contact ── */}
               <div className="co-section-divider"><span className="co-section-label">Contact Information</span></div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="co-grid-2">
                 <Field label="Email" required>
-                  <div style={{ position: 'relative' }}>
-                    <Mail size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                    <input className="co-input" style={{ ...baseInput, paddingLeft: 38 }} type="email" required
+                  <div className="t-input-icon">
+                    <Mail size={15} />
+                    <input className="t-input" type="email" required
                       value={form.customerEmail} onChange={set('customerEmail')} placeholder="you@example.com" />
                   </div>
                 </Field>
                 <Field label="Phone" required>
-                  <div style={{ position: 'relative' }}>
-                    <Phone size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                    <input className="co-input" style={{ ...baseInput, paddingLeft: 38 }} type="tel" required
+                  <div className="t-input-icon">
+                    <Phone size={15} />
+                    <input className="t-input" type="tel" required
                       value={form.customerPhone} onChange={set('customerPhone')} placeholder="+91 XXXXX XXXXX" />
                   </div>
                 </Field>
@@ -244,17 +224,17 @@ export default function Checkout() {
               <div className="co-section-divider"><span className="co-section-label">Shipping Address</span></div>
 
               <Field label="Full Name" required>
-                <div style={{ position: 'relative' }}>
-                  <User size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                  <input className="co-input" style={{ ...baseInput, paddingLeft: 38 }} type="text" required
+                <div className="t-input-icon">
+                  <User size={15} />
+                  <input className="t-input" type="text" required
                     value={form.customerName} onChange={set('customerName')} placeholder="Your full name" />
                 </div>
               </Field>
 
               <Field label="Full Address" required>
-                <div style={{ position: 'relative' }}>
-                  <MapPin size={15} style={{ position: 'absolute', left: 13, top: 14, color: '#9ca3af' }} />
-                  <textarea className="co-input" style={{ ...baseInput, paddingLeft: 38, resize: 'vertical', minHeight: 88 }}
+                <div className="t-input-icon top">
+                  <MapPin size={15} />
+                  <textarea className="t-input" style={{ minHeight: 96 }}
                     required rows={3}
                     value={form.customerAddress} onChange={set('customerAddress')}
                     placeholder="House No, Street, Area, City, State — PIN" />
@@ -263,13 +243,13 @@ export default function Checkout() {
 
               {/* ── Delivery notice ── */}
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                background: shipping === 0 ? '#f0fdf4' : '#fff8f0',
-                border: `1px solid ${shipping === 0 ? '#bbf7d0' : '#fed7aa'}`,
-                borderRadius: 12, padding: '12px 16px', marginBottom: 28,
+                display: 'flex', alignItems: 'center', gap: 12,
+                background: shipping === 0 ? 'var(--leaf-50)' : 'var(--haldi-50)',
+                border: `1px solid ${shipping === 0 ? '#C9DCC2' : '#EBD39A'}`,
+                borderRadius: 10, padding: '12px 16px', marginBottom: 26,
               }}>
-                <Truck size={16} style={{ color: shipping === 0 ? '#16a34a' : '#d97706', flexShrink: 0 }} />
-                <p style={{ fontSize: 13, fontWeight: 500, color: shipping === 0 ? '#15803d' : '#92400e' }}>
+                <Truck size={18} style={{ color: shipping === 0 ? 'var(--leaf)' : 'var(--haldi-d)', flexShrink: 0 }} />
+                <p style={{ fontSize: 14, fontWeight: 500, margin: 0, color: shipping === 0 ? 'var(--leaf)' : 'var(--ink-2)' }}>
                   {shipping === 0
                     ? '🎉 You\'ve unlocked free delivery!'
                     : <>Add <strong>₹{1000 - subtotal}</strong> more for free delivery. Current shipping: ₹{shipping}</>}
@@ -277,25 +257,10 @@ export default function Checkout() {
               </div>
 
               {/* ── Pay button ── */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="co-pay-btn"
-                style={{
-                  width: '100%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                  background: loading ? '#86efac' : '#15803d',
-                  color: '#fff', fontSize: 16, fontWeight: 800,
-                  padding: '17px', borderRadius: 14, border: 'none',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'background .2s,transform .2s,box-shadow .2s',
-                  boxShadow: '0 4px 20px rgba(21,128,61,0.28)',
-                  letterSpacing: '-0.01em',
-                }}
-              >
+              <button type="submit" disabled={loading} className="btn btn-primary btn-lg btn-block" style={{ fontSize: 17, padding: 17 }}>
                 {loading ? (
                   <>
-                    <div style={{ width: 20, height: 20, border: '2.5px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin-co .7s linear infinite' }} />
+                    <span className="dk-spinner" style={{ width: 20, height: 20, borderWidth: 2, margin: 0 }} />
                     Processing payment…
                   </>
                 ) : (
@@ -308,64 +273,61 @@ export default function Checkout() {
 
               {/* Security row */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 14 }}>
-                <ShieldCheck size={14} style={{ color: '#16a34a' }} />
-                <span style={{ fontSize: 12, color: '#9ca3af' }}>256-bit SSL · Secured by Razorpay</span>
+                <ShieldCheck size={15} style={{ color: 'var(--leaf)' }} />
+                <span style={{ fontSize: 13, color: 'var(--muted)' }}>256-bit SSL · Secured by Razorpay</span>
               </div>
 
               {/* Accepted payment methods */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 18, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 16, flexWrap: 'wrap' }}>
                 {['UPI', 'Cards', 'NetBanking', 'Wallets', 'EMI'].map(m => (
-                  <span key={m} style={{ fontSize: 10, fontWeight: 700, padding: '4px 9px', background: '#f4f4f5', borderRadius: 6, color: '#6b7280', letterSpacing: '0.04em' }}>{m}</span>
+                  <span key={m} className="t-badge t-badge-soft">{m}</span>
                 ))}
               </div>
             </form>
           </div>
         </div>
 
-        {/* ════════════════════════════════════
-            RIGHT — order summary
-        ════════════════════════════════════ */}
+        {/* RIGHT — order summary */}
         <div className="co-right">
           <div className="co-right-inner">
 
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <ShoppingBag size={17} style={{ color: '#16a34a' }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h3 className="font-display" style={{ fontSize: 24, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: 10, margin: 0 }}>
+                <ShoppingBag size={19} style={{ color: 'var(--maroon)' }} />
                 Order Summary
               </h3>
-              <span style={{ fontSize: 12, color: '#9ca3af', fontWeight: 500 }}>{cart.length} item{cart.length !== 1 ? 's' : ''}</span>
+              <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 500 }}>{cart.length} item{cart.length !== 1 ? 's' : ''}</span>
             </div>
 
             {/* Item list */}
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 22 }}>
               {cart.map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px dashed var(--line-2)' }}>
                   <div style={{ position: 'relative', flexShrink: 0 }}>
-                    <div style={{ width: 60, height: 60, background: '#fff', border: '1.5px solid #e5e7eb', borderRadius: 12, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 60, height: 64, background: 'var(--surface)', border: '1px solid var(--line-2)', borderRadius: '999px 999px 8px 8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {item.image
                         ? <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        : <ShoppingBag size={18} style={{ color: '#d1d5db' }} />
+                        : <ShoppingBag size={18} style={{ color: 'var(--line-2)' }} />
                       }
                     </div>
                     <span style={{
                       position: 'absolute', top: -6, right: -6,
-                      width: 19, height: 19,
-                      background: '#16a34a', color: '#fff',
-                      fontSize: 10, fontWeight: 800, borderRadius: '50%',
+                      width: 21, height: 21,
+                      background: 'var(--maroon)', color: '#FFF7EA',
+                      fontSize: 11, fontWeight: 800, borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      border: '2px solid #f8f8f6',
+                      border: '2px solid var(--sand)',
                     }}>
                       {item.quantity}
                     </span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: '#111', lineHeight: 1.35, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.35, margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {item.name}
                     </p>
-                    <p style={{ fontSize: 12, color: '#9ca3af' }}>₹{item.price} × {item.quantity} kg</p>
+                    <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>₹{item.price} × {item.quantity} kg</p>
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: '#111', flexShrink: 0 }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', flexShrink: 0 }}>
                     ₹{(item.price * item.quantity).toLocaleString()}
                   </span>
                 </div>
@@ -373,73 +335,72 @@ export default function Checkout() {
             </div>
 
             {/* Coupon */}
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 22 }}>
               <div style={{ display: 'flex', gap: 8 }}>
-                <div style={{ flex: 1, position: 'relative' }}>
-                  <Tag size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                <div className="t-input-icon" style={{ flex: 1, minWidth: 0 }}>
+                  <Tag size={14} />
                   <input
                     type="text"
                     placeholder="Coupon code"
                     value={coupon}
                     onChange={e => { setCoupon(e.target.value); setCouponStatus(null); setCouponMsg(''); }}
-                    style={{ ...baseInput, paddingLeft: 34, fontSize: 13 }}
-                    onFocus={focusInput} onBlur={blurInput}
+                    className="t-input"
+                    style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: '.06em' }}
                   />
                 </div>
                 <button
                   type="button"
                   onClick={applyCoupon}
-                  style={{ padding: '0 18px', background: couponStatus === 'ok' ? '#16a34a' : '#111', color: '#fff', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, transition: 'background .2s' }}
-                  onMouseEnter={e => { if (couponStatus !== 'ok') e.currentTarget.style.background = '#374151'; }}
-                  onMouseLeave={e => { if (couponStatus !== 'ok') e.currentTarget.style.background = '#111'; }}
+                  className={`btn ${couponStatus === 'ok' ? '' : 'btn-dark'}`}
+                  style={{ padding: '0 20px', flexShrink: 0, ...(couponStatus === 'ok' ? { background: 'var(--leaf)', color: '#fff' } : {}) }}
                 >
                   {couponStatus === 'ok' ? <CheckCircle size={15} /> : 'Apply'}
                 </button>
               </div>
               {couponMsg && (
-                <p style={{ fontSize: 12, marginTop: 6, fontWeight: 600, color: couponStatus === 'ok' ? '#16a34a' : '#ef4444' }}>
+                <p style={{ fontSize: 13, marginTop: 6, fontWeight: 600, color: couponStatus === 'ok' ? 'var(--leaf)' : 'var(--maroon)' }}>
                   {couponStatus === 'ok' ? '✓ ' : '✕ '}{couponMsg}
                 </p>
               )}
             </div>
 
             {/* Totals */}
-            <div style={{ background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 16, padding: 20 }}>
+            <div className="t-card frame-inset" style={{ padding: 22 }}>
               {[
                 { label: 'Subtotal', val: `₹${subtotal.toLocaleString()}` },
                 { label: 'Shipping', val: shipping === 0 ? 'FREE' : `₹${shipping}`, green: shipping === 0 },
                 ...(discount > 0 ? [{ label: 'Discount', val: `–₹${discount}`, green: true }] : []),
               ].map((r, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontSize: 14, color: '#6b7280' }}>{r.label}</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: r.green ? '#16a34a' : '#111' }}>{r.val}</span>
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: 15, color: 'var(--ink-2)' }}>{r.label}</span>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: r.green ? 'var(--leaf)' : 'var(--ink)' }}>{r.val}</span>
                 </div>
               ))}
 
-              <div style={{ height: 1, background: '#ebebeb', margin: '8px 0 16px' }} />
+              <div style={{ height: 1, borderTop: '1px dashed var(--line-2)', margin: '8px 0 14px' }} />
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 16, fontWeight: 800, color: '#111' }}>Total</span>
+                <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink)' }}>Total</span>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: '#0f0f0f', lineHeight: 1 }}>
+                  <div className="font-display" style={{ fontSize: 32, color: 'var(--maroon)', lineHeight: 1 }}>
                     ₹{total.toLocaleString()}
                   </div>
-                  <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>Incl. all taxes</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Incl. all taxes</div>
                 </div>
               </div>
             </div>
 
             {/* Trust badges */}
-            <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
-                { icon: <ShieldCheck size={14} />, text: 'Secure checkout' },
-                { icon: <Truck size={14} />, text: 'Fast delivery' },
-                { icon: <CheckCircle size={14} />, text: 'Easy returns' },
-                { icon: <Lock size={14} />, text: '100% safe' },
+                { icon: <ShieldCheck size={15} />, text: 'Secure checkout' },
+                { icon: <Truck size={15} />, text: 'Fast delivery' },
+                { icon: <CheckCircle size={15} />, text: 'Easy returns' },
+                { icon: <Lock size={15} />, text: '100% safe' },
               ].map((b, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff', border: '1px solid #ebebeb', borderRadius: 10, padding: '9px 12px' }}>
-                  <span style={{ color: '#16a34a' }}>{b.icon}</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{b.text}</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 8, padding: '10px 12px' }}>
+                  <span style={{ color: 'var(--haldi-d)', display: 'flex' }}>{b.icon}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }}>{b.text}</span>
                 </div>
               ))}
             </div>

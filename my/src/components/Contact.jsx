@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import { SectionHead } from './Ornament';
 
 const WA_SVG = (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -9,10 +10,10 @@ const WA_SVG = (
 );
 
 const infoItems = [
-  { icon: <MapPin size={18} />, bg: '#dcfce7', color: '#15803d', label: 'Visit Us', content: <a href="https://maps.app.goo.gl/2yeV6Ern1uCUVyEV8" target="_blank" rel="noopener noreferrer" style={{ color:'#15803d', fontWeight:600 }}>Dhasa Junction, Gujarat → Maps</a> },
-  { icon: <Phone size={18} />, bg: '#dbeafe', color: '#1e40af', label: 'Call Us', content: <><a href="tel:+919723089786" style={{ display:'block', color:'#111', fontWeight:600 }}>+91 97230 89786</a><a href="tel:+919033332365" style={{ display:'block', color:'#111', fontWeight:600 }}>+91 90333 32365</a></> },
-  { icon: <Mail size={18} />, bg: '#f3e8ff', color: '#7e22ce', label: 'Email Us', content: <a href="mailto:mustakmetar82@gmail.com" style={{ color:'#7e22ce', fontWeight:600, wordBreak:'break-all' }}>mustakmetar82@gmail.com</a> },
-  { icon: <Clock size={18} />, bg: '#fef9c3', color: '#854d0e', label: 'Hours', content: <><span style={{ display:'block', color:'#111', fontWeight:600 }}>Mon – Fri: 9 AM – 6 PM</span><span style={{ display:'block', color:'#111', fontWeight:600 }}>Sat – Sun: 9 AM – 2 PM</span></> },
+  { icon: <MapPin size={19} />, label: 'Visit Us', content: <a href="https://maps.app.goo.gl/2yeV6Ern1uCUVyEV8" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--maroon)' }}>Dhasa Junction, Gujarat → Maps</a> },
+  { icon: <Phone size={19} />, label: 'Call Us', content: <><a href="tel:+919723089786" style={{ display: 'block' }}>+91 97230 89786</a><a href="tel:+919033332365" style={{ display: 'block' }}>+91 90333 32365</a></> },
+  { icon: <Mail size={19} />, label: 'Email Us', content: <a href="mailto:mustakmetar82@gmail.com" style={{ wordBreak: 'break-all' }}>mustakmetar82@gmail.com</a> },
+  { icon: <Clock size={19} />, label: 'Hours', content: <><span style={{ display: 'block' }}>Mon – Fri: 9 AM – 6 PM</span><span style={{ display: 'block' }}>Sat – Sun: 9 AM – 2 PM</span></> },
 ];
 
 export default function Contact() {
@@ -30,128 +31,91 @@ export default function Contact() {
     } catch { setStatus('error'); }
   };
 
-  const inputStyle = {
-    width:'100%', padding:'12px 16px',
-    background:'#fff', border:'1.5px solid #e5e7eb',
-    borderRadius:11, fontSize:14,
-    fontFamily:'inherit', color:'#111',
-    outline:'none', boxSizing:'border-box',
-    transition:'border-color .2s',
-  };
-  const labelStyle = { display:'block', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.08em', color:'#6b7280', marginBottom:7 };
-
   return (
-    <section style={{ padding:'88px 0', background:'#f9fafb' }}>
-      <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 32px' }}>
+    <section className="dk-section bandhani" style={{ background: 'var(--paper)' }}>
+      <div className="dk-wrap">
 
-        {/* Header */}
-        <div style={{ textAlign:'center', marginBottom:56 }}>
-          <span style={{ display:'inline-flex', alignItems:'center', gap:6, background:'#dcfce7', color:'#15803d', fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.1em', padding:'5px 13px', borderRadius:100, marginBottom:14 }}>
-            Get in Touch
-          </span>
-          <h2 style={{ fontFamily:"'Playfair Display',Georgia,serif", fontWeight:700, fontSize:'clamp(28px,3.8vw,44px)', color:'#0f0f0f', lineHeight:1.15, marginBottom:12 }}>
-            We'd love to hear from you
-          </h2>
-          <p style={{ color:'#9ca3af', fontSize:15, maxWidth:420, margin:'0 auto' }}>
-            Question, bulk order, or just saying hello? Drop us a message.
-          </p>
-        </div>
+        <SectionHead
+          eyebrow="Get in Touch"
+          title="We'd love to hear from you"
+          sub="Question, bulk order, or just saying hello? Drop us a message."
+        />
 
-        {/* Two columns */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:60, alignItems:'start' }}>
+        <div className="dk-contact-grid">
 
           {/* Left — info */}
           <div>
             {infoItems.map((item, i) => (
-              <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:16, background:'#fff', border:'1.5px solid #f0f0f0', borderRadius:16, padding:'18px 22px', marginBottom:12, transition:'border-color .2s' }}
-                onMouseEnter={e => e.currentTarget.style.borderColor='#bbf7d0'}
-                onMouseLeave={e => e.currentTarget.style.borderColor='#f0f0f0'}
-              >
-                <div style={{ width:44, height:44, borderRadius:12, background:item.bg, color:item.color, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                  {item.icon}
-                </div>
-                <div>
-                  <p style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.1em', color:'#9ca3af', marginBottom:5 }}>{item.label}</p>
-                  <div style={{ fontSize:14, lineHeight:1.65 }}>{item.content}</div>
+              <div key={i} className="dk-contact-card">
+                <div className="t-icon-circle">{item.icon}</div>
+                <div style={{ minWidth: 0 }}>
+                  <p className="dk-contact-label">{item.label}</p>
+                  <div className="dk-contact-val">{item.content}</div>
                 </div>
               </div>
             ))}
 
-            {/* WhatsApp card */}
             <a
               href="https://wa.me/919723089786?text=Hello%20Dilkhush%2C%20I%20have%20a%20query"
               target="_blank" rel="noopener noreferrer"
-              style={{ display:'flex', alignItems:'center', gap:14, background:'#16a34a', color:'#fff', borderRadius:16, padding:'18px 22px', textDecoration:'none', marginTop:20, transition:'background .2s,transform .2s' }}
-              onMouseEnter={e => { e.currentTarget.style.background='#15803d'; e.currentTarget.style.transform='translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background='#16a34a'; e.currentTarget.style.transform='none'; }}
+              className="dk-wa-card"
             >
-              <div style={{ width:44, height:44, background:'rgba(255,255,255,0.18)', borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                {WA_SVG}
-              </div>
+              <div className="dk-wa-icon">{WA_SVG}</div>
               <div>
-                <p style={{ fontWeight:700, fontSize:14, marginBottom:2 }}>Chat on WhatsApp</p>
-                <p style={{ fontSize:12, opacity:0.8 }}>Fastest way to reach us — we reply quickly</p>
+                <p style={{ fontWeight: 700, fontSize: 16, margin: 0 }}>Chat on WhatsApp</p>
+                <p style={{ fontSize: 14, opacity: 0.82, margin: 0 }}>Fastest way to reach us — we reply quickly</p>
               </div>
             </a>
           </div>
 
           {/* Right — form */}
-          <div style={{ background:'#fff', border:'1.5px solid #f0f0f0', borderRadius:20, padding:36 }}>
+          <div className="t-card frame-inset dk-form" style={{ position: 'relative' }}>
             {status === 'done' ? (
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'48px 0', textAlign:'center' }}>
-                <div style={{ width:56, height:56, background:'#dcfce7', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16 }}>
-                  <CheckCircle size={28} style={{ color:'#15803d' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', textAlign: 'center' }}>
+                <div className="t-icon-circle" style={{ width: 64, height: 64, background: 'var(--leaf-50)', color: 'var(--leaf)', borderColor: '#C9DCC2', marginBottom: 16 }}>
+                  <CheckCircle size={30} />
                 </div>
-                <h3 style={{ fontWeight:700, fontSize:18, color:'#111', marginBottom:8 }}>Message Sent!</h3>
-                <p style={{ color:'#9ca3af', fontSize:14, marginBottom:20 }}>We'll get back to you as soon as possible.</p>
-                <button onClick={() => setStatus('idle')} style={{ fontSize:13, fontWeight:700, color:'#15803d', background:'none', border:'none', cursor:'pointer' }}>
-                  Send another →
-                </button>
+                <h3 className="font-display" style={{ fontSize: 26, color: 'var(--ink)', margin: '0 0 6px' }}>Message Sent!</h3>
+                <p style={{ color: 'var(--muted)', fontSize: 16, marginBottom: 20 }}>We'll get back to you as soon as possible.</p>
+                <button onClick={() => setStatus('idle')} className="link-arrow">Send another →</button>
               </div>
             ) : (
-              <form onSubmit={submit}>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
-                  <div>
-                    <label style={labelStyle}>Full Name <span style={{ color:'#ef4444' }}>*</span></label>
-                    <input style={inputStyle} type="text" required value={form.name} onChange={set('name')} placeholder="Your name"
-                      onFocus={e => e.target.style.borderColor='#4ade80'} onBlur={e => e.target.style.borderColor='#e5e7eb'} />
+              <form onSubmit={submit} style={{ position: 'relative' }}>
+                <h3 className="font-display" style={{ fontSize: 26, color: 'var(--ink)', margin: '0 0 4px' }}>Send a message</h3>
+                <p style={{ color: 'var(--muted)', fontSize: 15, margin: '0 0 22px' }}>We usually reply within a few hours.</p>
+                <div className="dk-form-row">
+                  <div className="dk-form-group">
+                    <label className="t-label">Full Name <span className="req">*</span></label>
+                    <input className="t-input" type="text" required value={form.name} onChange={set('name')} placeholder="Your name" />
                   </div>
-                  <div>
-                    <label style={labelStyle}>Phone</label>
-                    <input style={inputStyle} type="tel" value={form.phone} onChange={set('phone')} placeholder="+91 XXXXX XXXXX"
-                      onFocus={e => e.target.style.borderColor='#4ade80'} onBlur={e => e.target.style.borderColor='#e5e7eb'} />
+                  <div className="dk-form-group">
+                    <label className="t-label">Phone</label>
+                    <input className="t-input" type="tel" value={form.phone} onChange={set('phone')} placeholder="+91 XXXXX XXXXX" />
                   </div>
                 </div>
                 {[
-                  { k:'email', label:'Email *', type:'email', ph:'you@example.com', req:true },
-                  { k:'subject', label:'Subject *', type:'text', ph:"What's this about?", req:true },
+                  { k:'email', label:'Email', type:'email', ph:'you@example.com', req:true },
+                  { k:'subject', label:'Subject', type:'text', ph:"What's this about?", req:true },
                 ].map(f => (
-                  <div key={f.k} style={{ marginBottom:16 }}>
-                    <label style={labelStyle}>{f.label}</label>
-                    <input style={inputStyle} type={f.type} required={f.req} value={form[f.k]} onChange={set(f.k)} placeholder={f.ph}
-                      onFocus={e => e.target.style.borderColor='#4ade80'} onBlur={e => e.target.style.borderColor='#e5e7eb'} />
+                  <div key={f.k} className="dk-form-group">
+                    <label className="t-label">{f.label} {f.req && <span className="req">*</span>}</label>
+                    <input className="t-input" type={f.type} required={f.req} value={form[f.k]} onChange={set(f.k)} placeholder={f.ph} />
                   </div>
                 ))}
-                <div style={{ marginBottom:8 }}>
-                  <label style={labelStyle}>Message <span style={{ color:'#ef4444' }}>*</span></label>
-                  <textarea style={{ ...inputStyle, resize:'vertical', minHeight:100 }} required rows={4} value={form.message} onChange={set('message')} placeholder="Write your message here…"
-                    onFocus={e => e.target.style.borderColor='#4ade80'} onBlur={e => e.target.style.borderColor='#e5e7eb'} />
+                <div className="dk-form-group">
+                  <label className="t-label">Message <span className="req">*</span></label>
+                  <textarea className="t-input" style={{ minHeight: 110 }} required rows={4} value={form.message} onChange={set('message')} placeholder="Write your message here…" />
                 </div>
-                {status === 'error' && <p style={{ color:'#dc2626', fontSize:12, marginBottom:8 }}>Something went wrong. Please try WhatsApp instead.</p>}
-                <button type="submit" disabled={status==='sending'} style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:8, background:'#15803d', color:'#fff', fontSize:15, fontWeight:700, padding:15, borderRadius:12, border:'none', cursor:'pointer', marginTop:16, opacity: status==='sending' ? 0.7 : 1, transition:'background .2s' }}
-                  onMouseEnter={e => { if(status!=='sending') e.currentTarget.style.background='#166534'; }}
-                  onMouseLeave={e => e.currentTarget.style.background='#15803d'}
-                >
+                {status === 'error' && <p style={{ color: 'var(--maroon)', fontSize: 14, marginBottom: 8 }}>Something went wrong. Please try WhatsApp instead.</p>}
+                <button type="submit" disabled={status==='sending'} className="btn btn-primary btn-block btn-lg" style={{ marginTop: 6 }}>
                   {status === 'sending'
-                    ? <><div style={{ width:18, height:18, border:'2.5px solid rgba(255,255,255,.3)', borderTopColor:'#fff', borderRadius:'50%', animation:'dk-spin .7s linear infinite' }} /> Sending…</>
-                    : <><Send size={15} /> Send Message</>}
+                    ? <><span className="dk-spinner" style={{ width: 18, height: 18, borderWidth: 2, margin: 0 }} /> Sending…</>
+                    : <><Send size={16} /> Send Message</>}
                 </button>
               </form>
             )}
           </div>
         </div>
-
-        <style>{`@media(max-width:900px){.contact-grid{grid-template-columns:1fr!important}}`}</style>
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { SectionHead } from './Ornament';
 
 const faqs = [
   {
@@ -34,16 +35,14 @@ export default function Qna() {
   const [open, setOpen] = useState(null);
 
   return (
-    <section className="dk-section" style={{ background: '#fff' }}>
-      <div className="dk-wrap" style={{ maxWidth: 800, margin: '0 auto' }}>
+    <section className="dk-section" style={{ background: 'var(--sand)' }}>
+      <div className="dk-wrap" style={{ maxWidth: 840, margin: '0 auto' }}>
 
-        <div style={{ textAlign: 'center', marginBottom: 52 }}>
-          <span className="dk-eyebrow dk-eyebrow-green">FAQ</span>
-          <h2 className="dk-heading" style={{ marginTop: 14 }}>Everything you need to know</h2>
-          <p className="dk-subheading" style={{ maxWidth: 440, margin: '12px auto 0' }}>
-            Can't find an answer? Reach us on WhatsApp — we reply within minutes.
-          </p>
-        </div>
+        <SectionHead
+          eyebrow="Questions"
+          title="Everything you need to know"
+          sub="Can't find an answer? Reach us on WhatsApp — we reply within minutes."
+        />
 
         <div>
           {faqs.map((faq, i) => (
@@ -53,6 +52,7 @@ export default function Qna() {
                 onClick={() => setOpen(open === i ? null : i)}
                 aria-expanded={open === i}
               >
+                <span className="dk-faq-num">{String(i + 1).padStart(2, '0')}</span>
                 <span className="dk-faq-q">{faq.q}</span>
                 <span className="dk-faq-icon">
                   <Plus size={14} />
@@ -66,21 +66,13 @@ export default function Qna() {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: 48 }}>
-          <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 14 }}>Still have questions?</p>
+          <p style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 14 }}>Still have questions?</p>
           <a
             href="https://wa.me/919723089786?text=Hello%20Dilkhush%2C%20I%20have%20a%20question"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: '#16a34a', color: '#fff',
-              fontSize: 14, fontWeight: 700,
-              padding: '13px 26px', borderRadius: 12,
-              transition: 'background 0.2s, transform 0.2s',
-              textDecoration: 'none',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#15803d'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#16a34a'; e.currentTarget.style.transform = 'none'; }}
+            className="btn"
+            style={{ background: 'var(--leaf)', color: '#fff' }}
           >
             {WA_ICON} Chat on WhatsApp
           </a>

@@ -251,48 +251,47 @@ const OrderSuccess = () => {
 
   if (loading)
     return (
-      <div className="text-center py-5">
-        <p>Loading order details...</p>
+      <div className="dk-state">
+        <div className="dk-spinner" />
+        <p className="dk-state-text">Loading order details...</p>
       </div>
     );
 
   return (
-    <div className="container text-center py-5">
-      <DotLottieReact
-        src="https://lottie.host/3b0b1e9f-c4b5-4a83-ac91-a684ae861f27/cgY4CSU3Wl.lottie"
-        loop
-        autoplay
-        style={{ width: 180, height: 180, margin: "0 auto" }}
-      />
+    <div className="bandhani" style={{ padding: "56px 16px 88px" }}>
+      <div className="t-card frame-inset" style={{ maxWidth: 620, margin: "0 auto", padding: "40px 28px", textAlign: "center", position: "relative" }}>
+        <DotLottieReact
+          src="https://lottie.host/3b0b1e9f-c4b5-4a83-ac91-a684ae861f27/cgY4CSU3Wl.lottie"
+          loop
+          autoplay
+          style={{ width: 170, height: 170, margin: "0 auto" }}
+        />
 
-      <h1 className="text-success mt-3">Order Placed Successfully!</h1>
-      <p className="mt-3 text-muted">
-        Thank you for your purchase. Your order <strong>#{orderId}</strong> has been confirmed and will be delivered soon.
-      </p>
+        <span className="dk-eyebrow" style={{ marginTop: 8 }}>Dhanyavaad</span>
+        <h1 className="font-display" style={{ fontSize: "clamp(28px, 4.4vw, 40px)", color: "var(--ink)", margin: "0 0 6px", lineHeight: 1.15 }}>
+          Order Placed Successfully!
+        </h1>
+        <div className="ornament" style={{ margin: "14px 0 18px" }}><span className="diamond" /></div>
+        <p style={{ color: "var(--ink-2)", fontSize: 17, lineHeight: 1.7, margin: "0 auto 28px", maxWidth: 460 }}>
+          Thank you for your purchase. Your order <strong style={{ color: "var(--maroon)" }}>#{orderId}</strong> has been confirmed and will be delivered soon.
+        </p>
 
-      {/* ==== NEW: TRACK ORDER BUTTON ==== */}
-      <a
-        href={`/track/${orderId}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn btn-outline-info mt-3 me-2"
-        style={{ minWidth: "180px" }}
-      >
-        Track Order
-      </a>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
+          <button className="btn btn-primary" onClick={generatePDF}>
+            Download Invoice (PDF)
+          </button>
+          <a href={`/track/${orderId}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+            Track Order
+          </a>
+          <button className="btn btn-soft" onClick={() => navigate("/")}>
+            Back to Home
+          </button>
+        </div>
 
-      <button className="btn btn-success mt-4" onClick={generatePDF}>
-        Download Invoice (PDF)
-      </button>
-
-      <button className="btn btn-outline-primary ms-3 mt-4" onClick={() => navigate("/")}>
-        Back to Home
-      </button>
-
-      {/* Optional nice badge */}
-      <p className="mt-3 text-muted small">
-        Order ID: <strong>{orderId}</strong>
-      </p>
+        <p style={{ marginTop: 24, marginBottom: 0, fontSize: 14, color: "var(--muted)" }}>
+          Order ID: <strong style={{ color: "var(--ink)" }}>{orderId}</strong>
+        </p>
+      </div>
     </div>
   );
 };
