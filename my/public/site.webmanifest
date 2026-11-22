@@ -1,8 +1,9 @@
 {
-  "name": "Dilkhush Kirana Store",
+  "name": "Dilkhush Kirana Store - Order Saani & Kachariyu",
   "short_name": "Dilkhush",
-  "description": "Authentic homemade Saani, Kachariyu & Pure Spices from Dhasa, Gujarat. Free delivery on orders above ₹299.",
+  "description": "Order authentic homemade Saani, Kachariyu & pure spices online from Dhasa, Gujarat. Free delivery on orders above ₹299.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#15803d",

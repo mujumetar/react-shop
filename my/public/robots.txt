@@ -1,5 +1,5 @@
 # Robots.txt for Dilkhush Kirana Store
-# Domain: https://dilkhush-kirana.vercel.app/
+# Domain: https://dilkhushshop.in/
 
 User-agent: *
 Allow: /
@@ -58,4 +58,4 @@ User-agent: anthropic-ai
 Allow: /
 
 # Sitemap
-Sitemap: https://dilkhush-kirana.vercel.app/sitemap.xml
+Sitemap: https://dilkhushshop.in/sitemap.xml

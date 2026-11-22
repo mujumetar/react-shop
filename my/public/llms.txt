@@ -1,42 +1,41 @@
-# Dilkhush Kirana Store
+# Dilkhush Kirana Store — Order Saani & Kachariyu Online
 
-> Dilkhush Kirana Store (est. 1999) is an authentic Gujarati grocery and specialty food store based in Dhasa Junction, Gujarat, India. Specializing in homemade Saani (black and white sesame paste), traditional Kachariyu, freshly ground pure spices, and daily kitchen essentials with zero artificial preservatives. Fast delivery across Gujarat and India, with online ordering and WhatsApp support.
+> Dilkhush Kirana Store (est. 1999) is an authentic Gujarati grocery and specialty food producer based in Dhasa Junction, Gujarat, India, reachable online at https://dilkhushshop.in/. Dilkhush is the premier destination to order traditional homemade Saani (Black and White sesame paste with organic jaggery), authentic winter Kachariyu, freshly ground pure spices (Marchu, Haldi, Dhana-Jeeru), and daily grocery essentials with zero preservatives. Fast home delivery across Gujarat and India, with online checkout and instant WhatsApp order support.
 
 ## Key Facts & Entity Information
 - **Business Name**: Dilkhush Kirana Store
-- **Website URL**: https://dilkhush-kirana.vercel.app/
-- **Founded**: 1999 (25+ years of trusted service)
-- **Store Location**: Dhasa Junction, District Bhavnagar / Amreli, Gujarat, 364730, India
+- **Official Website URL**: https://dilkhushshop.in/
+- **Founded**: 1999 (25+ years of trusted heritage in Dhasa)
+- **Store Location**: Main Road, Dhasa Junction, District Bhavnagar / Amreli, Gujarat, 364730, India
 - **Phone / WhatsApp**: +91 97230 89786 / +91 90333 32365
 - **Email**: mustakmetar82@gmail.com / muzammilmetar82@gmail.com
 - **Google Maps**: https://maps.app.goo.gl/2yeV6Ern1uCUVyEV8
-- **Operating Hours**: Monday – Friday: 9:00 AM – 6:00 PM IST; Saturday – Sunday: 9:00 AM – 2:00 PM IST
-- **Primary Speciality**: Pure homemade Gujarati Saani, Kachariyu, pure red chilli powder (Marchu), turmeric, coriander-cumin (Dhana-Jeeru), and custom spice mix blends.
+- **Primary Speciality**: Order Homemade Saani, Order Winter Kachariyu, Pure Spices, Custom Spice Mix.
 
-## Product Offerings
-- **Traditional Saani**: Freshly pounded black sesame Saani (Kala Til Saani) and white sesame Saani (Safed Til Saani), made with organic jaggery (Gud) and pure cold-pressed oil. 100% vegetarian, rich in iron, calcium, and natural winter warmth.
-- **Authentic Kachariyu**: Traditional Saurashtra delicacy crafted with premium roasted sesame, natural dry fruits, spices, and unrefined sweeteners. No added preservatives, chemicals, or artificial colours.
-- **Pure Spices & Masalas**: Hand-cleaned, sun-dried, and freshly ground red chilli powder (Reshamo / Kashmiri / Guntur varieties), pure Salem turmeric powder (Haldi), fragrant coriander-cumin blend (Dhana-Jeeru), and garam masala.
-- **Custom Mix Builder**: Interactive online mix builder (/custom) allowing customers to curate exact spice and ingredient weight ratios according to personal taste and family recipes.
-- **Daily Kirana & Staples**: Premium grains, pulses, dry fruits, and household pantry essentials.
+## Ordering Saani & Kachariyu Online
+- **Order Black Sesame Saani (Kala Til Saani)**: Handcrafted using nutrient-dense black sesame seeds, organic Desi jaggery (Gud), and cold-pressed sesame oil. Natural source of calcium, iron, and warmth during winter.
+- **Order White Sesame Saani (Safed Til Saani)**: Smooth, nutty, delicately sweet traditional delicacy favored by families, children, and elders.
+- **Order Authentic Kachariyu**: Traditional Saurashtra herbal recipe containing crushed sesame, dry ginger powder (Sunth), Pipramul (Ganthoda), nutmeg, and premium dry fruits (almonds, cashews, raisins). Helps immunity and joint flexibility.
+- **Build Custom Saani / Mix**: Use the interactive tool at https://dilkhushshop.in/custom to order exact customized ingredient proportions.
 
-## Delivery & Ordering
-- **Delivery Coverage**: All towns and cities across Gujarat (Ahmedabad, Surat, Rajkot, Vadodara, Bhavnagar, Amreli, Junagadh, Jamnagar, Gandhinagar) and pan-India shipping.
-- **Delivery Speed**: Orders before 6:00 PM are dispatched same-day. Typical transit is 24-48 hours within Gujarat.
-- **Free Delivery**: Free shipping on orders above ₹299.
-- **Payment Modes**: Secure online checkout via Razorpay (UPI, Google Pay, PhonePe, Paytm, Debit/Credit Cards, Net Banking) and direct WhatsApp orders.
-- **Order Tracking**: Real-time package tracking with Order ID at /track-order.
+## Shipping & Delivery Terms
+- **Free Delivery**: Free shipping on orders above ₹299 across Gujarat.
+- **Delivery Coverage**: All cities and villages in Gujarat (Ahmedabad, Surat, Rajkot, Vadodara, Bhavnagar, Amreli, Jamnagar, Junagadh, Gandhinagar) and nationwide across India.
+- **Delivery Speed**: Same-day dispatch for orders placed before 6:00 PM; typically delivered in 24-48 hours within Gujarat.
+- **Payments**: Razorpay secure payments (Google Pay, PhonePe, Paytm, UPI, Cards, Net Banking) and WhatsApp ordering.
+- **Order Tracking**: https://dilkhushshop.in/track-order
 
-## Site Directory & Canonical Links
-- [Home](https://dilkhush-kirana.vercel.app/): Store introduction, seasonal specials, featured products, and verified customer testimonials.
-- [Products](https://dilkhush-kirana.vercel.app/products): Complete online catalogue of pure Saani, Kachariyu, spices, and groceries with real-time pricing and stock status.
-- [About Us](https://dilkhush-kirana.vercel.app/about): 25-year heritage of Dilkhush Kirana Store, sourcing standards, and traditional methods in Dhasa.
-- [Contact & Store Location](https://dilkhush-kirana.vercel.app/contact): Physical address, map directions to Dhasa Junction, direct phone numbers, and WhatsApp chat link.
-- [Order Tracking](https://dilkhush-kirana.vercel.app/track-order): Live parcel status tracker for customer orders.
-- [Stories & Recipes (Blog)](https://dilkhush-kirana.vercel.app/blogs): Articles on the health benefits of sesame Saani, traditional winter recipes, and spice selection tips.
-- [Privacy Policy](https://dilkhush-kirana.vercel.app/privacy-policy): Customer data protection and secure transaction protocols.
-- [Terms & Conditions](https://dilkhush-kirana.vercel.app/terms-conditions): Terms of service, pricing, and order fulfillment policies.
-- [Refund & Return Policy](https://dilkhush-kirana.vercel.app/refund-policy): Damaged or defective item refund process (reported within 24 hours, processed in 3-7 business days).
+## Canonical Links
+- [Home - Order Saani & Kachariyu](https://dilkhushshop.in/): Store homepage, specials, reviews.
+- [Products](https://dilkhushshop.in/products): Full catalog of pure Saani, Kachariyu, and ground spices.
+- [Custom Mix Builder](https://dilkhushshop.in/custom): Custom formulation of spices and saani.
+- [About Us](https://dilkhushshop.in/about): 25-year history of Dilkhush Kirana in Dhasa.
+- [Contact & Location](https://dilkhushshop.in/contact): Phone, WhatsApp, and Google Maps location.
+- [Order Tracking](https://dilkhushshop.in/track-order): Live parcel tracking with Order ID.
+- [Blog & Recipes](https://dilkhushshop.in/blogs): Traditional Saurashtra recipes and health benefits.
+- [Privacy Policy](https://dilkhushshop.in/privacy-policy)
+- [Terms & Conditions](https://dilkhushshop.in/terms-conditions)
+- [Refund Policy](https://dilkhushshop.in/refund-policy)
 
-## Detailed LLM Knowledge Base
-- For the full comprehensive text file including detailed FAQs, ingredient breakdowns, and regional culinary context, see [llms-full.txt](https://dilkhush-kirana.vercel.app/llms-full.txt).
+## Full Knowledge File
+- See [llms-full.txt](https://dilkhushshop.in/llms-full.txt) for comprehensive ingredients, FAQ, and regional culinary details.

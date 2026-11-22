@@ -1,73 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd
+        http://www.google.com/schemas/sitemap-image/1.1
+        http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd">
 
-  <!-- Homepage -->
+  <!-- Homepage: Order Saani, Kachariyu & Spices Online -->
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://dilkhushshop.in/og-image.png</image:loc>
+      <image:title>Order Homemade Gujarati Saani and Kachariyu Online - Dilkhush Kirana Store</image:title>
+      <image:caption>Pure black and white sesame Saani, winter Kachariyu, and fresh spices from Dhasa, Gujarat</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dilkhushshop.in/shop.png</image:loc>
+      <image:title>Dilkhush Kirana Store, Dhasa Junction Gujarat</image:title>
+      <image:caption>Authentic grocery and traditional homemade saani store since 1999</image:caption>
+    </image:image>
   </url>
 
-  <!-- Products Catalog -->
+  <!-- Products Page: Buy Saani, Kachariyu, Marchu & Masalas -->
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/products</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/products</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://dilkhushshop.in/black.jpeg</image:loc>
+      <image:title>Order Black Sesame Saani (Kala Til Saani) Online</image:title>
+      <image:caption>Authentic Kathiyawadi black til saani prepared with natural jaggery and pure sesame oil</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dilkhushshop.in/logo2.jpg</image:loc>
+      <image:title>Order Authentic Gujarati Kachariyu Online</image:title>
+      <image:caption>Nutrient-rich traditional winter kachariyu with dry fruits, ginger and herbal spices</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Custom Builder: Build Custom Saani, Kachariyu & Spice Mix -->
+  <url>
+    <loc>https://dilkhushshop.in/custom</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- About Us Page -->
+  <!-- About Store: 25+ Years Heritage in Dhasa, Gujarat -->
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/about</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/about</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Contact & Store Location -->
+  <!-- Contact & WhatsApp Ordering -->
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/contact</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/contact</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Blogs & Traditional Recipes -->
+  <!-- Blogs: Health Benefits of Saani, Kachariyu Recipes -->
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/blogs</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/blogs</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
-  <!-- Order Tracking -->
+  <!-- Real-time Order Tracking -->
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/track-order</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/track-order</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
-  <!-- Legal & Policies -->
+  <!-- Legal Policies -->
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/privacy-policy</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/privacy-policy</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/terms-conditions</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/terms-conditions</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://dilkhush-kirana.vercel.app/refund-policy</loc>
-    <lastmod>2026-11-15</lastmod>
+    <loc>https://dilkhushshop.in/refund-policy</loc>
+    <lastmod>2026-11-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
