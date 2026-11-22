@@ -285,7 +285,9 @@ const TrackOrder = () => {
     { status: 'shipped', label: 'Shipped', Icon: Truck },
     { status: 'delivered', label: 'Delivered', Icon: CheckCircle },
   ];
-  const currentIdx = statusFlow.findIndex(s => s.status === (order?.status || 'ordered'));
+  // Map server/admin statuses (pending, paid, Processing, Shipped, Delivered…) onto the tracking steps
+  const normStatus = (st = '') => ({ processing: 'confirmed', confirmed: 'confirmed', shipped: 'shipped', delivered: 'delivered' }[String(st).toLowerCase()] || 'ordered');
+  const currentIdx = statusFlow.findIndex(s => s.status === normStatus(order?.status));
 
   return (
     <>
