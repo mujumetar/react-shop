@@ -27,6 +27,7 @@ const OrderSuccess = () => {
     };
 
     if (!orderData && orderId) fetchOrder();
+    else if (!orderData) setLoading(false);
 
     if ("Notification" in window) {
       Notification.requestPermission().then((permission) => {
@@ -280,7 +281,7 @@ const OrderSuccess = () => {
           <button className="btn btn-primary" onClick={generatePDF}>
             Download Invoice (PDF)
           </button>
-          <a href={`/track/${orderId}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+          <a href={`/track-order?order=${encodeURIComponent(orderId || "")}`} className="btn btn-outline">
             Track Order
           </a>
           <button className="btn btn-soft" onClick={() => navigate("/")}>
