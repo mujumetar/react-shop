@@ -25,6 +25,7 @@ export const SectionHead = ({ eyebrow, title, sub, align = 'center', children })
 
 export const PageBanner = ({ title, sub, crumb = 'Dilkhush Kirana' }) => (
   <section className="page-banner">
+    <div className="garland" aria-hidden="true" />
     <div className="bandhani-light" style={{ position: 'absolute', inset: 0 }} />
     <div className="dk-wrap" style={{ position: 'relative' }}>
       <div className="crumb"><span className="diamond" />{crumb}<span className="diamond" /></div>

@@ -95,6 +95,7 @@ const Slider = () => {
   return (
     <>
       <section className="hero2 scallop-bottom">
+        <div className="garland" aria-hidden="true" />
         <div className="bandhani-light" style={{ position: "absolute", inset: 0 }} />
 
         <div className="dk-wrap hero2-grid" style={{ padding: 0 }}>

@@ -28,7 +28,7 @@ const legal = [
 ];
 
 const trustItems = [
-  { icon: <Truck size={15} />, text: 'Free delivery above ₹299' },
+  { icon: <Truck size={15} />, text: 'Free delivery across Gujarat' },
   { icon: <ShieldCheck size={15} />, text: '100% pure & natural' },
   { icon: <Clock size={15} />, text: 'Open 9 AM – 6 PM' },
 ];

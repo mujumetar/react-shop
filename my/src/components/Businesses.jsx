@@ -246,7 +246,8 @@ export const BusinessPage = () => {
   return (
     <>
       {/* Hero */}
-      <section className="page-banner" style={{ background: biz.bg, textAlign: 'left', padding: '48px 0 64px' }}>
+      <section className="page-banner" style={{ background: biz.bg, textAlign: 'left', padding: '72px 0 64px' }}>
+        <div className="garland" aria-hidden="true" />
         <div className="bandhani-light" style={{ position: 'absolute', inset: 0 }} />
         <div className="dk-wrap biz-hero" style={{ position: 'relative' }}>
           <div>

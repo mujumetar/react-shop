@@ -510,7 +510,7 @@ function ProductDetail({ product, onClose }) {
               </div>
               <div className="t-card p-5 space-y-4">
                 {[
-                  { Icon: Truck, t: 'Free delivery on orders above ₹499' },
+                  { Icon: Truck, t: 'Free delivery across Gujarat · Outside Gujarat by weight' },
                   { Icon: Package, t: '100% vegetarian · No preservatives' },
                   { Icon: Shield, t: '25 years of trusted quality · Made in Dhasa' },
                 ].map(({ Icon, t }) => (
@@ -546,8 +546,7 @@ const Cart = () => {
   const { cart, removeFromCart, updateQuantity } = useCart();
   const navigate = useNavigate();
   const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-  const shipping = subtotal > 1000 ? 0 : 1;
-  const total = subtotal + shipping;
+  const total = subtotal; // shipping is added at checkout once the delivery state is known
 
   if (!cart.length) return (
     <>
@@ -561,11 +560,11 @@ const Cart = () => {
     <>
       <PageBanner title="Your Cart" sub={`${cart.length} item${cart.length !== 1 ? 's' : ''} in your bag`} crumb="Shopping Bag" />
       <div className="dk-wrap" style={{ paddingTop: 40, paddingBottom: 88 }}>
-        <div className="flex items-center mb-8 p-4 rounded-xl gap-4" style={{ background: 'var(--haldi-50)', border: '1px solid #EBD39A' }}>
-          <span className="t-icon-circle" style={{ background: 'var(--surface)' }}><Truck size={20} /></span>
+        <div className="flex items-center mb-8 p-4 rounded-xl gap-4" style={{ background: 'var(--leaf-50)', border: '1px solid #C9DCC2' }}>
+          <span className="t-icon-circle" style={{ background: 'var(--surface)', color: 'var(--leaf)', borderColor: '#C9DCC2' }}><Truck size={20} /></span>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[15px] text-ink m-0">{subtotal >= 1000 ? 'Free Shipping Unlocked! 🎉' : `Add ₹${(1000 - subtotal).toLocaleString()} more for FREE shipping`}</p>
-            <div className="w-full rounded-full h-2 mt-2" style={{ background: 'rgba(168,111,14,.18)' }}><div className="h-2 rounded-full transition-all" style={{ background: 'var(--maroon)', width: `${Math.min((subtotal / 1000) * 100, 100)}%` }} /></div>
+            <p className="font-semibold text-[15px] text-ink m-0">Free delivery anywhere in Gujarat 🎉</p>
+            <p className="text-sm text-ink-soft m-0">Delivering outside Gujarat? Charges are calculated by weight at checkout.</p>
           </div>
         </div>
         <div className="grid lg:grid-cols-3 gap-8">
@@ -595,7 +594,7 @@ const Cart = () => {
             <div className="t-panel-head dark">Order Summary</div>
             <div className="p-5 pt-7 space-y-3">
               <div className="flex justify-between text-[15px]"><span className="text-ink-soft">Subtotal</span><span className="font-semibold">₹{subtotal.toLocaleString()}</span></div>
-              <div className="flex justify-between text-[15px]"><span className="text-ink-soft">Shipping</span><span className="font-semibold">{shipping === 0 ? <span className="text-leaf">FREE</span> : `₹${shipping}`}</span></div>
+              <div className="flex justify-between text-[15px]"><span className="text-ink-soft">Shipping</span><span className="font-semibold text-right"><span className="text-leaf">FREE in Gujarat</span><br /><span className="text-xs text-muted font-normal">Outside: at checkout</span></span></div>
               <div className="border-t border-dashed border-line-strong pt-3 flex justify-between items-baseline"><span className="font-bold text-ink">Total</span><span className="font-display text-3xl text-maroon">₹{total.toLocaleString()}</span></div>
               <button onClick={() => navigate('/checkout', { state: { cart } })} className="btn btn-primary btn-lg btn-block" style={{ marginTop: 14 }}>
                 Proceed to Checkout <ArrowRight size={16} />

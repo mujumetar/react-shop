@@ -5,6 +5,7 @@ import {
   Truck, Tag, CheckCircle, MapPin, User, Mail, Phone
 } from 'lucide-react';
 import logo from '../assets/logo2.jpg';
+import { INDIAN_STATES, calcShipping, useShippingSettings } from '../shipping';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -43,16 +44,15 @@ const Step = ({ num, label, active, done }) => (
 );
 
 /* ─── Main Component ─── */
-/* ─── Main Component ─── */
 export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
   const cart = location.state?.cart || [];
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-  const shipping = subtotal >= 1000 ? 0 : 50;
+  const totalKg = cart.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+  const shippingSettings = useShippingSettings();
   const [discount, setDiscount] = useState(0);
-  const total = subtotal + shipping - discount;
 
   const [loading, setLoading] = useState(false);
   const [coupon, setCoupon] = useState('');
@@ -62,7 +62,13 @@ export default function Checkout() {
   const [form, setForm] = useState({
     customerName: '', customerEmail: '',
     customerPhone: '', customerAddress: '',
+    city: '', state: '', pincode: '',
   });
+
+  // Free across Gujarat; dynamic (by weight) outside — null until a state is chosen
+  const shippingQuote = calcShipping(shippingSettings, form.state, totalKg, subtotal);
+  const shipping = shippingQuote ?? 0;
+  const total = subtotal + shipping - discount;
 
   useEffect(() => { if (!cart.length) navigate('/cart'); }, []);
 
@@ -102,8 +108,16 @@ export default function Checkout() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form,
-          shippingAddress: form.customerAddress, // Map to backend requirement
+          customerName: form.customerName,
+          customerEmail: form.customerEmail,
+          customerPhone: form.customerPhone,
+          shippingAddress: {
+            street: form.customerAddress,
+            city: form.city,
+            state: form.state,
+            zip: form.pincode,
+            country: 'India',
+          },
           products: cart.map(i => ({ productId: i.productId || i._id, quantity: i.quantity })),
         }),
       });
@@ -237,24 +251,51 @@ export default function Checkout() {
                   <textarea className="t-input" style={{ minHeight: 96 }}
                     required rows={3}
                     value={form.customerAddress} onChange={set('customerAddress')}
-                    placeholder="House No, Street, Area, City, State — PIN" />
+                    placeholder="House No, Street, Area / Village" />
                 </div>
               </Field>
 
-              {/* ── Delivery notice ── */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                background: shipping === 0 ? 'var(--leaf-50)' : 'var(--haldi-50)',
-                border: `1px solid ${shipping === 0 ? '#C9DCC2' : '#EBD39A'}`,
-                borderRadius: 10, padding: '12px 16px', marginBottom: 26,
-              }}>
-                <Truck size={18} style={{ color: shipping === 0 ? 'var(--leaf)' : 'var(--haldi-d)', flexShrink: 0 }} />
-                <p style={{ fontSize: 14, fontWeight: 500, margin: 0, color: shipping === 0 ? 'var(--leaf)' : 'var(--ink-2)' }}>
-                  {shipping === 0
-                    ? '🎉 You\'ve unlocked free delivery!'
-                    : <>Add <strong>₹{1000 - subtotal}</strong> more for free delivery. Current shipping: ₹{shipping}</>}
-                </p>
+              <div className="co-grid-2">
+                <Field label="City / Town" required>
+                  <input className="t-input" type="text" required
+                    value={form.city} onChange={set('city')} placeholder="e.g. Bhavnagar" />
+                </Field>
+                <Field label="PIN Code" required>
+                  <input className="t-input" type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required
+                    title="6-digit PIN code"
+                    value={form.pincode} onChange={e => setForm(p => ({ ...p, pincode: e.target.value.replace(/\D/g, '') }))} placeholder="364740" />
+                </Field>
               </div>
+
+              <Field label="State" required>
+                <select className="t-input" required value={form.state} onChange={set('state')}>
+                  <option value="">Select your state</option>
+                  {INDIAN_STATES.map(st => <option key={st} value={st}>{st}{st === 'Gujarat' ? ' — Free delivery' : ''}</option>)}
+                </select>
+              </Field>
+
+              {/* ── Delivery notice ── */}
+              {(() => {
+                const pending = shippingQuote === null;
+                const free = shippingQuote === 0;
+                return (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    background: free ? 'var(--leaf-50)' : 'var(--haldi-50)',
+                    border: `1px solid ${free ? '#C9DCC2' : '#EBD39A'}`,
+                    borderRadius: 10, padding: '12px 16px', marginBottom: 26,
+                  }}>
+                    <Truck size={18} style={{ color: free ? 'var(--leaf)' : 'var(--haldi-d)', flexShrink: 0 }} />
+                    <p style={{ fontSize: 14, fontWeight: 500, margin: 0, color: free ? 'var(--leaf)' : 'var(--ink-2)' }}>
+                      {pending
+                        ? <>Free delivery across <strong>Gujarat</strong>. Select your state to see delivery charges.</>
+                        : free
+                          ? <>🎉 Free delivery to <strong>{form.state}</strong>!</>
+                          : <>Delivery to <strong>{form.state}</strong> ({Math.max(1, Math.ceil(totalKg))} kg): <strong>₹{shippingQuote}</strong>. Free delivery within Gujarat.</>}
+                    </p>
+                  </div>
+                );
+              })()}
 
               {/* ── Pay button ── */}
               <button type="submit" disabled={loading} className="btn btn-primary btn-lg btn-block" style={{ fontSize: 17, padding: 17 }}>
@@ -368,7 +409,7 @@ export default function Checkout() {
             <div className="t-card frame-inset" style={{ padding: 22 }}>
               {[
                 { label: 'Subtotal', val: `₹${subtotal.toLocaleString()}` },
-                { label: 'Shipping', val: shipping === 0 ? 'FREE' : `₹${shipping}`, green: shipping === 0 },
+                { label: 'Shipping', val: shippingQuote === null ? 'Select state' : shippingQuote === 0 ? 'FREE' : `₹${shippingQuote}`, green: shippingQuote === 0 },
                 ...(discount > 0 ? [{ label: 'Discount', val: `–₹${discount}`, green: true }] : []),
               ].map((r, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
